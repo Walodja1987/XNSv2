@@ -24,13 +24,7 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 /// @notice An Ethereum-native name registry that maps human-readable names to Ethereum addresses.
 /// Names are **permanent, immutable, and non-transferable**.
 ///
-/// Name format: [label].[namespace]
-///
-/// Examples:
-/// - alice.xns
-/// - bob.yolo
-/// - vitalik.100x
-/// - garry.ape
+/// Name format: "label" + @ + "namespace"
 ///
 /// ### String rules
 /// Label and namespace string requirements:
@@ -104,7 +98,7 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
     // Mapping from address to name (label, namespace). If label is empty, the address has no name.
     mapping(address => Name) private _addressToName;
 
-    // Mapping from `keccak256(label, ".", namespace)` to name owner address.
+    // Mapping from `keccak256(label, "@", namespace)` to name owner address.
     mapping(bytes32 => address) private _nameHashToAddress;
 
     // Mapping from `keccak256(namespace)` to namespace metadata.
@@ -231,7 +225,7 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
 
         require(bytes(_addressToName[msg.sender].label).length == 0, "XNS: address already has a name");
 
-        bytes32 key = keccak256(abi.encodePacked(label, ".", namespace));
+        bytes32 key = keccak256(abi.encodePacked(label, "@", namespace));
         require(_nameHashToAddress[key] == address(0), "XNS: name already registered");
 
         _nameHashToAddress[key] = msg.sender;
@@ -302,7 +296,7 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
             "XNS: recipient already has a name"
         );
 
-        bytes32 key = keccak256(abi.encodePacked(registerNameAuth.label, ".", registerNameAuth.namespace));
+        bytes32 key = keccak256(abi.encodePacked(registerNameAuth.label, "@", registerNameAuth.namespace));
         require(_nameHashToAddress[key] == address(0), "XNS: name already registered");
 
         require(_isValidSignature(registerNameAuth, signature), "XNS: bad authorization");
@@ -376,7 +370,7 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
                 continue;
             }
 
-            bytes32 key = keccak256(abi.encodePacked(auth.label, ".", auth.namespace));
+            bytes32 key = keccak256(abi.encodePacked(auth.label, "@", auth.namespace));
 
             // Skip if name is already registered (protection against griefing attacks).
             if (_nameHashToAddress[key] != address(0)) {
@@ -630,9 +624,9 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
     // GETTER / VIEW FUNCTIONS
     // =========================================================================
 
-    /// @notice Function to resolve a name string like "bob.007" or "alice.gm-web3" to an address.
+    /// @notice Function to resolve a name string including the @ sign to an address.
     /// Returns `address(0)` for anything not registered or malformed.
-    /// Names must include a namespace separator `'.'`; strings without `'.'` are invalid and return `address(0)`.
+    /// Provided strings without an @ sign are invalid and return `address(0)`.
     ///
     /// @param fullName The name string to resolve.
     /// @return addr The address associated with the name, or `address(0)` if not registered.
@@ -641,26 +635,26 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
         uint256 len = b.length;
         if (len == 0) return address(0);
 
-        // Find the last '.' by scanning from the end (handles both public and private namespaces).
-        uint256 dotIndex = type(uint256).max; // Sentinel: no dot found
+        // Find the last '@' by scanning from the end (handles both public and private namespaces).
+        uint256 atIndex = type(uint256).max; // Sentinel: no @ found
         for (uint256 i = len; i > 0; i--) {
-            if (b[i - 1] == 0x2E) { // '.'
-                dotIndex = i - 1;
+            if (b[i - 1] == 0x40) { // '@'
+                atIndex = i - 1;
                 break;
             }
         }
 
-        if (dotIndex == type(uint256).max) {
+        if (atIndex == type(uint256).max) {
             return address(0);
         }
 
         // Extract label and namespace.
-        bytes memory labelBytes = new bytes(dotIndex);
-        for (uint256 j = 0; j < dotIndex; j++) labelBytes[j] = b[j];
+        bytes memory labelBytes = new bytes(atIndex);
+        for (uint256 j = 0; j < atIndex; j++) labelBytes[j] = b[j];
 
-        uint256 nsLen = len - dotIndex - 1;
+        uint256 nsLen = len - atIndex - 1;
         bytes memory nsBytes = new bytes(nsLen);
-        for (uint256 j = 0; j < nsLen; j++) nsBytes[j] = b[dotIndex + 1 + j];
+        for (uint256 j = 0; j < nsLen; j++) nsBytes[j] = b[atIndex + 1 + j];
 
         return _getAddress(string(labelBytes), string(nsBytes));
     }
@@ -677,13 +671,13 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
 
     /// @dev Helper function for `getAddress(fullName)` and `getAddress(label, namespace)`.
     function _getAddress(string memory label, string memory namespace) private view returns (address addr) {
-        bytes32 key = keccak256(abi.encodePacked(label, ".", namespace));
+        bytes32 key = keccak256(abi.encodePacked(label, "@", namespace));
         return _nameHashToAddress[key];
     }
 
     /// @notice Function to lookup the XNS name for an address.
     /// Returns an empty string if the address has no name. Otherwise returns the full name
-    /// in format `"label.namespace"`.
+    /// in format "label" + @ + "namespace".
     /// @param addr The address to lookup the XNS name for.
     /// @return name The XNS name for the address, or empty string if the address has no name.
     function getName(address addr) external view returns (string memory) {
@@ -693,7 +687,7 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
             return "";
         }
 
-        return string.concat(n.label, ".", n.namespace);
+        return string.concat(n.label, "@", n.namespace);
     }
 
     /// @notice Function to retrieve the namespace metadata associated with `namespace`.

@@ -465,7 +465,7 @@ The following test cases are implemented in [XNS.test.ts](./XNS.test.ts).
 
 #### Functionality
 
-- Should resolve full name with dot notation correctly (e.g., "alice.001").
+- Should resolve full name with @ notation correctly (e.g., "alice@001").
 - Should resolve correctly for one-character namespaces.
 - Should resolve correctly for two-character namespaces.
 - Should resolve correctly for three-character namespaces.
@@ -478,9 +478,9 @@ The following test cases are implemented in [XNS.test.ts](./XNS.test.ts).
 - Should resolve fullnames with twenty-five characters.
 - Should return `address(0)` for unregistered names.
 - Should return `address(0)` for empty string.
-- Should return `address(0)` for "foo.bar.baz" (parses correctly with full reverse scan as label="foo.bar", namespace="baz").
-- Should resolve correctly for long private namespaces (e.g., "label.my-private-namespace" with namespace up to 20 characters).
-- Should return correct address for "label.my-private" (correctly parses long private namespace with full reverse scan).
+- Should return `address(0)` for "foo@bar@baz" (parses correctly with full reverse scan as label="foo@bar", namespace="baz").
+- Should resolve correctly for long private namespaces (e.g., "label@my-private-namespace" with namespace up to 20 characters).
+- Should return correct address for "label@my-private" (correctly parses long private namespace with full reverse scan).
 
 ---
 
@@ -488,8 +488,8 @@ The following test cases are implemented in [XNS.test.ts](./XNS.test.ts).
 
 #### Functionality
 
-- Should return full name with namespace for regular names (e.g., returns "alice.001").
-- Should return full name with namespace for private namespace names (e.g., returns "alice.my-private").
+- Should return full name with namespace for regular names (e.g., returns "alice@001").
+- Should return full name with namespace for private namespace names (e.g., returns "alice@my-private").
 - Should return empty string for address without a name.
 
 ---

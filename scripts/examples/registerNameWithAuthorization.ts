@@ -102,7 +102,7 @@ async function main() {
   const existingOwner = await getAddress(label, namespace);
   if (existingOwner !== hre.ethers.ZeroAddress) {
     throw new Error(
-      `Name "${label}.${namespace}" is already registered to ${existingOwner}`,
+      `Name "${label}@${namespace}" is already registered to ${existingOwner}`,
     );
   }
 
@@ -131,7 +131,7 @@ async function main() {
   };
 
   // Register name with authorization
-  const fullName = namespace.toLowerCase() === "x" ? label : `${label}.${namespace}`;
+  const fullName = `${label}@${namespace}`;
   console.log(`Registering name: ${GREEN}${fullName}${RESET}`);
   console.log(`Recipient: ${GREEN}${recipient.address}${RESET}`);
   console.log(`Sponsor: ${GREEN}${sponsor.address}${RESET}`);

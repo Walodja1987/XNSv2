@@ -37,7 +37,7 @@ const RED = "\x1b[31m";
 const label = "alice";
 const namespace = "xns";
 
-// Option 2: Use full name string (e.g., "vitalik", "bob", "alice.xns")
+// Option 2: Use full name string (e.g., "vitalik", "bob", "alice@xns")
 // Set to null to use label + namespace instead
 const fullName: string | null = null;
 
@@ -69,7 +69,7 @@ async function main() {
     const getAddressFull = xns.getFunction("getAddress(string)");
     address = await getAddressFull(fullName);
   } else {
-    nameToResolve = namespace.toLowerCase() === "x" ? label : `${label}.${namespace}`;
+    nameToResolve = `${label}@${namespace}`;
     console.log(`Resolving name: ${GREEN}${nameToResolve}${RESET}`);
     console.log(`  Label: ${GREEN}${label}${RESET}`);
     console.log(`  Namespace: ${GREEN}${namespace}${RESET}\n`);

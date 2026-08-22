@@ -91,7 +91,7 @@ async function main() {
     namespace
   );
 
-  const fullName = namespace.toLowerCase() === "x" ? label : `${label}.${namespace}`;
+  const fullName = `${label}@${namespace}`;
 
   console.log(`${GREEN}✓ Signature generated!${RESET}\n`);
   console.log(`${CYAN}═══════════════════════════════════════════════════════════${RESET}`);

@@ -242,7 +242,7 @@ async function main() {
     const registeredName = await getName(auth.recipient);
     if (nameOwner === auth.recipient) {
       successCount++;
-      const fullName = namespace.toLowerCase() === "x" ? auth.label : `${auth.label}.${auth.namespace}`;
+      const fullName = `${auth.label}@${auth.namespace}`;
       console.log(
         `  ${GREEN}✓${RESET} ${fullName} → ${auth.recipient}`,
       );
@@ -259,7 +259,7 @@ async function main() {
   for (let i = 0; i < contracts.length; i++) {
     const { erc20Address, label, owner } = contracts[i];
     const registeredName = await getName(erc20Address);
-    const fullName = namespace.toLowerCase() === "x" ? label : `${label}.${namespace}`;
+    const fullName = `${label}@${namespace}`;
     console.log(`  [${i + 1}] ${GREEN}${tokenSymbols[i]}${RESET}`);
     console.log(`      Contract: ${GREEN}${erc20Address}${RESET}`);
     console.log(`      Owner: ${GREEN}${owner.address}${RESET}`);
