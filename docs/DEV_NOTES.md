@@ -159,7 +159,7 @@ While it cannot be technically prevented that someone deploys a similar contract
 Front-running is possible but not considered a significant problem because:
 
 * Front-runners must burn ETH to register the name and cannot sell or transfer it (names are permanent, immutable, and non-transferable)
-* Users can choose alternative namespaces to secure their preferred name (e.g., if `vitalik.x` is taken, they can register `vitalik.yolo` or another namespace)
+* Users can choose alternative namespaces to secure their preferred name (e.g., if `vitalik@x` is taken, they can register `vitalik@yolo` or another namespace)
 * Users can use private RPCs.
 
 ### Front-Running during the First Year

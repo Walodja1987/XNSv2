@@ -8,13 +8,13 @@ This is an automatically generated documentation (using `solidity-docgen` packag
 An Ethereum-native name registry that maps human-readable names to Ethereum addresses.
 Names are **permanent, immutable, and non-transferable**.
 
-Name format: [label].[namespace]
+Name format: [label]@[namespace]
 
 Examples:
-- alice.xns
-- bob.yolo
-- vitalik.100x
-- garry.ape
+- alice@xns
+- bob@yolo
+- vitalik@100x
+- garry@ape
 
 ### String rules
 Label and namespace string requirements:
@@ -401,9 +401,9 @@ function acceptNamespaceOwnership(string namespace) external
 ### getAddress
 
 
-Function to resolve a name string like "bob.007" or "alice.gm-web3" to an address.
+Function to resolve a name string like "bob@007" or "alice@gm-web3" to an address.
 Returns `address(0)` for anything not registered or malformed.
-Names must include a namespace separator `'.'`; strings without `'.'` are invalid and return `address(0)`.
+Names must include a namespace separator `'@'`; strings without `'@'` are invalid and return `address(0)`.
 
 ```solidity
 function getAddress(string fullName) external view returns (address addr)
@@ -452,7 +452,7 @@ function getAddress(string label, string namespace) external view returns (addre
 
 Function to lookup the XNS name for an address.
 Returns an empty string if the address has no name. Otherwise returns the full name
-in format `"label.namespace"`.
+in format `"label@namespace"`.
 
 ```solidity
 function getName(address addr) external view returns (string)

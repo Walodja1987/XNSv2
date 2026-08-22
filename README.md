@@ -34,7 +34,7 @@
 
 ## 🚀 Overview
 
-**XNS** is an **immutable address book for Ethereum**. It maps human-readable names to Ethereum addresses so you can send crypto to `vitalik.xns` instead of `0x8AdEFeb576dcF52F5220709c1B267d89d5208E78`. With XNS, applications and wallets can show user-friendly names in place of long hexadecimal addresses, making every Ethereum interaction simpler and safer.
+**XNS** is an **immutable address book for Ethereum**. It maps human-readable names to Ethereum addresses so you can send crypto to `vitalik@xns` instead of `0x8AdEFeb576dcF52F5220709c1B267d89d5208E78`. With XNS, applications and wallets can show user-friendly names in place of long hexadecimal addresses, making every Ethereum interaction simpler and safer.
 
 **Key properties:**
 - **Permanent:** Each name is irrevocably bound to an Ethereum address; no expiration, no transfer, no resale.
@@ -47,7 +47,7 @@
 
 ### Name Format
 
-XNS names follow the format `<label>.<namespace>`.
+XNS names follow the format `<label>@<namespace>`.
 
 Labels and namespaces are subject to the following format rules:
 - Must be 1–20 characters long
@@ -56,20 +56,20 @@ Labels and namespaces are subject to the following format rules:
 - Cannot contain consecutive hyphens (`--`)
 
 **Valid name examples:**
-- ✅ `alice.xns`
-- ✅ `vitalik.100x`
-- ✅ `crypto-degen.yolo`
-- ✅ `to-the-moon.bull`
-- ✅ `gm.wen-lambo`
-- ✅ `2-rich.4-real`
+- ✅ `alice@xns`
+- ✅ `vitalik@100x`
+- ✅ `crypto-degen@yolo`
+- ✅ `to-the-moon@bull`
+- ✅ `gm@wen-lambo`
+- ✅ `2-rich@4-real`
 
 **Invalid name examples:**
-- ❌ `thisisaveryverylongname.xns` (label too long)
-- ❌ `Name.xns` (uppercase in label)
-- ❌ `gm@web3.xyz` (special character in label)
-- ❌ `-name.gm` (label cannot start with hyphen)
-- ❌ `name-.og` (label cannot end with hyphen)
-- ❌ `my--name.888` (label cannot have consecutive hyphens)
+- ❌ `thisisaveryverylongname@xns` (label too long)
+- ❌ `Name@xns` (uppercase in label)
+- ❌ `gm$web3@xyz` (special character in label)
+- ❌ `-name@gm` (label cannot start with hyphen)
+- ❌ `name-@og` (label cannot end with hyphen)
+- ❌ `my--name@888` (label cannot have consecutive hyphens)
 
 The same format rules apply to namespaces. For example, `--name`, `$rich`, and `-ns` are all invalid and cannot be registered.
 
@@ -129,7 +129,7 @@ Beyond these core differences, XNS offers additional capabilities: permissionles
 Registering an XNS name in a public namespace is straightforward:
 
 1. **Check Available Namespaces**: Browse the [XNS price list](#-xns-price-list) to find available namespaces and their registration fees (e.g., names within the `xns` namespace cost 0.001 ETH).
-2. **Choose a Name**: e.g., `alice.xns` (must not be registered yet).
+2. **Choose a Name**: e.g., `alice@xns` (must not be registered yet).
 3. **Register Name**: Send a transaction with the required ETH amount to register a name (see [`registerName`][api-registerName] in API docs). Any excess will be refunded.
 4. **Verify Resolution**: Wait a few blocks, then verify the name is registered (see [`getAddress`][api-getAddress] and [`getName`][api-getName] in API docs).
 
@@ -148,7 +148,7 @@ Names can be registered for EOAs directly via [Etherscan][etherscan-mainnet].
 
 <img width="302" height="82" alt="image" src="https://github.com/user-attachments/assets/628791be-b647-4bcc-b85f-f75289afac1c" />
 
-**Example 1:** Registering `bob.xns` in the `xns` namespace (costs 0.001 ETH):
+**Example 1:** Registering `bob@xns` in the `xns` namespace (costs 0.001 ETH):
 <img width="670" height="301" alt="image" src="https://github.com/user-attachments/assets/2323cac5-060d-4cc8-abc6-0a27ea3f03d4" />
 
 
@@ -184,14 +184,14 @@ XNS supports **authorized name registration** via [`registerNameWithAuthorizatio
 XNS provides simple on-chain resolution for names and addresses.
 
 **Look up Address from Name: [`getAddress`][api-getAddress]**
-- Resolve a name like `vitalik.001` or `bob.xns` to its Ethereum address.
-- Strings without a `.` namespace separator are invalid and return `address(0)`.
+- Resolve a name like `vitalik@001` or `bob@xns` to its Ethereum address.
+- Strings without an `@` namespace separator are invalid and return `address(0)`.
 - Works directly on Etherscan or any Ethereum interface.
 - Returns zero address if the name is not registered.
 
 **Look up Name from Address: [`getName`][api-getName]**
 - Find the XNS name for any Ethereum address.
-- Returns the full name format (e.g., `alice.001`).
+- Returns the full name format (e.g., `alice@001`).
 - Returns an empty string if the address has no name.
 
 **Example scripts:**
@@ -273,42 +273,42 @@ Public namespaces are open — anyone can register a name under them by paying t
 
 | Price | Namespaces | Example Names |
 |---|---|---|
-| 0.001 ETH | `0-balance`, `1-cent`, `123`, `314159`, `8pm`, `a-lot`, `abi`, `acc`, `action`, `address`, `afaict`, `aggr`, `agree`, `allez`, `alliance`, `alt`, `always-winning`, `ani`, `apr`, `arena`, `auction`, `auditor`, `aug`, `avg-joe`, `bagholder`, `banger`, `banned`, `believe-in-something`, `bin`, `bird`, `black`, `blanc`, `bonk`, `book`, `boom`, `brave`, `break`, `broke-bro`, `browser`, `buy-high-sell-low`, `buy-the-dip`, `by-design`, `cafe`, `carpe-diem`, `carrot`, `catalyst`, `chain`, `cheater`, `check-this-out`, `cheers`, `cheese`, `cloud`, `cold`, `come-in-and-register`, `commit`, `compete`, `cooking`, `copium`, `cozy`, `crispy`, `crops`, `cross`, `dance`, `dca`, `dec`, `defamfi`, `deth`, `diamond`, `discount`, `done`, `drain`, `drako`, `dream`, `drink`, `dude`, `earth`, `edition`, `elite`, `emoji`, `enum`, `energy`, `ethcc`, `ether`, `ethereum`, `facet`, `fam`, `feb`, `fire`, `for-real`, `for-sale`, `fresh`, `frog`, `game-over`, `garbage`, `get-it-done`, `goal`, `goat`, `grain-of-salt`, `green`, `green-candle-lover`, `green-only`, `group`, `guardian`, `haha`, `hard-rug`, `harmony`, `have-fun`, `hello`, `hide`, `hold-my-beer`, `honey`, `hooligan`, `hopium`, `horn`, `hyper`, `hyperinflation`, `i-am`, `i-am-not`, `i-dont`, `i-know`, `i-think`, `ico-craze`, `idgaf`, `idk`, `indeed`, `industry`, `jan`, `jesus`, `jpg`, `json`, `jul`, `jun`, `k-pop`, `kek`, `layer`, `legend`, `level`, `leverage`, `lion`, `liquidated`, `literally`, `looking-for-a-job`, `lowcost`, `mar`, `market`, `married`, `mate`, `matrix`, `max-pain`, `may`, `maybe`, `milk`, `mint`, `miracle`, `mmiwg2slgbtqqiaplus`, `multisigfi`, `my-problem`, `native`, `nature`, `nevertheless`, `no-brainer`, `no-idea`, `no-problem`, `no-war`, `normie`, `north`, `not-a-scam`, `not-ens`, `nov`, `oct`, `off`, `office`, `offside`, `ok-ok`, `on-it`, `online`, `orange`, `otc`, `other`, `ouais`, `p2p`, `p33`, `panda`, `peanut`, `penny`, `pizza`, `plasma`, `platin`, `play`, `pleb`, `png`, `poc`, `post-mortem`, `pre-rich`, `probably`, `purple`, `pwned`, `race`, `radio`, `rails`, `rainbow`, `record`, `refill`, `reload`, `reset`, `rgb`, `road`, `route`, `rulez`, `sauce`, `sausage`, `scam`, `scared`, `scout`, `script`, `sep`, `service`, `share`, `ship`, `shirt`, `shit`, `sidelined`, `silver`, `skill-issue`, `slow-rug`, `smile`, `smoke`, `snake`, `snow`, `soft-rug`, `south`, `spartan`, `spend`, `stack`, `stack-too-deep`, `status`, `straight`, `structured`, `style`, `svg`, `synth`, `tab`, `tacit`, `talisman`, `the-end`, `this-is-fine`, `thor`, `thumbs-up`, `tour-de-finance`, `transfer`, `trb`, `trust-me-bro`, `trustmebrofi`, `txt`, `ubi`, `unlimited`, `unwind`, `vanity`, `verse`, `very`, `victim`, `vinyl`, `virus`, `we-are-so-back`, `week`, `wellness`, `whatever`, `white`, `why-not`, `wolve`, `x-factor`, `x2x`, `xns`, `yadayada`, `yellow`, `your-problem`, `yummy`, `zation`, `zip` | bob.xns, my-oracle.trb, best.auditor |
-| 0.002 ETH | `0-9`, `0xwhale`, `16-bit`, `24h`, `32-bit`, `50c`, `64-bit`, `8-bit`, `af`, `afro`, `after`, `ago`, `alert`, `alien`, `almaz`, `anime`, `app`, `asap`, `atom`, `aux`, `awesome`, `azure`, `back`, `bastard`, `beach`, `beast`, `bell`, `bid`, `billion`, `blue`, `boost`, `brand`, `breaking`, `bubble`, `bug`, `bullet`, `bum`, `bumpy`, `buyer`, `can`, `chef`, `cherry`, `chick`, `chip`, `classic`, `closed`, `co2`, `crash`, `crew`, `cxm`, `day`, `day0`, `den`, `desk`, `dev`, `dirt`, `dj`, `dnd`, `draft`, `drama`, `drop`, `eagle`, `east`, `eco`, `edit`, `else`, `emu`, `era`, `ethless`, `ethos`, `exactly`, `exs`, `fan`, `farm`, `fella`, `ffs`, `flash`, `flex`, `flow`, `freak`, `frens`, `friend`, `fte`, `ftw`, `fud`, `g-star`, `gang`, `gem`, `give`, `glad`, `gm`, `gn`, `go-big`, `go-up`, `goose`, `guild`, `hey`, `hill`, `hood`, `how`, `hundred`, `icon`, `impact`, `insane`, `intro`, `inx`, `ion`, `joy`, `jump`, `karat`, `kit`, `lean`, `lemon`, `ley`, `lounge`, `magma`, `mail`, `md`, `me`, `mf`, `million`, `mind`, `mini`, `minus`, `miyagi`, `mono`, `mont`, `mr`, `mrs`, `nada`, `nail`, `never`, `ngo`, `nitro`, `nonstop`, `not`, `not-easy`, `not-me`, `oldie`, `omg`, `only`, `open`, `or`, `org`, `oscar`, `outro`, `own`, `pain`, `party`, `path`, `pearl`, `pen`, `pigeon`, `pill`, `pink`, `pipe`, `planb`, `plenty`, `plus`, `pool`, `pop`, `prestige`, `prompt`, `psyop`, `px`, `rebel`, `red`, `renegade`, `republic`, `retro`, `revoke`, `rey`, `ride`, `run`, `rx`, `sea`, `seller`, `sis`, `smell`, `so-what`, `sorry`, `sov`, `spark`, `spicy`, `spider`, `spike`, `stfu`, `stop`, `sub`, `sucks`, `tbh`, `team`, `the`, `think`, `this`, `time`, `tion`, `tn`, `trader`, `trillion`, `twin`, `usd`, `verge`, `vista`, `volt`, `wallet`, `water`, `way`, `west`, `wifey`, `wish`, `xau`, `xgr`, `xlsx`, `yea`, `yes`, `yet`, `z12`, `zeus`, `zone` | max.gm, its.me, front.dev |
-| 0.003 ETH | `00s`, `01`, `1987`, `1988`, `247`, `3d`, `4d`, `80s`, `90s`, `abc`, `air`, `amen`, `any`, `ash`, `away`, `b10c`, `bad`, `billy`, `blade`, `block`, `boba`, `bold`, `bora`, `broker`, `bruh`, `bunny`, `buzz`, `byob`, `cake`, `cam`, `car`, `care`, `casa`, `cat`, `chop`, `coz`, `craft`, `crap`, `crm`, `cubic`, `cute`, `darling`, `date`, `dick`, `diva`, `docs`, `dog`, `don`, `donate`, `dot`, `dove`, `dpm`, `duty`, `easy`, `ebr`, `eez`, `eli5`, `epic`, `etch`, `ever`, `exe`, `exo`, `face`, `fart`, `fly`, `foo`, `gala`, `galaxy`, `geez`, `glow`, `gmd`, `grab`, `graph`, `gum`, `guy`, `her`, `hex`, `him`, `hulk`, `inch`, `ink`, `intern`, `jaya`, `jazz`, `jr`, `kiss`, `kiwi`, `lady`, `land`, `lava`, `lgnd`, `linux`, `llm`, `lloyd`, `lxxi`, `m320`, `mana`, `max`, `meow`, `mir`, `moi`, `mug`, `myth`, `nemo`, `nero`, `noob`, `nyan`, `nyk`, `ok`, `omfg`, `once`, `oops`, `ouch`, `para`, `payme`, `pint`, `pinx`, `plug`, `ppon`, `pray`, `pvd`, `quit`, `quiz`, `ram`, `rnd`, `rofl`, `rollin`, `rvy`, `rug`, `sax`, `sci`, `self`, `send`, `sick`, `sign`, `skin`, `slap`, `snip`, `some`, `soul`, `sqrt`, `sr`, `sudo`, `tape`, `ten`, `that`, `they`, `tour`, `trench`, `trio`, `turn`, `tvpi`, `uint256`, `unicorn`, `void`, `vyn`, `wash`, `weed`, `well`, `wen`, `wifi`, `win`, `wknd`, `wlcm`, `work`, `www`, `x2y2`, `xeth`, `xly`, `yan`, `yeey`, `ymca`, `yuge`, `zap` | miss.diva, give.mana, exact.xly |
-| 0.004 ETH | `046`, `100k`, `1st`, `21m`, `365`, `58sec`, `828`, `99pct`, `a-z`, `agi`, `all`, `all-in`, `amc`, `ant`, `atm`, `atx`, `aura`, `bang`, `bar`, `bbq`, `bond`, `bro`, `bs`, `chat`, `chess`, `cia`, `clyo`, `crx`, `csc`, `cvx`, `cyk`, `debt`, `dgn`, `dom`, `drift`, `dunk`, `dvd`, `dy`, `dyor`, `equity`, `fat`, `fcb`, `fck`, `fey`, `fit`, `flip`, `fzz`, `gate`, `hcx`, `hkx`, `hr`, `hrv`, `htt`, `hub`, `hug`, `hyp`, `hype`, `ico`, `iron`, `irr`, `jj`, `jlg`, `jnr`, `joker`, `kny`, `kong`, `kvn`, `lbg`, `lit`, `lmt`, `lnx`, `loan`, `loop`, `lrr`, `lxl`, `lzv`, `mania`, `mav`, `mcp`, `mgm`, `mlx`, `mnx`, `mobi`, `mp3`, `msg`, `myh`, `nct`, `ndn`, `nfa`, `ngl`, `ngmi`, `nix`, `njz`, `none`, `onl`, `orange21`, `out`, `oya`, `pct`, `pico`, `pls`, `pmf`, `pos`, `pow`, `ppl`, `ppm`, `put`, `qbit`, `qtr`, `raw`, `rip`, `rock`, `sir`, `six`, `sun`, `tar`, `tetris`, `tnt`, `tnu`, `trx`, `uno`, `veo`, `vibe`, `wagmi`, `wild`, `wine`, `wok`, `wow`, `wta`, `wwe`, `x-ray`, `xrr`, `xyu`, `zai`, `zaya`, `zhk` | bob.wagmi, we.ngmi, numero.uno |
-| 0.005 ETH | `0xygen`, `2xp`, `777x`, `9-5`, `acx`, `algo`, `arb`, `babe`, `bay`, `buidl`, `call`, `club`, `cow`, `crown`, `crv`, `crypto`, `elix`, `fame`, `fxxk`, `gcc`, `gtfo`, `guru`, `h2o`, `hxx`, `hzl`, `imo`, `inf`, `jet`, `jewel`, `jjg`, `jo`, `love`, `ly`, `lyv`, `null`, `nyc`, `o3`, `o7`, `oha`, `oz`, `paris`, `permabull`, `pm`, `polar`, `pyro`, `qw`, `retard`, `rtx`, `safe`, `ser`, `snap`, `spa`, `swap`, `tg`, `tokyo`, `troll`, `ultra`, `van`, `vn`, `vrtx`, `x64`, `x86`, `xeno`, `xyro`, `ygg`, `yolo` | alice.yolo, jack.buidl, gm.ser |
-| 0.006 ETH | `4real`, `a0x`, `ace`, `aero`, `astro`, `ath`, `b3z`, `bag`, `beatz`, `bot`, `bsz`, `bz`, `cry`, `dax`, `dice`, `duo`, `etherrock`, `few`, `geo`, `glk`, `gti`, `gtx`, `gym`, `ice`, `irl`, `jam`, `jcd`, `mars`, `mfer`, `mod`, `mon`, `ninja`, `qef`, `set`, `soy`, `str`, `sum`, `super`, `tex`, `tng`, `ufo`, `vy`, `xccy`, `xwg`, `yuf`, `zrh`, `zrx` | wallee.bot |
-| 0.007 ETH | `007`, `10m`, `4pf`, `56k`, `casino`, `chad`, `cxx`, `db`, `dox`, `eip-000`, `fbi`, `gmc`, `gxn`, `ily`, `iq200`, `n64`, `n6n`, `nin`, `rekt`, `royal`, `shark`, `sky`, `sx6`, `titan`, `txl`, `xan`, `yew`, `znz` | crypto.chad, get.rekt |
-| 0.008 ETH | `11g`, `1x`, `anon`, `ape`, `bet`, `coc`, `daddy`, `dragon`, `ghx`, `hash`, `igx`, `jackpot`, `la`, `lgx`, `lol`, `long`, `neo`, `octo`, `og`, `short`, `uh`, `vpn`, `xd`, `xtr`, `ye`, `ygx`, `yq`, `yzi`, `zero` | punk.og, 100x.ape, based.anon |
-| 0.009 ETH | `0c`, `0y`, `1m`, `24`, `api`, `ay`, `az`, `cr`, `gwei`, `gx`, `is`, `jb`, `l8`, `lm`, `lr`, `nx`, `py`, `rs7`, `rw`, `s3`, `slot-0`, `tv`, `we`, `xyk`, `ya`, `yo` | give-me.gwei |
-| 0.010 ETH | `5ff`, `7xx`, `a2a`, `amb`, `bd`, `be`, `bit`, `boss`, `bq`, `cc`, `ch`, `coin`, `ct`, `dat`, `dna`, `down-99pct`, `down-bad`, `down-only`, `ec`, `erc`, `erc20`, `evm`, `ez`, `game`, `giga`, `go`, `gp`, `gt`, `gu`, `hot`, `it`, `mc`, `new`, `o2`, `on`, `one`, `os`, `pi`, `sha256`, `token`, `tx`, `up`, `up-only`, `us`, `web3`, `what`, `ws`, `xy`, `yy9`, `zk` | uni.token, pepe.coin, end.game |
-| 0.011 ETH | `code`, `dg`, `ef`, `eh`, `eq`, `fx`, `ip`, `jm`, `lv`, `pa`, `ty`, `ux`, `xio` | write.code |
-| 0.012 ETH | `1024`, `2048`, `4096`, `agent`, `cd`, `in`, `pro`, `xtra` | clawd.agent |
+| 0.001 ETH | `0-balance`, `1-cent`, `123`, `314159`, `8pm`, `a-lot`, `abi`, `acc`, `action`, `address`, `afaict`, `aggr`, `agree`, `allez`, `alliance`, `alt`, `always-winning`, `ani`, `apr`, `arena`, `auction`, `auditor`, `aug`, `avg-joe`, `bagholder`, `banger`, `banned`, `believe-in-something`, `bin`, `bird`, `black`, `blanc`, `bonk`, `book`, `boom`, `brave`, `break`, `broke-bro`, `browser`, `buy-high-sell-low`, `buy-the-dip`, `by-design`, `cafe`, `carpe-diem`, `carrot`, `catalyst`, `chain`, `cheater`, `check-this-out`, `cheers`, `cheese`, `cloud`, `cold`, `come-in-and-register`, `commit`, `compete`, `cooking`, `copium`, `cozy`, `crispy`, `crops`, `cross`, `dance`, `dca`, `dec`, `defamfi`, `deth`, `diamond`, `discount`, `done`, `drain`, `drako`, `dream`, `drink`, `dude`, `earth`, `edition`, `elite`, `emoji`, `enum`, `energy`, `ethcc`, `ether`, `ethereum`, `facet`, `fam`, `feb`, `fire`, `for-real`, `for-sale`, `fresh`, `frog`, `game-over`, `garbage`, `get-it-done`, `goal`, `goat`, `grain-of-salt`, `green`, `green-candle-lover`, `green-only`, `group`, `guardian`, `haha`, `hard-rug`, `harmony`, `have-fun`, `hello`, `hide`, `hold-my-beer`, `honey`, `hooligan`, `hopium`, `horn`, `hyper`, `hyperinflation`, `i-am`, `i-am-not`, `i-dont`, `i-know`, `i-think`, `ico-craze`, `idgaf`, `idk`, `indeed`, `industry`, `jan`, `jesus`, `jpg`, `json`, `jul`, `jun`, `k-pop`, `kek`, `layer`, `legend`, `level`, `leverage`, `lion`, `liquidated`, `literally`, `looking-for-a-job`, `lowcost`, `mar`, `market`, `married`, `mate`, `matrix`, `max-pain`, `may`, `maybe`, `milk`, `mint`, `miracle`, `mmiwg2slgbtqqiaplus`, `multisigfi`, `my-problem`, `native`, `nature`, `nevertheless`, `no-brainer`, `no-idea`, `no-problem`, `no-war`, `normie`, `north`, `not-a-scam`, `not-ens`, `nov`, `oct`, `off`, `office`, `offside`, `ok-ok`, `on-it`, `online`, `orange`, `otc`, `other`, `ouais`, `p2p`, `p33`, `panda`, `peanut`, `penny`, `pizza`, `plasma`, `platin`, `play`, `pleb`, `png`, `poc`, `post-mortem`, `pre-rich`, `probably`, `purple`, `pwned`, `race`, `radio`, `rails`, `rainbow`, `record`, `refill`, `reload`, `reset`, `rgb`, `road`, `route`, `rulez`, `sauce`, `sausage`, `scam`, `scared`, `scout`, `script`, `sep`, `service`, `share`, `ship`, `shirt`, `shit`, `sidelined`, `silver`, `skill-issue`, `slow-rug`, `smile`, `smoke`, `snake`, `snow`, `soft-rug`, `south`, `spartan`, `spend`, `stack`, `stack-too-deep`, `status`, `straight`, `structured`, `style`, `svg`, `synth`, `tab`, `tacit`, `talisman`, `the-end`, `this-is-fine`, `thor`, `thumbs-up`, `tour-de-finance`, `transfer`, `trb`, `trust-me-bro`, `trustmebrofi`, `txt`, `ubi`, `unlimited`, `unwind`, `vanity`, `verse`, `very`, `victim`, `vinyl`, `virus`, `we-are-so-back`, `week`, `wellness`, `whatever`, `white`, `why-not`, `wolve`, `x-factor`, `x2x`, `xns`, `yadayada`, `yellow`, `your-problem`, `yummy`, `zation`, `zip` | bob@xns, my-oracle@trb, best@auditor |
+| 0.002 ETH | `0-9`, `0xwhale`, `16-bit`, `24h`, `32-bit`, `50c`, `64-bit`, `8-bit`, `af`, `afro`, `after`, `ago`, `alert`, `alien`, `almaz`, `anime`, `app`, `asap`, `atom`, `aux`, `awesome`, `azure`, `back`, `bastard`, `beach`, `beast`, `bell`, `bid`, `billion`, `blue`, `boost`, `brand`, `breaking`, `bubble`, `bug`, `bullet`, `bum`, `bumpy`, `buyer`, `can`, `chef`, `cherry`, `chick`, `chip`, `classic`, `closed`, `co2`, `crash`, `crew`, `cxm`, `day`, `day0`, `den`, `desk`, `dev`, `dirt`, `dj`, `dnd`, `draft`, `drama`, `drop`, `eagle`, `east`, `eco`, `edit`, `else`, `emu`, `era`, `ethless`, `ethos`, `exactly`, `exs`, `fan`, `farm`, `fella`, `ffs`, `flash`, `flex`, `flow`, `freak`, `frens`, `friend`, `fte`, `ftw`, `fud`, `g-star`, `gang`, `gem`, `give`, `glad`, `gm`, `gn`, `go-big`, `go-up`, `goose`, `guild`, `hey`, `hill`, `hood`, `how`, `hundred`, `icon`, `impact`, `insane`, `intro`, `inx`, `ion`, `joy`, `jump`, `karat`, `kit`, `lean`, `lemon`, `ley`, `lounge`, `magma`, `mail`, `md`, `me`, `mf`, `million`, `mind`, `mini`, `minus`, `miyagi`, `mono`, `mont`, `mr`, `mrs`, `nada`, `nail`, `never`, `ngo`, `nitro`, `nonstop`, `not`, `not-easy`, `not-me`, `oldie`, `omg`, `only`, `open`, `or`, `org`, `oscar`, `outro`, `own`, `pain`, `party`, `path`, `pearl`, `pen`, `pigeon`, `pill`, `pink`, `pipe`, `planb`, `plenty`, `plus`, `pool`, `pop`, `prestige`, `prompt`, `psyop`, `px`, `rebel`, `red`, `renegade`, `republic`, `retro`, `revoke`, `rey`, `ride`, `run`, `rx`, `sea`, `seller`, `sis`, `smell`, `so-what`, `sorry`, `sov`, `spark`, `spicy`, `spider`, `spike`, `stfu`, `stop`, `sub`, `sucks`, `tbh`, `team`, `the`, `think`, `this`, `time`, `tion`, `tn`, `trader`, `trillion`, `twin`, `usd`, `verge`, `vista`, `volt`, `wallet`, `water`, `way`, `west`, `wifey`, `wish`, `xau`, `xgr`, `xlsx`, `yea`, `yes`, `yet`, `z12`, `zeus`, `zone` | max@gm, its@me, front@dev |
+| 0.003 ETH | `00s`, `01`, `1987`, `1988`, `247`, `3d`, `4d`, `80s`, `90s`, `abc`, `air`, `amen`, `any`, `ash`, `away`, `b10c`, `bad`, `billy`, `blade`, `block`, `boba`, `bold`, `bora`, `broker`, `bruh`, `bunny`, `buzz`, `byob`, `cake`, `cam`, `car`, `care`, `casa`, `cat`, `chop`, `coz`, `craft`, `crap`, `crm`, `cubic`, `cute`, `darling`, `date`, `dick`, `diva`, `docs`, `dog`, `don`, `donate`, `dot`, `dove`, `dpm`, `duty`, `easy`, `ebr`, `eez`, `eli5`, `epic`, `etch`, `ever`, `exe`, `exo`, `face`, `fart`, `fly`, `foo`, `gala`, `galaxy`, `geez`, `glow`, `gmd`, `grab`, `graph`, `gum`, `guy`, `her`, `hex`, `him`, `hulk`, `inch`, `ink`, `intern`, `jaya`, `jazz`, `jr`, `kiss`, `kiwi`, `lady`, `land`, `lava`, `lgnd`, `linux`, `llm`, `lloyd`, `lxxi`, `m320`, `mana`, `max`, `meow`, `mir`, `moi`, `mug`, `myth`, `nemo`, `nero`, `noob`, `nyan`, `nyk`, `ok`, `omfg`, `once`, `oops`, `ouch`, `para`, `payme`, `pint`, `pinx`, `plug`, `ppon`, `pray`, `pvd`, `quit`, `quiz`, `ram`, `rnd`, `rofl`, `rollin`, `rvy`, `rug`, `sax`, `sci`, `self`, `send`, `sick`, `sign`, `skin`, `slap`, `snip`, `some`, `soul`, `sqrt`, `sr`, `sudo`, `tape`, `ten`, `that`, `they`, `tour`, `trench`, `trio`, `turn`, `tvpi`, `uint256`, `unicorn`, `void`, `vyn`, `wash`, `weed`, `well`, `wen`, `wifi`, `win`, `wknd`, `wlcm`, `work`, `www`, `x2y2`, `xeth`, `xly`, `yan`, `yeey`, `ymca`, `yuge`, `zap` | miss@diva, give@mana, exact@xly |
+| 0.004 ETH | `046`, `100k`, `1st`, `21m`, `365`, `58sec`, `828`, `99pct`, `a-z`, `agi`, `all`, `all-in`, `amc`, `ant`, `atm`, `atx`, `aura`, `bang`, `bar`, `bbq`, `bond`, `bro`, `bs`, `chat`, `chess`, `cia`, `clyo`, `crx`, `csc`, `cvx`, `cyk`, `debt`, `dgn`, `dom`, `drift`, `dunk`, `dvd`, `dy`, `dyor`, `equity`, `fat`, `fcb`, `fck`, `fey`, `fit`, `flip`, `fzz`, `gate`, `hcx`, `hkx`, `hr`, `hrv`, `htt`, `hub`, `hug`, `hyp`, `hype`, `ico`, `iron`, `irr`, `jj`, `jlg`, `jnr`, `joker`, `kny`, `kong`, `kvn`, `lbg`, `lit`, `lmt`, `lnx`, `loan`, `loop`, `lrr`, `lxl`, `lzv`, `mania`, `mav`, `mcp`, `mgm`, `mlx`, `mnx`, `mobi`, `mp3`, `msg`, `myh`, `nct`, `ndn`, `nfa`, `ngl`, `ngmi`, `nix`, `njz`, `none`, `onl`, `orange21`, `out`, `oya`, `pct`, `pico`, `pls`, `pmf`, `pos`, `pow`, `ppl`, `ppm`, `put`, `qbit`, `qtr`, `raw`, `rip`, `rock`, `sir`, `six`, `sun`, `tar`, `tetris`, `tnt`, `tnu`, `trx`, `uno`, `veo`, `vibe`, `wagmi`, `wild`, `wine`, `wok`, `wow`, `wta`, `wwe`, `x-ray`, `xrr`, `xyu`, `zai`, `zaya`, `zhk` | bob@wagmi, we@ngmi, numero@uno |
+| 0.005 ETH | `0xygen`, `2xp`, `777x`, `9-5`, `acx`, `algo`, `arb`, `babe`, `bay`, `buidl`, `call`, `club`, `cow`, `crown`, `crv`, `crypto`, `elix`, `fame`, `fxxk`, `gcc`, `gtfo`, `guru`, `h2o`, `hxx`, `hzl`, `imo`, `inf`, `jet`, `jewel`, `jjg`, `jo`, `love`, `ly`, `lyv`, `null`, `nyc`, `o3`, `o7`, `oha`, `oz`, `paris`, `permabull`, `pm`, `polar`, `pyro`, `qw`, `retard`, `rtx`, `safe`, `ser`, `snap`, `spa`, `swap`, `tg`, `tokyo`, `troll`, `ultra`, `van`, `vn`, `vrtx`, `x64`, `x86`, `xeno`, `xyro`, `ygg`, `yolo` | alice@yolo, jack@buidl, gm@ser |
+| 0.006 ETH | `4real`, `a0x`, `ace`, `aero`, `astro`, `ath`, `b3z`, `bag`, `beatz`, `bot`, `bsz`, `bz`, `cry`, `dax`, `dice`, `duo`, `etherrock`, `few`, `geo`, `glk`, `gti`, `gtx`, `gym`, `ice`, `irl`, `jam`, `jcd`, `mars`, `mfer`, `mod`, `mon`, `ninja`, `qef`, `set`, `soy`, `str`, `sum`, `super`, `tex`, `tng`, `ufo`, `vy`, `xccy`, `xwg`, `yuf`, `zrh`, `zrx` | wallee@bot |
+| 0.007 ETH | `007`, `10m`, `4pf`, `56k`, `casino`, `chad`, `cxx`, `db`, `dox`, `eip-000`, `fbi`, `gmc`, `gxn`, `ily`, `iq200`, `n64`, `n6n`, `nin`, `rekt`, `royal`, `shark`, `sky`, `sx6`, `titan`, `txl`, `xan`, `yew`, `znz` | crypto@chad, get@rekt |
+| 0.008 ETH | `11g`, `1x`, `anon`, `ape`, `bet`, `coc`, `daddy`, `dragon`, `ghx`, `hash`, `igx`, `jackpot`, `la`, `lgx`, `lol`, `long`, `neo`, `octo`, `og`, `short`, `uh`, `vpn`, `xd`, `xtr`, `ye`, `ygx`, `yq`, `yzi`, `zero` | punk@og, 100x@ape, based@anon |
+| 0.009 ETH | `0c`, `0y`, `1m`, `24`, `api`, `ay`, `az`, `cr`, `gwei`, `gx`, `is`, `jb`, `l8`, `lm`, `lr`, `nx`, `py`, `rs7`, `rw`, `s3`, `slot-0`, `tv`, `we`, `xyk`, `ya`, `yo` | give-me@gwei |
+| 0.010 ETH | `5ff`, `7xx`, `a2a`, `amb`, `bd`, `be`, `bit`, `boss`, `bq`, `cc`, `ch`, `coin`, `ct`, `dat`, `dna`, `down-99pct`, `down-bad`, `down-only`, `ec`, `erc`, `erc20`, `evm`, `ez`, `game`, `giga`, `go`, `gp`, `gt`, `gu`, `hot`, `it`, `mc`, `new`, `o2`, `on`, `one`, `os`, `pi`, `sha256`, `token`, `tx`, `up`, `up-only`, `us`, `web3`, `what`, `ws`, `xy`, `yy9`, `zk` | uni@token, pepe@coin, end@game |
+| 0.011 ETH | `code`, `dg`, `ef`, `eh`, `eq`, `fx`, `ip`, `jm`, `lv`, `pa`, `ty`, `ux`, `xio` | write@code |
+| 0.012 ETH | `1024`, `2048`, `4096`, `agent`, `cd`, `in`, `pro`, `xtra` | clawd@agent |
 | 0.013 ETH | `quant`, `ypz` | - |
-| 0.015 ETH | `128`, `256`, `512`, `ai`, `bull`, `clan`, `cool`, `degen`, `dex`, `dope`, `f33`, `gg`, `halo`, `hhh`, `id`, `iq`, `kol`, `lambo`, `m8`, `meme`, `o8`, `pepe`, `perp`, `prince`, `princess`, `rex`, `rocket`, `rocks`, `szn`, `vault`, `vega`, `x8`, `yoda`, `zh` | cyber.bull, dank.meme, defi.vault |
-| 0.016 ETH | `milady`, `punk` | glam.milady, anon.punk |
+| 0.015 ETH | `128`, `256`, `512`, `ai`, `bull`, `clan`, `cool`, `degen`, `dex`, `dope`, `f33`, `gg`, `halo`, `hhh`, `id`, `iq`, `kol`, `lambo`, `m8`, `meme`, `o8`, `pepe`, `perp`, `prince`, `princess`, `rex`, `rocket`, `rocks`, `szn`, `vault`, `vega`, `x8`, `yoda`, `zh` | cyber@bull, dank@meme, defi@vault |
+| 0.016 ETH | `milady`, `punk` | glam@milady, anon@punk |
 | 0.017 ETH | `lex`, `xoxo` | - |
-| 0.018 ETH | `brrr`, `oxy` | printer-goes.brrr |
-| 0.019 ETH | `ooo` | m.ooo |
-| 0.020 ETH | `16`, `18`, `32`, `36`, `64`, `ag`, `alpha`, `art`, `ceo`, `comp`, `etf`, `fi`, `fund`, `g1`, `globe`, `gold`, `hq`, `inc`, `index`, `king`, `labs`, `ltd`, `lux`, `ny`, `pay`, `prime`, `queen`, `rv`, `rwa`, `ry`, `store`, `tech`, `vx`, `world`, `x7` | soros.alpha, de.fi, genesis.labs |
-| 0.023 ETH | `cash` | jonny.cash |
-| 0.025 ETH | `0x`, `3e`, `bank`, `capital`, `vc` | my-protocol.0x, a16z.vc, swiss.bank |
-| 0.030 ETH | `100x` | pump.100x |
-| 0.035 ETH | `czar` | crypto.czar |
+| 0.018 ETH | `brrr`, `oxy` | printer-goes@brrr |
+| 0.019 ETH | `ooo` | m@ooo |
+| 0.020 ETH | `16`, `18`, `32`, `36`, `64`, `ag`, `alpha`, `art`, `ceo`, `comp`, `etf`, `fi`, `fund`, `g1`, `globe`, `gold`, `hq`, `inc`, `index`, `king`, `labs`, `ltd`, `lux`, `ny`, `pay`, `prime`, `queen`, `rv`, `rwa`, `ry`, `store`, `tech`, `vx`, `world`, `x7` | soros@alpha, de@fi, genesis@labs |
+| 0.023 ETH | `cash` | jonny@cash |
+| 0.025 ETH | `0x`, `3e`, `bank`, `capital`, `vc` | my-protocol@0x, a16z@vc, swiss@bank |
+| 0.030 ETH | `100x` | pump@100x |
+| 0.035 ETH | `czar` | crypto@czar |
 | 0.040 ETH | `star` | - |
 | 0.050 ETH | `2`, `4`, `8`, `a7x`, `pl4` | - |
 | 0.055 ETH | `xxl` | - |
-| 0.067 ETH | `67` | meme.67 |
-| 0.069 ETH | `69` | nice.69 |
-| 0.200 ETH | `dao` | dev.dao |
-| 0.589 ETH | `589` | lucky.589 |
-| 0.666 ETH | `18plus`, `porn`, `sex`, `xxx` | duck.xxx |
-| 0.777 ETH | `777` | jackpot.777 |
-| 0.888 ETH | `888` | lucky.888 |
+| 0.067 ETH | `67` | meme@67 |
+| 0.069 ETH | `69` | nice@69 |
+| 0.200 ETH | `dao` | dev@dao |
+| 0.589 ETH | `589` | lucky@589 |
+| 0.666 ETH | `18plus`, `porn`, `sex`, `xxx` | duck@xxx |
+| 0.777 ETH | `777` | jackpot@777 |
+| 0.888 ETH | `888` | lucky@888 |
 | 0.999 ETH | `999` | - |
-| 1.000 ETH | `1`, `defi` | myprotocol.defi, one.1 |
-| 1.500 ETH | `i`, `u`, `v`, `y` | tom-ba.y, vee.v |
+| 1.000 ETH | `1`, `defi` | myprotocol@defi, one@1 |
+| 1.500 ETH | `i`, `u`, `v`, `y` | tom-ba@y, vee@v |
 
 
 
@@ -342,7 +342,7 @@ The testnet contract has been parametrized as follows:
 
 ## 🔧 Integration Guide for Contract Developers
 
-XNS can be integrated into smart contracts, allowing users to identify contracts by a human-readable name (e.g., `myprotocol.xns`) instead of a long address.
+XNS can be integrated into smart contracts, allowing users to identify contracts by a human-readable name (e.g., `myprotocol@xns`) instead of a long address.
 
 > **Note:** Existing contracts without EIP-1271 support cannot register names retroactively. For contracts that implement EIP-1271, see [Option 3](#option-3-sponsored-registration-via-eip-1271) for instructions on how to register names.
 
@@ -508,13 +508,13 @@ contract YourContract {
 
 ### Documentation and Address Books
 
-When publishing contract addresses, use the XNS name (e.g., `myprotocol.xns`) if the contract address matches the Ethereum deployment. If the address is different on another chain, use the raw address instead.
+When publishing contract addresses, use the XNS name (e.g., `myprotocol@xns`) if the contract address matches the Ethereum deployment. If the address is different on another chain, use the raw address instead.
 
 Example:
 
 | Network                         | XNS name / Address         |
 |-------------------------------------|--------------------|
-| Ethereum / Arbitrum / Optimism / Base | `myprotocol.xns`   |
+| Ethereum / Arbitrum / Optimism / Base | `myprotocol@xns`   |
 | Avalanche                           | `0x1234…5678`      |
 
 
@@ -569,14 +569,14 @@ XNS names can enhance privacy when used thoughtfully, but the privacy implicatio
 
 Traditional Ethereum addresses (e.g., `0x8AdEFeb576dcF52F5220709c1B267d89d5208E78`) are long hexadecimal strings that are typically shared through digital channels like email, messaging apps, or social media. This creates a **digital trail** that links your identity to your address, which can be monitored, analyzed, and potentially used for surveillance or correlation attacks.
 
-With XNS, you can share addresses **off-chain** (verbally or in person) using memorable names like `alice.xns` or `1x45.xns`. The counterparty can easily remember and use the name without needing to copy-paste a long address, reducing digital traces that link your identity to your address.
+With XNS, you can share addresses **off-chain** (verbally or in person) using memorable names like `alice@xns` or `1x45@xns`. The counterparty can easily remember and use the name without needing to copy-paste a long address, reducing digital traces that link your identity to your address.
 
 ### Name Choice Matters
 
 **⚠️ Important:** The privacy benefit is **conditional** and depends on your name choice:
 
-- ✅ **Privacy-enhancing:** Using pseudonymous names (e.g., `1x45.xns`, `alice.xns`, `crypto123.xns`) that don't reveal your real identity, combined with off-chain sharing, can reduce identity-address correlation.
-- ❌ **Privacy-reducing:** Using identifiable names (e.g., `frank-walter.xns`, `john-smith.xns`) that reveal your real identity can actually **worsen** privacy compared to random addresses, as they create a direct, permanent link between your name and address on-chain.
+- ✅ **Privacy-enhancing:** Using pseudonymous names (e.g., `1x45@xns`, `alice@xns`, `crypto123@xns`) that don't reveal your real identity, combined with off-chain sharing, can reduce identity-address correlation.
+- ❌ **Privacy-reducing:** Using identifiable names (e.g., `frank-walter@xns`, `john-smith@xns`) that reveal your real identity can actually **worsen** privacy compared to random addresses, as they create a direct, permanent link between your name and address on-chain.
 
 ### Best Practices for Privacy-Conscious Users
 
@@ -593,7 +593,7 @@ This choice is intentional and motivated by **technical and user-safety consider
 
 ### Why BUSL?
 
-XNS is an identity and naming primitive. Names like `alice.x` or `bankless` are meant to be
+XNS is an identity and naming primitive. Names like `alice@x` or `bankless` are meant to be
 **globally unique, permanent, and unambiguous**.
 
 Allowing unrestricted third-party deployments of the XNS registry on other chains would lead to:

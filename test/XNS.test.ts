@@ -1153,7 +1153,7 @@ describe("XNS", function () {
         expect(await s.xns.isValidLabelOrNamespace("alice@bob")).to.be.false;
         expect(await s.xns.isValidLabelOrNamespace("test#label")).to.be.false;
         expect(await s.xns.isValidLabelOrNamespace("user$name")).to.be.false;
-        expect(await s.xns.isValidLabelOrNamespace("test.label")).to.be.false;
+        expect(await s.xns.isValidLabelOrNamespace("test@label")).to.be.false;
         expect(await s.xns.isValidLabelOrNamespace("alice!bob")).to.be.false;
     });
 
@@ -3650,7 +3650,7 @@ describe("XNS", function () {
 
         // Should map name hash to owner address (verify using getAddress with full name)
         // Note: Using short namespace "abc" (3 chars) so the dot is within the last 5 characters
-        const fullName = `${label}.${namespace}`;
+        const fullName = `${label}@${namespace}`;
         const getAddressByFullName = s.xns.getFunction("getAddress(string)");
         const ownerAddressByFullName = await getAddressByFullName(fullName);
         expect(ownerAddressByFullName).to.equal(s.user2.address);
@@ -3661,8 +3661,8 @@ describe("XNS", function () {
         expect(returnedName).to.equal(fullName);
 
         // Should set correct label and namespace (verify by parsing the returned name)
-        // The name format is "label.namespace"
-        const [returnedLabel, returnedNamespace] = returnedName.split(".");
+        // The name format is "label@namespace"
+        const [returnedLabel, returnedNamespace] = returnedName.split("@");
         expect(returnedLabel).to.equal(label);
         expect(returnedNamespace).to.equal(namespace);
     });
@@ -3719,11 +3719,11 @@ describe("XNS", function () {
         // Should map owner address to name
         const getName = s.xns.getFunction("getName(address)");
         const returnedName = await getName(s.user2.address);
-        const fullName = `${label}.${namespace}`;
+        const fullName = `${label}@${namespace}`;
         expect(returnedName).to.equal(fullName);
 
         // Should set correct label and namespace
-        const [returnedLabel, returnedNamespace] = returnedName.split(".");
+        const [returnedLabel, returnedNamespace] = returnedName.split("@");
         expect(returnedLabel).to.equal(label);
         expect(returnedNamespace).to.equal(namespace);
 
@@ -3823,7 +3823,7 @@ describe("XNS", function () {
         // Verify namespace can be queried
         const getName = s.xns.getFunction("getName(address)");
         const returnedName = await getName(s.user2.address);
-        const fullName = `${label}.${namespace}`;
+        const fullName = `${label}@${namespace}`;
         expect(returnedName).to.equal(fullName);
 
         // Verify refund: balance should decrease by pricePerName (0.001 ETH) + gas costs (excess was refunded)
@@ -3903,7 +3903,7 @@ describe("XNS", function () {
         expect(ownerAddress).to.equal(contractAddress);
 
         // Should map name hash to contract address
-        const fullName = `${label}.${namespace}`;
+        const fullName = `${label}@${namespace}`;
         const getAddressByFullName = s.xns.getFunction("getAddress(string)");
         const ownerAddressByFullName = await getAddressByFullName(fullName);
         expect(ownerAddressByFullName).to.equal(contractAddress);
@@ -3914,7 +3914,7 @@ describe("XNS", function () {
         expect(returnedName).to.equal(fullName);
 
         // Should set correct label and namespace
-        const [returnedLabel, returnedNamespace] = returnedName.split(".");
+        const [returnedLabel, returnedNamespace] = returnedName.split("@");
         expect(returnedLabel).to.equal(label);
         expect(returnedNamespace).to.equal(namespace);
     });
@@ -3961,7 +3961,7 @@ describe("XNS", function () {
         expect(ownerAddress).to.equal(contractAddress);
 
         // Should map name hash to contract address
-        const fullName = `${label}.${namespace}`;
+        const fullName = `${label}@${namespace}`;
         const getAddressByFullName = s.xns.getFunction("getAddress(string)");
         const ownerAddressByFullName = await getAddressByFullName(fullName);
         expect(ownerAddressByFullName).to.equal(contractAddress);
@@ -3971,7 +3971,7 @@ describe("XNS", function () {
         expect(returnedName).to.equal(fullName);
 
         // Should set correct label and namespace
-        const [returnedLabel, returnedNamespace] = returnedName.split(".");
+        const [returnedLabel, returnedNamespace] = returnedName.split("@");
         expect(returnedLabel).to.equal(label);
         expect(returnedNamespace).to.equal(namespace);
     });
@@ -4249,7 +4249,7 @@ describe("XNS", function () {
         // Verify user2 has a name
         const getName = s.xns.getFunction("getName(address)");
         const returnedName = await getName(s.user2.address);
-        expect(returnedName).to.equal(`${firstLabel}.${namespace}`);
+        expect(returnedName).to.equal(`${firstLabel}@${namespace}`);
 
         // ---------
         // Act & Assert: Attempt to register another name for the same address and expect revert
@@ -4339,7 +4339,7 @@ describe("XNS", function () {
         expect(ownerAddress).to.not.equal(s.user1.address); // msg.sender should not be the owner
 
         // Should map name hash to recipient address
-        const fullName = `${label}.${namespace}`;
+        const fullName = `${label}@${namespace}`;
         const getAddressByFullName = s.xns.getFunction("getAddress(string)");
         const ownerAddressByFullName = await getAddressByFullName(fullName);
         expect(ownerAddressByFullName).to.equal(recipient);
@@ -4350,7 +4350,7 @@ describe("XNS", function () {
         expect(returnedName).to.equal(fullName);
 
         // Should set correct label and namespace
-        const [returnedLabel, returnedNamespace] = returnedName.split(".");
+        const [returnedLabel, returnedNamespace] = returnedName.split("@");
         expect(returnedLabel).to.equal(label);
         expect(returnedNamespace).to.equal(namespace);
     });
@@ -4423,11 +4423,11 @@ describe("XNS", function () {
         // Should map owner address to name
         const getName = s.xns.getFunction("getName(address)");
         const returnedName = await getName(s.user1.address);
-        const fullName = `${label}.${namespace}`;
+        const fullName = `${label}@${namespace}`;
         expect(returnedName).to.equal(fullName);
 
         // Should set correct label and namespace
-        const [returnedLabel, returnedNamespace] = returnedName.split(".");
+        const [returnedLabel, returnedNamespace] = returnedName.split("@");
         expect(returnedLabel).to.equal(label);
         expect(returnedNamespace).to.equal(namespace);
 
@@ -4496,7 +4496,7 @@ describe("XNS", function () {
 
         const getNameByAddress = s.xns.getFunction("getName(address)");
         const registeredName = await getNameByAddress(s.user1.address);
-        expect(registeredName).to.equal(`${label}.${namespace}`);
+        expect(registeredName).to.equal(`${label}@${namespace}`);
 
         // Verify 80% was burnt via DETH (credited to payer/namespace owner)
         const finalDETHBurned = await s.deth.burned(s.user1.address);
@@ -4556,7 +4556,7 @@ describe("XNS", function () {
         expect(ownerAddress).to.not.equal(s.user1.address); // msg.sender should not be the owner
 
         // Should map name hash to recipient address
-        const fullName = `${label}.${namespace}`;
+        const fullName = `${label}@${namespace}`;
         const getAddressByFullName = s.xns.getFunction("getAddress(string)");
         const ownerAddressByFullName = await getAddressByFullName(fullName);
         expect(ownerAddressByFullName).to.equal(recipient);
@@ -4567,7 +4567,7 @@ describe("XNS", function () {
         expect(returnedName).to.equal(fullName);
 
         // Should set correct label and namespace
-        const [returnedLabel, returnedNamespace] = returnedName.split(".");
+        const [returnedLabel, returnedNamespace] = returnedName.split("@");
         expect(returnedLabel).to.equal(label);
         expect(returnedNamespace).to.equal(namespace);
     });
@@ -4621,7 +4621,7 @@ describe("XNS", function () {
         expect(ownerAddress).to.not.equal(s.owner.address); // msg.sender should not be the owner
 
         // Should map name hash to recipient address
-        const fullName = `${label}.${namespace}`;
+        const fullName = `${label}@${namespace}`;
         const getAddressByFullName = s.xns.getFunction("getAddress(string)");
         const ownerAddressByFullName = await getAddressByFullName(fullName);
         expect(ownerAddressByFullName).to.equal(recipient);
@@ -4632,7 +4632,7 @@ describe("XNS", function () {
         expect(returnedName).to.equal(fullName);
 
         // Should set correct label and namespace
-        const [returnedLabel, returnedNamespace] = returnedName.split(".");
+        const [returnedLabel, returnedNamespace] = returnedName.split("@");
         expect(returnedLabel).to.equal(label);
         expect(returnedNamespace).to.equal(namespace);
     });
@@ -4686,7 +4686,7 @@ describe("XNS", function () {
         expect(ownerAddress).to.not.equal(s.user1.address); // msg.sender should not be the owner
 
         // Should map name hash to recipient address
-        const fullName = `${label}.${namespace}`;
+        const fullName = `${label}@${namespace}`;
         const getAddressByFullName = s.xns.getFunction("getAddress(string)");
         const ownerAddressByFullName = await getAddressByFullName(fullName);
         expect(ownerAddressByFullName).to.equal(recipient);
@@ -4697,7 +4697,7 @@ describe("XNS", function () {
         expect(returnedName).to.equal(fullName);
 
         // Should set correct label and namespace
-        const [returnedLabel, returnedNamespace] = returnedName.split(".");
+        const [returnedLabel, returnedNamespace] = returnedName.split("@");
         expect(returnedLabel).to.equal(label);
         expect(returnedNamespace).to.equal(namespace);
     });
@@ -4861,7 +4861,7 @@ describe("XNS", function () {
         expect(ownerAddress).to.not.equal(s.owner.address); // msg.sender should not be the owner
 
         // Should map name hash to contract wallet address
-        const fullName = `${label}.${namespace}`;
+        const fullName = `${label}@${namespace}`;
         const getAddressByFullName = s.xns.getFunction("getAddress(string)");
         const ownerAddressByFullName = await getAddressByFullName(fullName);
         expect(ownerAddressByFullName).to.equal(walletAddress);
@@ -4872,7 +4872,7 @@ describe("XNS", function () {
         expect(returnedName).to.equal(fullName);
 
         // Should set correct label and namespace
-        const [returnedLabel, returnedNamespace] = returnedName.split(".");
+        const [returnedLabel, returnedNamespace] = returnedName.split("@");
         expect(returnedLabel).to.equal(label);
         expect(returnedNamespace).to.equal(namespace);
     });
@@ -5206,7 +5206,7 @@ describe("XNS", function () {
         // Verify recipient has a name
         const getName = s.xns.getFunction("getName(address)");
         const returnedName = await getName(recipient);
-        expect(returnedName).to.equal(`${firstLabel}.${namespace}`);
+        expect(returnedName).to.equal(`${firstLabel}@${namespace}`);
 
         // Create signature for second name (will fail recipient validation)
         const signature = await s.signRegisterNameAuth(s.user2, recipient, secondLabel, namespace);
@@ -5439,7 +5439,7 @@ describe("XNS", function () {
         const getName = s.xns.getFunction("getName(address)");
         for (const reg of registrations) {
             // Should map name hash to recipient address
-            const fullName = `${reg.label}.${namespace}`;
+            const fullName = `${reg.label}@${namespace}`;
             const getAddressByFullName = s.xns.getFunction("getAddress(string)");
             const ownerAddressByFullName = await getAddressByFullName(fullName);
             expect(ownerAddressByFullName).to.equal(reg.recipient);
@@ -5449,7 +5449,7 @@ describe("XNS", function () {
             expect(returnedName).to.equal(fullName);
 
             // Should set correct label and namespace
-            const [returnedLabel, returnedNamespace] = returnedName.split(".");
+            const [returnedLabel, returnedNamespace] = returnedName.split("@");
             expect(returnedLabel).to.equal(reg.label);
             expect(returnedNamespace).to.equal(namespace);
         }
@@ -5477,7 +5477,7 @@ describe("XNS", function () {
         // Verify user1 has a name
         const getName = s.xns.getFunction("getName(address)");
         const user1Name = await getName(s.user1.address);
-        expect(user1Name).to.equal(`${firstLabel}.${namespace}`);
+        expect(user1Name).to.equal(`${firstLabel}@${namespace}`);
 
         // Prepare batch registrations: user1 (already has name), user2 (new), owner (new)
         const registrations = [
@@ -5551,9 +5551,9 @@ describe("XNS", function () {
 
         // Verify user1 still has their original name (not the new one)
         const user1NameAfter = await getName(s.user1.address);
-        expect(user1NameAfter).to.equal(`${firstLabel}.${namespace}`); // Original name, not "alice.xns"
+        expect(user1NameAfter).to.equal(`${firstLabel}@${namespace}`); // Original name, not "alice@xns"
         
-        // Verify "alice.xns" was not registered (should return address(0))
+        // Verify "alice@xns" was not registered (should return address(0))
         const getAddressByLabelAndNamespace = s.xns.getFunction("getAddress(string,string)");
         const aliceOwner = await getAddressByLabelAndNamespace("alice", namespace);
         expect(aliceOwner).to.equal(ethers.ZeroAddress);
@@ -5562,13 +5562,13 @@ describe("XNS", function () {
         const bobOwner = await getAddressByLabelAndNamespace("bob", namespace);
         expect(bobOwner).to.equal(s.user2.address);
         const user2Name = await getName(s.user2.address);
-        expect(user2Name).to.equal(`bob.${namespace}`);
+        expect(user2Name).to.equal(`bob@${namespace}`);
 
         // Verify owner's registration succeeded
         const charlieOwner = await getAddressByLabelAndNamespace("charlie", namespace);
         expect(charlieOwner).to.equal(s.owner.address);
         const ownerName = await getName(s.owner.address);
-        expect(ownerName).to.equal(`charlie.${namespace}`);
+        expect(ownerName).to.equal(`charlie@${namespace}`);
 
         // Verify payment: should only charge for 2 successful registrations, refund the rest
         // balanceAfter should equal balanceBefore - (pricePerName * 2) - gasCost
@@ -5587,7 +5587,7 @@ describe("XNS", function () {
         const exclusivityPeriod = await s.xns.EXCLUSIVITY_PERIOD();
         await time.increase(Number(exclusivityPeriod) + 86400); // 7 days + 1 day
 
-        // First, register "alice.xns" for user1
+        // First, register "alice@xns" for user1
         const existingLabel = "alice";
         await s.xns.connect(s.user1).registerName(existingLabel, namespace, { value: pricePerName });
 
@@ -5666,23 +5666,23 @@ describe("XNS", function () {
         const events = await s.xns.queryFilter(eventFilter, receipt!.blockNumber, receipt!.blockNumber);
         expect(events.length).to.equal(Number(expectedSuccessfulCount));
 
-        // Verify "alice.xns" still belongs to user1 (not user2)
+        // Verify "alice@xns" still belongs to user1 (not user2)
         const aliceOwnerAfter = await getAddressByLabelAndNamespace(existingLabel, namespace);
         expect(aliceOwnerAfter).to.equal(s.user1.address); // Still user1, not user2
         expect(aliceOwnerAfter).to.not.equal(s.user2.address); // user2 did not get it
 
-        // Verify user2's "bob.xns" registration succeeded
+        // Verify user2's "bob@xns" registration succeeded
         const bobOwner = await getAddressByLabelAndNamespace("bob", namespace);
         expect(bobOwner).to.equal(s.user2.address);
         const getName = s.xns.getFunction("getName(address)");
         const user2Name = await getName(s.user2.address);
-        expect(user2Name).to.equal(`bob.${namespace}`);
+        expect(user2Name).to.equal(`bob@${namespace}`);
 
-        // Verify owner's "charlie.xns" registration succeeded
+        // Verify owner's "charlie@xns" registration succeeded
         const charlieOwner = await getAddressByLabelAndNamespace("charlie", namespace);
         expect(charlieOwner).to.equal(s.owner.address);
         const ownerName = await getName(s.owner.address);
-        expect(ownerName).to.equal(`charlie.${namespace}`);
+        expect(ownerName).to.equal(`charlie@${namespace}`);
 
         // Verify payment: should only charge for 2 successful registrations, refund the rest
         // balanceAfter should equal balanceBefore - (pricePerName * 2) - gasCost
@@ -5708,9 +5708,9 @@ describe("XNS", function () {
 
         // Verify all recipients have names
         const getName = s.xns.getFunction("getName(address)");
-        expect(await getName(s.user1.address)).to.equal("first.xns");
-        expect(await getName(s.user2.address)).to.equal("second.xns");
-        expect(await getName(s.owner.address)).to.equal("third.xns");
+        expect(await getName(s.user1.address)).to.equal("first@xns");
+        expect(await getName(s.user2.address)).to.equal("second@xns");
+        expect(await getName(s.owner.address)).to.equal("third@xns");
 
         // Prepare batch registrations where all recipients already have names (all will be skipped)
         const registrations = [
@@ -5792,9 +5792,9 @@ describe("XNS", function () {
         expect(charlieOwner).to.equal(ethers.ZeroAddress); // Not registered
 
         // Verify all recipients still have their original names
-        expect(await getName(s.user1.address)).to.equal("first.xns");
-        expect(await getName(s.user2.address)).to.equal("second.xns");
-        expect(await getName(s.owner.address)).to.equal("third.xns");
+        expect(await getName(s.user1.address)).to.equal("first@xns");
+        expect(await getName(s.user2.address)).to.equal("second@xns");
+        expect(await getName(s.owner.address)).to.equal("third@xns");
 
         // Verify payment: should refund all payment (only gas cost should be deducted)
         // balanceAfter should equal balanceBefore - gasCost (all payment refunded)
@@ -6172,7 +6172,7 @@ describe("XNS", function () {
             expect(ownerAddress).to.equal(reg.recipient); // recipient is the owner, not user1 (sponsor)
             expect(ownerAddress).to.not.equal(s.user1.address); // sponsor should not own the name
 
-            const fullName = `${reg.label}.${namespace}`;
+            const fullName = `${reg.label}@${namespace}`;
             expect(await getName(reg.recipient)).to.equal(fullName);
         }
     });
@@ -6263,7 +6263,7 @@ describe("XNS", function () {
             expect(ownerAddress).to.equal(reg.recipient); // recipient is the owner, not owner (sponsor)
             expect(ownerAddress).to.not.equal(s.owner.address); // sponsor should not own the name
 
-            const fullName = `${reg.label}.${namespace}`;
+            const fullName = `${reg.label}@${namespace}`;
             expect(await getName(reg.recipient)).to.equal(fullName);
         }
     });
@@ -6354,7 +6354,7 @@ describe("XNS", function () {
             expect(ownerAddress).to.equal(reg.recipient); // recipient is the owner, not user1 (sponsor)
             expect(ownerAddress).to.not.equal(s.user1.address); // sponsor should not own the name
 
-            const fullName = `${reg.label}.${namespace}`;
+            const fullName = `${reg.label}@${namespace}`;
             expect(await getName(reg.recipient)).to.equal(fullName);
         }
     });
@@ -6436,19 +6436,19 @@ describe("XNS", function () {
             expect(ownerAddress).to.equal(reg.recipient); // recipient is the owner, not owner (sponsor)
             expect(ownerAddress).to.not.equal(s.owner.address); // sponsor should not own the name
 
-            const fullName = `${reg.label}.${namespace}`;
+            const fullName = `${reg.label}@${namespace}`;
             expect(await getName(reg.recipient)).to.equal(fullName);
         }
 
         // Specifically verify EIP-1271 wallet registration
         const walletOwnerAddress = await getAddressByLabelAndNamespace(registrations[0].label, namespace);
         expect(walletOwnerAddress).to.equal(walletAddress);
-        expect(await getName(walletAddress)).to.equal(`${registrations[0].label}.${namespace}`);
+        expect(await getName(walletAddress)).to.equal(`${registrations[0].label}@${namespace}`);
 
         // Verify EOA registration
         const eoaOwnerAddress = await getAddressByLabelAndNamespace(registrations[1].label, namespace);
         expect(eoaOwnerAddress).to.equal(s.user1.address);
-        expect(await getName(s.user1.address)).to.equal(`${registrations[1].label}.${namespace}`);
+        expect(await getName(s.user1.address)).to.equal(`${registrations[1].label}@${namespace}`);
     });
 
 
@@ -8392,7 +8392,7 @@ describe("XNS", function () {
     // Functionality
     // -----------------------
 
-    it("Should resolve full name with dot notation correctly (e.g., \"alice.001\")", async () => {
+    it("Should resolve full name with @ notation correctly (e.g., \"alice@001\")", async () => {
       // ---------
       // Arrange
       // ---------
@@ -8414,7 +8414,7 @@ describe("XNS", function () {
       // ---------
       // Act & Assert
       // ---------
-      expect(await getAddressByFullName("alice.001")).to.equal(user3.address);
+      expect(await getAddressByFullName("alice@001")).to.equal(user3.address);
     });
 
     it("Should resolve correctly for one-character namespaces", async () => {
@@ -8439,7 +8439,7 @@ describe("XNS", function () {
       // ---------
       // Act & Assert
       // ---------
-      expect(await getAddressByFullName("bob.a")).to.equal(user3.address);
+      expect(await getAddressByFullName("bob@a")).to.equal(user3.address);
     });
 
     it("Should resolve correctly for two-character namespaces", async () => {
@@ -8464,7 +8464,7 @@ describe("XNS", function () {
       // ---------
       // Act & Assert
       // ---------
-      expect(await getAddressByFullName("charlie.ab")).to.equal(user3.address);
+      expect(await getAddressByFullName("charlie@ab")).to.equal(user3.address);
     });
 
     it("Should resolve correctly for three-character namespaces", async () => {
@@ -8486,7 +8486,7 @@ describe("XNS", function () {
       // ---------
       // Act & Assert
       // ---------
-      expect(await getAddressByFullName("david.xns")).to.equal(user3.address);
+      expect(await getAddressByFullName("david@xns")).to.equal(user3.address);
     });
 
     it("Should resolve correctly for four-character namespaces", async () => {
@@ -8511,7 +8511,7 @@ describe("XNS", function () {
       // ---------
       // Act & Assert
       // ---------
-      expect(await getAddressByFullName("eve.abcd")).to.equal(user3.address);
+      expect(await getAddressByFullName("eve@abcd")).to.equal(user3.address);
     });
 
     it("Should resolve fullnames with three characters", async () => {
@@ -8536,7 +8536,7 @@ describe("XNS", function () {
       // ---------
       // Act & Assert
       // ---------
-      expect(await getAddressByFullName("xy.a")).to.equal(user3.address);
+      expect(await getAddressByFullName("xy@a")).to.equal(user3.address);
     });
 
     it("Should resolve fullnames with four characters", async () => {
@@ -8561,7 +8561,7 @@ describe("XNS", function () {
       // ---------
       // Act & Assert
       // ---------
-      expect(await getAddressByFullName("a.abc")).to.equal(user3.address);
+      expect(await getAddressByFullName("a@abc")).to.equal(user3.address);
     });
 
     it("Should resolve fullnames with five characters", async () => {
@@ -8586,7 +8586,7 @@ describe("XNS", function () {
       // ---------
       // Act & Assert
       // ---------
-      expect(await getAddressByFullName("ab.abc")).to.equal(user3.address);
+      expect(await getAddressByFullName("ab@abc")).to.equal(user3.address);
     });
 
     it("Should resolve fullnames with six characters", async () => {
@@ -8611,7 +8611,7 @@ describe("XNS", function () {
       // ---------
       // Act & Assert
       // ---------
-      expect(await getAddressByFullName("abc.abc")).to.equal(user3.address);
+      expect(await getAddressByFullName("abc@abc")).to.equal(user3.address);
     });
 
     it("Should resolve fullnames with seven characters", async () => {
@@ -8636,7 +8636,7 @@ describe("XNS", function () {
       // ---------
       // Act & Assert
       // ---------
-      expect(await getAddressByFullName("abcd.abc")).to.equal(user3.address);
+      expect(await getAddressByFullName("abcd@abc")).to.equal(user3.address);
     });
 
     it("Should resolve fullnames with twenty-five characters", async () => {
@@ -8662,7 +8662,7 @@ describe("XNS", function () {
       // ---------
       // Act & Assert
       // ---------
-      expect(await getAddressByFullName("abcdefghijklmnopqrst.abcd")).to.equal(user3.address);
+      expect(await getAddressByFullName("abcdefghijklmnopqrst@abcd")).to.equal(user3.address);
     });
 
     it("Should return `address(0)` for unregistered names", async () => {
@@ -8674,8 +8674,8 @@ describe("XNS", function () {
       // ---------
       // Act & Assert
       // ---------
-      expect(await getAddressByFullName("unregistered.xns")).to.equal(ethers.ZeroAddress);
-      expect(await getAddressByFullName("unknown.x")).to.equal(ethers.ZeroAddress);
+      expect(await getAddressByFullName("unregistered@xns")).to.equal(ethers.ZeroAddress);
+      expect(await getAddressByFullName("unknown@x")).to.equal(ethers.ZeroAddress);
       expect(await getAddressByFullName("notregistered")).to.equal(ethers.ZeroAddress);
     });
 
@@ -8691,25 +8691,25 @@ describe("XNS", function () {
       expect(await getAddressByFullName("")).to.equal(ethers.ZeroAddress);
     });
 
-    it("Should return `address(0)` for \"foo.bar.baz\" (parses correctly with full reverse scan as label=\"foo.bar\", namespace=\"baz\")", async () => {
+    it("Should return `address(0)` for \"foo@bar@baz\" (parses correctly with full reverse scan as label=\"foo@bar\", namespace=\"baz\")", async () => {
         // ---------
         // Arrange
         // ---------
-        // "foo.bar.baz" uses full reverse scan (finds last '.' from the right).
-        // It finds '.' at the last position (between "bar" and "baz"),
-        // so it parses as label="foo.bar" and namespace="baz".
-        // Since "foo.bar.baz" is not registered, it should return address(0).
+        // "foo@bar@baz" uses full reverse scan (finds last '@' from the right).
+        // It finds '@' at the last position (between "bar" and "baz"),
+        // so it parses as label="foo@bar" and namespace="baz".
+        // Since "foo@bar@baz" is not registered, it should return address(0).
         const getAddressByFullName = s.xns.getFunction("getAddress(string)");
   
         // ---------
         // Act & Assert
         // ---------
-        // The name "foo.bar.baz" will be parsed as label="foo.bar" and namespace="baz",
+        // The name "foo@bar@baz" will be parsed as label="foo@bar" and namespace="baz",
         // which is not registered, so it returns address(0).
-        expect(await getAddressByFullName("foo.bar.baz")).to.equal(ethers.ZeroAddress);
+        expect(await getAddressByFullName("foo@bar@baz")).to.equal(ethers.ZeroAddress);
       });
 
-    it("Should resolve correctly for long private namespaces (e.g., \"label.my-private-namespace\" with namespace up to 20 characters)", async () => {
+    it("Should resolve correctly for long private namespaces (e.g., \"label@my-private-namespace\" with namespace up to 20 characters)", async () => {
         // ---------
         // Arrange: Register a long private namespace (20 characters) and sponsor a name registration
         // ---------
@@ -8744,7 +8744,7 @@ describe("XNS", function () {
         // ---------
         // Act: Get address using full name format
         // ---------
-        const fullName = `${label}.${namespace}`;
+        const fullName = `${label}@${namespace}`;
         const getAddressByFullName = s.xns.getFunction("getAddress(string)");
         const ownerAddress = await getAddressByFullName(fullName);
 
@@ -8755,7 +8755,7 @@ describe("XNS", function () {
         expect(ownerAddress).to.equal(s.user2.address);
     });
 
-    it("Should return correct address for \"label.my-private\" (correctly parses long private namespace with full reverse scan)", async () => {
+    it("Should return correct address for \"label@my-private\" (correctly parses long private namespace with full reverse scan)", async () => {
         // ---------
         // Arrange: Register a private namespace "my-private" and sponsor a name registration
         // ---------
@@ -8787,9 +8787,9 @@ describe("XNS", function () {
         );
 
         // ---------
-        // Act: Get address using full name format "label.my-private"
+        // Act: Get address using full name format "label@my-private"
         // ---------
-        const fullName = `${label}.${namespace}`;
+        const fullName = `${label}@${namespace}`;
         const getAddressByFullName = s.xns.getFunction("getAddress(string)");
         const ownerAddress = await getAddressByFullName(fullName);
 
@@ -8812,7 +8812,7 @@ describe("XNS", function () {
     // Functionality
     // -----------------------
 
-    it("Should return full name with namespace for regular names (e.g., returns \"alice.001\")", async () => {
+    it("Should return full name with namespace for regular names (e.g., returns \"alice@001\")", async () => {
       // ---------
       // Arrange
       // ---------
@@ -8841,10 +8841,10 @@ describe("XNS", function () {
       // ---------
       // Assert
       // ---------
-      expect(name).to.equal("alice.001");
+      expect(name).to.equal("alice@001");
     });
 
-    it("Should return full name with namespace for private namespace names (e.g., returns \"alice.my-private\")", async () => {
+    it("Should return full name with namespace for private namespace names (e.g., returns \"alice@my-private\")", async () => {
       // ---------
       // Arrange: Register a private namespace and sponsor a name registration
       // ---------
@@ -8886,7 +8886,7 @@ describe("XNS", function () {
       // ---------
       // Assert: Should return full name with private namespace
       // ---------
-      expect(name).to.equal("alice.my-private");
+      expect(name).to.equal("alice@my-private");
     });
 
 

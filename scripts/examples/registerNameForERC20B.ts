@@ -118,7 +118,7 @@ async function main() {
   const existingOwner = await getAddress(label, namespace);
   if (existingOwner !== hre.ethers.ZeroAddress) {
     throw new Error(
-      `Name "${label}.${namespace}" is already registered to ${existingOwner}`,
+      `Name "${label}@${namespace}" is already registered to ${existingOwner}`,
     );
   }
 
@@ -158,7 +158,7 @@ async function main() {
   }
 
   // Register XNS name for the ERC20 contract
-  const fullName = namespace.toLowerCase() === "x" ? label : `${label}.${namespace}`;
+  const fullName = `${label}@${namespace}`;
   console.log(`Registering XNS name for contract: ${GREEN}${fullName}${RESET}`);
   console.log(`Sending ${GREEN}${formatEther(pricePerName)} ETH${RESET}...\n`);
 

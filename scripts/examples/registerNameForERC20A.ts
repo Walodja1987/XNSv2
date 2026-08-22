@@ -118,7 +118,7 @@ async function main() {
   const existingOwner = await getAddress(label, namespace);
   if (existingOwner !== hre.ethers.ZeroAddress) {
     throw new Error(
-      `Name "${label}.${namespace}" is already registered to ${existingOwner}`,
+      `Name "${label}@${namespace}" is already registered to ${existingOwner}`,
     );
   }
 
@@ -134,7 +134,7 @@ async function main() {
   console.log(`  Token symbol: ${GREEN}${tokenSymbol}${RESET}`);
   console.log(`  Initial supply: ${GREEN}${formatEther(initialSupply)} ${tokenSymbol}${RESET}`);
   
-  const fullName = namespace.toLowerCase() === "x" ? label : `${label}.${namespace}`;
+  const fullName = `${label}@${namespace}`;
   console.log(`  XNS name to register: ${GREEN}${fullName}${RESET}`);
   console.log(`  Sending ${GREEN}${formatEther(pricePerName)} ETH${RESET}...\n`);
 
