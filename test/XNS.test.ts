@@ -135,12 +135,6 @@ describe("XNS", function () {
 
         // Should set special namespace as public (isPrivate = false)
         expect(isPrivate).to.equal(false);
-
-        // Should register bare name "xns" for the XNS contract itself
-        const contractAddress = await s.xns.getAddress();
-        expect(await s.xns.getAddress("xns")).to.equal(contractAddress);
-        expect(await s.xns.getAddress("xns", "x")).to.equal(contractAddress);
-        expect(await s.xns.getName(contractAddress)).to.equal("xns");
     });
 
     it("Should have correct constants", async () => {
@@ -183,13 +177,6 @@ describe("XNS", function () {
         await expect(s.xns.deploymentTransaction())
             .to.emit(s.xns, "NamespaceRegistered")
             .withArgs("x", ethers.parseEther("10"), s.owner.address, false);
-    });
-
-    it("Should emit `NameRegistered` event for contract's own name 'xns'", async () => {
-        const contractAddress = await s.xns.getAddress();
-        await expect(s.xns.deploymentTransaction())
-            .to.emit(s.xns, "NameRegistered")
-            .withArgs("xns", "x", contractAddress);
     });
 
     it("Should revert with `XNS: 0x owner` error when owner is `address(0)`", async () => {

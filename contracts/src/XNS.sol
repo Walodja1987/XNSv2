@@ -200,8 +200,7 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
 
     /// @dev Initializes the contract by setting the XNS contract owner (via OpenZeppelin's `Ownable` contract)
     /// and deployment timestamp. Also pre-registers the special public namespace "x" (associated with bare names) with the
-    /// given owner as its namespace owner and a price of 10 ETH per name. Additionally, registers the bare name "xns" for the
-    /// XNS contract itself.
+    /// given owner as its namespace owner and a price of 10 ETH per name.
     /// @param initialOwner Address that will own the contract and receive protocol fees (should not be `address(0)`).
     constructor(address initialOwner) EIP712("XNS", "1") Ownable(initialOwner) {
         // Zero address check on `initialOwner` is performed in the OpenZeppelin's `Ownable` contract.
@@ -217,17 +216,6 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
         });
 
         emit NamespaceRegistered(BARE_NAME_NAMESPACE, BARE_NAME_PRICE, initialOwner, false);
-
-        // Register bare name "xns" for the XNS contract itself.
-        string memory contractLabel = "xns";
-        bytes32 nameKey = keccak256(abi.encodePacked(contractLabel, ".", BARE_NAME_NAMESPACE));
-        _nameHashToAddress[nameKey] = address(this);
-        _addressToName[address(this)] = Name({
-            label: contractLabel,
-            namespace: BARE_NAME_NAMESPACE
-        });
-
-        emit NameRegistered(contractLabel, BARE_NAME_NAMESPACE, address(this));
     }
     
     // =========================================================================
