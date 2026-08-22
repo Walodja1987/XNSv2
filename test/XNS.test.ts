@@ -1815,20 +1815,27 @@ describe("XNS", function () {
         ).to.be.revertedWith("XNS: invalid namespace");
     });
 
-    it("Should revert with `XNS: 'eth' namespace forbidden` error when trying to register \"eth\" namespace", async () => {
+    it("Should allow registering the \"eth\" namespace", async () => {
         // ---------
-        // Arrange: Prepare parameters with "eth" namespace
+        // Arrange
         // ---------
         const namespace = "eth";
         const pricePerName = ethers.parseEther("0.001");
         const fee = await s.xns.PUBLIC_NAMESPACE_REGISTRATION_FEE();
 
         // ---------
-        // Act & Assert: Attempt to register "eth" namespace and expect revert
+        // Act
         // ---------
-        await expect(
-            s.xns.connect(s.user1).registerPublicNamespace(namespace, pricePerName, { value: fee })
-        ).to.be.revertedWith("XNS: 'eth' namespace forbidden");
+        await s.xns.connect(s.user1).registerPublicNamespace(namespace, pricePerName, { value: fee });
+
+        // ---------
+        // Assert
+        // ---------
+        const getNamespaceInfo = s.xns.getFunction("getNamespaceInfo(string)");
+        const [returnedPrice, owner, , isPrivate] = await getNamespaceInfo(namespace);
+        expect(returnedPrice).to.equal(pricePerName);
+        expect(owner).to.equal(s.user1.address);
+        expect(isPrivate).to.equal(false);
     });
 
     it("Should revert with `XNS: pricePerName too low` error for price less than 0.001 ETH", async () => {
@@ -2309,20 +2316,27 @@ describe("XNS", function () {
         ).to.be.revertedWith("XNS: invalid namespace");
     });
 
-    it("Should revert with `XNS: 'eth' namespace forbidden` error when trying to register \"eth\" namespace", async () => {
+    it("Should allow registering the \"eth\" namespace via registerPublicNamespaceFor", async () => {
         // ---------
-        // Arrange: Prepare parameters with "eth" namespace
+        // Arrange
         // ---------
         const namespace = "eth";
         const pricePerName = ethers.parseEther("0.001");
         const nsOwner = s.user1.address;
 
         // ---------
-        // Act & Assert: Attempt to register "eth" namespace and expect revert
+        // Act
         // ---------
-        await expect(
-            s.xns.connect(s.owner).registerPublicNamespaceFor(nsOwner, namespace, pricePerName)
-        ).to.be.revertedWith("XNS: 'eth' namespace forbidden");
+        await s.xns.connect(s.owner).registerPublicNamespaceFor(nsOwner, namespace, pricePerName);
+
+        // ---------
+        // Assert
+        // ---------
+        const getNamespaceInfo = s.xns.getFunction("getNamespaceInfo(string)");
+        const [returnedPrice, owner, , isPrivate] = await getNamespaceInfo(namespace);
+        expect(returnedPrice).to.equal(pricePerName);
+        expect(owner).to.equal(nsOwner);
+        expect(isPrivate).to.equal(false);
     });
 
     it("Should revert with `XNS: pricePerName too low` error for price less than 0.001 ETH", async () => {
@@ -2692,20 +2706,27 @@ describe("XNS", function () {
         ).to.be.revertedWith("XNS: invalid namespace");
     });
 
-    it("Should revert with `XNS: 'eth' namespace forbidden` error when trying to register \"eth\" namespace", async () => {
+    it("Should allow registering the \"eth\" namespace via registerPrivateNamespaceFor", async () => {
         // ---------
-        // Arrange: Prepare parameters with "eth" namespace
+        // Arrange
         // ---------
         const namespace = "eth";
         const pricePerName = ethers.parseEther("0.005");
         const nsOwner = s.user1.address;
 
         // ---------
-        // Act & Assert: Attempt to register "eth" namespace and expect revert
+        // Act
         // ---------
-        await expect(
-            s.xns.connect(s.owner).registerPrivateNamespaceFor(nsOwner, namespace, pricePerName)
-        ).to.be.revertedWith("XNS: 'eth' namespace forbidden");
+        await s.xns.connect(s.owner).registerPrivateNamespaceFor(nsOwner, namespace, pricePerName);
+
+        // ---------
+        // Assert
+        // ---------
+        const getNamespaceInfo = s.xns.getFunction("getNamespaceInfo(string)");
+        const [returnedPrice, owner, , isPrivate] = await getNamespaceInfo(namespace);
+        expect(returnedPrice).to.equal(pricePerName);
+        expect(owner).to.equal(nsOwner);
+        expect(isPrivate).to.equal(true);
     });
 
     it("Should revert with `XNS: pricePerName too low` error for price less than 0.005 ETH", async () => {
@@ -3385,20 +3406,27 @@ describe("XNS", function () {
         ).to.be.revertedWith("XNS: invalid namespace");
     });
 
-    it("Should revert with `XNS: 'eth' namespace forbidden` error when trying to register \"eth\" namespace", async () => {
+    it("Should allow registering the \"eth\" private namespace", async () => {
         // ---------
-        // Arrange: Prepare parameters with "eth" namespace
+        // Arrange
         // ---------
         const namespace = "eth";
         const pricePerName = ethers.parseEther("0.005");
         const fee = await s.xns.PRIVATE_NAMESPACE_REGISTRATION_FEE();
 
         // ---------
-        // Act & Assert: Attempt to register "eth" private namespace and expect revert
+        // Act
         // ---------
-        await expect(
-            s.xns.connect(s.user1).registerPrivateNamespace(namespace, pricePerName, { value: fee })
-        ).to.be.revertedWith("XNS: 'eth' namespace forbidden");
+        await s.xns.connect(s.user1).registerPrivateNamespace(namespace, pricePerName, { value: fee });
+
+        // ---------
+        // Assert
+        // ---------
+        const getNamespaceInfo = s.xns.getFunction("getNamespaceInfo(string)");
+        const [returnedPrice, owner, , isPrivate] = await getNamespaceInfo(namespace);
+        expect(returnedPrice).to.equal(pricePerName);
+        expect(owner).to.equal(s.user1.address);
+        expect(isPrivate).to.equal(true);
     });
 
     it("Should revert with `XNS: pricePerName too low` error for price less than 0.005 ETH", async () => {

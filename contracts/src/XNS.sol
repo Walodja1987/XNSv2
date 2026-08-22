@@ -38,7 +38,6 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 /// - Must consist only of [a-z0-9-] (lowercase letters, digits, and hyphens)
 /// - Cannot start or end with '-'
 /// - Cannot contain consecutive hyphens ('--')
-/// - "eth" as namespace is disallowed to avoid confusion with ENS
 ///
 /// ### Namespaces
 /// - Anyone can register new namespaces by paying a one-time fee.
@@ -56,7 +55,6 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 ///   - Namespace owners do not receive fees; all fees go to the XNS contract owner.
 /// - During the first year after XNS contract deployment, the contract owner can register
 ///   namespaces for others at no cost.
-/// - The "eth" namespace is disallowed to avoid confusion with ENS.
 ///
 /// ### Name Registration
 /// - Users can register names in public namespaces after the 7-day exclusivity period using `registerName`.
@@ -121,9 +119,6 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
     // EIP-712 struct type hash for `RegisterNameAuth`.
     bytes32 private constant _REGISTER_NAME_AUTH_TYPEHASH =
         keccak256("RegisterNameAuth(address recipient,string label,string namespace)");
-
-    // Hash of the forbidden "eth" namespace to avoid confusion with ENS.
-    bytes32 private constant _ETH_NAMESPACE_HASH = keccak256(bytes("eth"));
 
 
     // -------------------------------------------------------------------------
@@ -424,7 +419,6 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
     /// - `msg.value` must be >= 50 ETH (excess refunded).
     /// - Namespace must be valid (non-empty, length 1–20, only lowercase letters, digits, and hyphens,
     ///   cannot start or end with '-', cannot contain consecutive hyphens ('--')).
-    /// - Namespace must not equal "eth".
     /// - Namespace must not already exist.
     /// - `pricePerName` must be >= 0.001 ETH and a multiple of 0.001 ETH (0.001, 0.002, 0.003, etc.).
     ///
@@ -450,7 +444,6 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
     /// - `msg.value` must be >= 10 ETH (excess refunded).
     /// - Namespace must be valid (non-empty, length 1–20, only lowercase letters, digits, and hyphens,
     ///   cannot start or end with '-', cannot contain consecutive hyphens ('--')).
-    /// - Namespace must not equal "eth".
     /// - Namespace must not already exist.
     /// - `pricePerName` must be >= 0.005 ETH and a multiple of 0.001 ETH (0.005, 0.006, 0.007, etc.).
     ///
@@ -529,9 +522,6 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
         require(_isValidLabelOrNamespace(namespace), "XNS: invalid namespace");
 
         bytes32 nsHash = keccak256(bytes(namespace));
-        
-        // Forbid "eth" namespace to avoid confusion with ENS.
-        require(nsHash != _ETH_NAMESPACE_HASH, "XNS: 'eth' namespace forbidden");
 
         require(_namespaces[nsHash].owner == address(0), "XNS: namespace already exists");
 
