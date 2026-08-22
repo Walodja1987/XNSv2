@@ -24,13 +24,7 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 /// @notice An Ethereum-native name registry that maps human-readable names to Ethereum addresses.
 /// Names are **permanent, immutable, and non-transferable**.
 ///
-/// Name format: <label>@<namespace>
-///
-/// Examples:
-/// - alice@xns
-/// - bob@yolo
-/// - vitalik@100x
-/// - garry@ape
+/// Name format: "label" + @ + "namespace"
 ///
 /// ### String rules
 /// Label and namespace string requirements:
@@ -630,9 +624,9 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
     // GETTER / VIEW FUNCTIONS
     // =========================================================================
 
-    /// @notice Function to resolve a name string like "bob@007" or "alice@gm-web3" to an address.
+    /// @notice Function to resolve a name string including the @ sign to an address.
     /// Returns `address(0)` for anything not registered or malformed.
-    /// Names must include a namespace separator `'@'`; strings without `'@'` are invalid and return `address(0)`.
+    /// Provided strings without an @ sign are invalid and return `address(0)`.
     ///
     /// @param fullName The name string to resolve.
     /// @return addr The address associated with the name, or `address(0)` if not registered.
@@ -683,7 +677,7 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
 
     /// @notice Function to lookup the XNS name for an address.
     /// Returns an empty string if the address has no name. Otherwise returns the full name
-    /// in format `"label@namespace"`.
+    /// in format "label" + @ + "namespace".
     /// @param addr The address to lookup the XNS name for.
     /// @return name The XNS name for the address, or empty string if the address has no name.
     function getName(address addr) external view returns (string memory) {
