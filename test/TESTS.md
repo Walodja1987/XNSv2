@@ -113,6 +113,7 @@ The following test cases are implemented in [XNS.test.ts](./XNS.test.ts).
 - Should credit correct amount of DETH to owner after initial period.
 - Should credit correct amount of DETH to non-owner registrant after initial period.
 - Should allow public namespace registration with minimum price (0.001 ETH).
+- Should allow registering the "eth" namespace.
 
 #### Events
 
@@ -126,7 +127,6 @@ The following test cases are implemented in [XNS.test.ts](./XNS.test.ts).
 - Should revert with `XNS: invalid namespace` error for public namespace starting with hyphen.
 - Should revert with `XNS: invalid namespace` error for public namespace ending with hyphen.
 - Should revert with `XNS: invalid namespace` error for public namespace with consecutive hyphens.
-- Should revert with `XNS: 'eth' namespace forbidden` error when trying to register "eth" namespace.
 - Should revert with `XNS: pricePerName too low` error for price less than 0.001 ETH.
 - Should revert with `XNS: pricePerName too low` error for zero price.
 - Should revert with `XNS: price not multiple of 0.001 ETH` error for non-multiple price.
@@ -144,6 +144,7 @@ The following test cases are implemented in [XNS.test.ts](./XNS.test.ts).
 - Should allow OWNER to register public namespace for another address during onboarding.
 - Should register namespace with correct namespace owner (not OWNER).
 - Should not process any payment (no fees, no burns).
+- Should allow registering the "eth" namespace via registerPublicNamespaceFor.
 
 #### Events
 
@@ -161,7 +162,6 @@ The following test cases are implemented in [XNS.test.ts](./XNS.test.ts).
 - Should revert with `XNS: invalid namespace` error for public namespace starting with hyphen.
 - Should revert with `XNS: invalid namespace` error for public namespace ending with hyphen.
 - Should revert with `XNS: invalid namespace` error for public namespace with consecutive hyphens.
-- Should revert with `XNS: 'eth' namespace forbidden` error when trying to register "eth" namespace.
 - Should revert with `XNS: pricePerName too low` error for price less than 0.001 ETH.
 - Should revert with `XNS: pricePerName too low` error for zero price.
 - Should revert with `XNS: price not multiple of 0.001 ETH` error when price is not a multiple of PRICE_STEP.
@@ -176,6 +176,7 @@ The following test cases are implemented in [XNS.test.ts](./XNS.test.ts).
 - Should allow OWNER to register private namespace for another address during onboarding.
 - Should register private namespace with correct namespace owner (not OWNER).
 - Should not process any payment (no fees, no burns).
+- Should allow registering the "eth" namespace via registerPrivateNamespaceFor.
 
 #### Events
 
@@ -193,7 +194,6 @@ The following test cases are implemented in [XNS.test.ts](./XNS.test.ts).
 - Should revert with `XNS: invalid namespace` error for private namespace starting with hyphen.
 - Should revert with `XNS: invalid namespace` error for private namespace ending with hyphen.
 - Should revert with `XNS: invalid namespace` error for private namespace with consecutive hyphens.
-- Should revert with `XNS: 'eth' namespace forbidden` error when trying to register "eth" namespace.
 - Should revert with `XNS: pricePerName too low` error for price less than 0.005 ETH.
 - Should revert with `XNS: pricePerName too low` error for zero price.
 - Should revert with `XNS: price not multiple of 0.001 ETH` error when price is not a multiple of PRICE_STEP.
@@ -221,6 +221,7 @@ The following test cases are implemented in [XNS.test.ts](./XNS.test.ts).
 - Should credit correct amount of DETH to non-owner registrant after initial period.
 - Should allow multiple private namespaces with the same price (no price uniqueness).
 - Should allow private namespace registration with minimum price (0.005 ETH).
+- Should allow registering the "eth" private namespace.
 
 #### Events
 
@@ -234,7 +235,6 @@ The following test cases are implemented in [XNS.test.ts](./XNS.test.ts).
 - Should revert with `XNS: invalid namespace` error for private namespace starting with hyphen.
 - Should revert with `XNS: invalid namespace` error for private namespace ending with hyphen.
 - Should revert with `XNS: invalid namespace` error for private namespace with consecutive hyphens.
-- Should revert with `XNS: 'eth' namespace forbidden` error when trying to register "eth" namespace.
 - Should revert with `XNS: pricePerName too low` error for price less than 0.005 ETH.
 - Should revert with `XNS: pricePerName too low` error for price less than 0.001 ETH.
 - Should revert with `XNS: price not multiple of 0.001 ETH` error for non-multiple price.

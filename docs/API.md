@@ -22,7 +22,6 @@ Label and namespace string requirements:
 - Must consist only of [a-z0-9-] (lowercase letters, digits, and hyphens)
 - Cannot start or end with '-'
 - Cannot contain consecutive hyphens ('--')
-- "eth" as namespace is disallowed to avoid confusion with ENS
 
 ### Namespaces
 - Anyone can register new namespaces by paying a one-time fee.
@@ -40,7 +39,7 @@ Label and namespace string requirements:
   - Namespace owners do not receive fees; all fees go to the XNS contract owner.
 - During the first year after XNS contract deployment, the contract owner can register
   namespaces for others at no cost.
-- The "eth" namespace is disallowed to avoid confusion with ENS.
+- No namespaces are blocked (including `"eth"`).
 
 ### Name Registration
 - Users can register names in public namespaces after the 7-day exclusivity period using `registerName`.
@@ -202,7 +201,6 @@ Register a new public namespace.
 - `msg.value` must be >= 50 ETH (excess refunded).
 - Namespace must be valid (non-empty, length 1–20, only lowercase letters, digits, and hyphens,
   cannot start or end with '-', cannot contain consecutive hyphens ('--')).
-- Namespace must not equal "eth".
 - Namespace must not already exist.
 - `pricePerName` must be >= 0.001 ETH and a multiple of 0.001 ETH (0.001, 0.002, 0.003, etc.).
 
@@ -234,7 +232,6 @@ Register a new private namespace.
 - `msg.value` must be >= 10 ETH (excess refunded).
 - Namespace must be valid (non-empty, length 1–20, only lowercase letters, digits, and hyphens,
   cannot start or end with '-', cannot contain consecutive hyphens ('--')).
-- Namespace must not equal "eth".
 - Namespace must not already exist.
 - `pricePerName` must be >= 0.005 ETH and a multiple of 0.001 ETH (0.005, 0.006, 0.007, etc.).
 

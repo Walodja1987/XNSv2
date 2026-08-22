@@ -54,7 +54,6 @@ Labels and namespaces are subject to the following format rules:
 - Must consist only of lowercase letters (`a-z`), digits (`0-9`), and hyphens (`-`)
 - Cannot start or end with `-`
 - Cannot contain consecutive hyphens (`--`)
-- "eth" as namespace is disallowed to avoid confusion with ENS
 
 **Valid name examples:**
 - ✅ `alice.xns`
@@ -89,7 +88,7 @@ XNS features two types of namespaces: **public** and **private**.
 - Namespace owners do not receive fees; all fees go to the XNS contract owner.
 - Registration fee: 10 ETH.
 
-Anyone can register a new namespace by paying the one-time registration fee. The `eth` namespace is disallowed to avoid confusion with ENS.
+Anyone can register a new namespace by paying the one-time registration fee.
 
 ### ETH Burn and Fee Distribution
 
