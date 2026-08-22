@@ -38,21 +38,14 @@ Label and namespace string requirements:
   - Only the namespace owner can register names (via `registerNameWithAuthorization`
     or `batchRegisterNameWithAuthorization`).
   - Namespace owners do not receive fees; all fees go to the XNS contract owner.
-- During the first year post XNS contract deployment, the contract owner can register
+- During the first year after XNS contract deployment, the contract owner can register
   namespaces for others at no cost.
 - The "eth" namespace is disallowed to avoid confusion with ENS.
-- The "x" namespace is associated with bare names (e.g. "vitalik" = "vitalik.x").
-- The contract owner is set as the namespace owner of the "x" namespace at deployment.
-
-### Bare Names
-- Bare names are names without a namespace (e.g., "vitalik" instead of "vitalik.x").
-- Internally, bare names use the special "x" namespace, so "vitalik" and "vitalik.x" resolve to the same address.
-- Bare names are premium and cost 10 ETH per name.
 
 ### Name Registration
 - Users can register names in public namespaces after the 7-day exclusivity period using `registerName`.
 - Each address can own at most one name.
-- Registration fees vary by namespace
+- Registration fees vary by namespace.
 
 ### Authorized Name Registration
 - XNS features authorized name registration via EIP-712 signatures.
@@ -75,8 +68,7 @@ Label and namespace string requirements:
 ### registerName
 
 
-Function to register a paid name for `msg.sender`. To register a bare name
-(e.g., "vitalik"), use "x" as the namespace parameter.
+Function to register a paid name for `msg.sender`.
 This function only works for public namespaces after the exclusivity period (7 days) has ended.
 
 **Requirements:**
@@ -412,9 +404,9 @@ function acceptNamespaceOwnership(string namespace) external
 ### getAddress
 
 
-Function to resolve a name string like "vitalik", "bob.007", "alice.gm-web3" to an address.
-Returns `address(0)` for anything not registered or malformed. 
-If `fullName` contains no '.', it is treated as a bare name.
+Function to resolve a name string like "bob.007" or "alice.gm-web3" to an address.
+Returns `address(0)` for anything not registered or malformed.
+Names must include a namespace separator `'.'`; strings without `'.'` are invalid and return `address(0)`.
 
 ```solidity
 function getAddress(string fullName) external view returns (address addr)
@@ -439,7 +431,6 @@ function getAddress(string fullName) external view returns (address addr)
 Function to resolve a name to an address taking separate label and namespace parameters.
 This version is more gas efficient than `getAddress(string calldata fullName)` as it does not
 require string splitting. Returns `address(0)` if not registered.
-If `namespace` is empty, it is treated as a bare name (equivalent to "x" namespace).
 
 ```solidity
 function getAddress(string label, string namespace) external view returns (address addr)
@@ -451,7 +442,7 @@ function getAddress(string label, string namespace) external view returns (addre
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | label | string | The label part of the name. |
-| namespace | string | The namespace part of the name. Use empty string "" for bare names. |
+| namespace | string | The namespace part of the name. |
 
 #### Return Values
 
@@ -463,9 +454,8 @@ function getAddress(string label, string namespace) external view returns (addre
 
 
 Function to lookup the XNS name for an address.
-Returns an empty string if the address has no name. For bare names (namespace "x"),
-returns just the label without the ".x" suffix. For regular names, returns the full name
-in format "label.namespace".
+Returns an empty string if the address has no name. Otherwise returns the full name
+in format `"label.namespace"`.
 
 ```solidity
 function getName(address addr) external view returns (string)
@@ -680,7 +670,7 @@ _Emitted in name registration functions._
 event NamespaceRegistered(string namespace, uint256 pricePerName, address owner, bool isPrivate)
 ```
 
-_Emitted in constructor when "x" namespace is registered, and in namespace registration functions._
+_Emitted in namespace registration functions._
 
 
 
@@ -841,36 +831,10 @@ uint256 PRIVATE_NAMESPACE_MIN_PRICE
 
 
 
-### BARE_NAME_NAMESPACE
-
-
-Namespace associated with bare names (e.g. "vitalik" = "vitalik.x").
-
-```solidity
-string BARE_NAME_NAMESPACE
-```
-
-
-
-
-
-### BARE_NAME_PRICE
-
-
-Price for registering a bare name (e.g. "vitalik").
-
-```solidity
-uint256 BARE_NAME_PRICE
-```
-
-
-
-
-
 ### DETH
 
 
-Address of DETH contract used to burn ETH and credit the recipient.
+Address of the DETH contract used to burn ETH and credit the recipient.
 
 ```solidity
 address DETH

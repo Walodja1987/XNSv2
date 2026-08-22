@@ -74,12 +74,6 @@ Labels and namespaces are subject to the following format rules:
 
 The same format rules apply to namespaces. For example, `--name`, `$rich`, and `-ns` are all invalid and cannot be registered.
 
-### Bare Names
-
-XNS supports **bare names**, i.e. names without a namespace suffix (e.g., `bob`, `vitalik`, `alice-walker`, `1xy`). Bare names are premium names costing 10 ETH per name.
-
-> **Note:** Internally, all bare names are associated with the special namespace `"x"`. That is, `vitalik` and `vitalik.x` are the same and resolve to the same address.
-
 ### Namespaces
 
 XNS features two types of namespaces: **public** and **private**.
@@ -158,11 +152,6 @@ Names can be registered for EOAs directly via [Etherscan][etherscan-mainnet].
 **Example 1:** Registering `bob.xns` in the `xns` namespace (costs 0.001 ETH):
 <img width="670" height="301" alt="image" src="https://github.com/user-attachments/assets/2323cac5-060d-4cc8-abc6-0a27ea3f03d4" />
 
-**Example 2:** Registering the bare name `vitalik` (costs 10 ETH):
-<img width="664" height="296" alt="image" src="https://github.com/user-attachments/assets/a1fd1570-c946-4049-a812-528eed7c7878" />
-
-> **Note:** As mentioned earlier, bare names are internally mapped to the special namespace `"x"`. When registering a bare name like `vitalik`, specify `"x"` as the namespace. `vitalik` and `vitalik.x` are equivalent and resolve to the same address.
-
 
 ### Name Registration With Authorization
 
@@ -196,13 +185,14 @@ XNS supports **authorized name registration** via [`registerNameWithAuthorizatio
 XNS provides simple on-chain resolution for names and addresses.
 
 **Look up Address from Name: [`getAddress`][api-getAddress]**
-- Resolve a name like `vitalik.001` or `bob` to its Ethereum address.
+- Resolve a name like `vitalik.001` or `bob.xns` to its Ethereum address.
+- Strings without a `.` namespace separator are invalid and return `address(0)`.
 - Works directly on Etherscan or any Ethereum interface.
 - Returns zero address if the name is not registered.
 
 **Look up Name from Address: [`getName`][api-getName]**
 - Find the XNS name for any Ethereum address.
-- Returns the full name format (e.g., `alice.001` or just `vitalik` for bare names).
+- Returns the full name format (e.g., `alice.001`).
 - Returns an empty string if the address has no name.
 
 **Example scripts:**
@@ -320,9 +310,7 @@ Public namespaces are open — anyone can register a name under them by paying t
 | 0.999 ETH | `999` | - |
 | 1.000 ETH | `1`, `defi` | myprotocol.defi, one.1 |
 | 1.500 ETH | `i`, `u`, `v`, `y` | tom-ba.y, vee.v |
-| 10.000 ETH | `x` | vitalik (bare name) |
 
-> The "x" namespace is special and associated with bare names. "vitalik.x" is equivalent to "vitalik" (bare name).
 
 
 ### Private Namespaces
@@ -341,7 +329,6 @@ See [`constants/namespaces.json`](./constants/namespaces.json) for the full list
 
 The official XNS contract is live on Ethereum mainnet at: [0x648E4F05aF2b7eB85109A8dc8AE81D8E006457D8][etherscan-mainnet]
 
-This contract also owns the XNS "bare name": `xns`.
 
 ### Sepolia Testnet
 
@@ -352,7 +339,6 @@ The testnet contract has been parametrized as follows:
 - Private namespace registration fee: 0.01 ether (instead of 10 ether)
 - Namespace owner exclusive period: 300 seconds (instead of 7 days)
 - Onboarding period: 100 days (instead of 365 days)
-- Bare name price: 0.01 ether (instead of 10 ether)
 
 
 ## 🔧 Integration Guide for Contract Developers

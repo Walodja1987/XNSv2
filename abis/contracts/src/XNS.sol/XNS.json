@@ -13,8 +13,6 @@
   "event NamespaceRegistered(string indexed,uint256,address indexed,bool)",
   "event OwnershipTransferStarted(address indexed,address indexed)",
   "event OwnershipTransferred(address indexed,address indexed)",
-  "function BARE_NAME_NAMESPACE() view returns (string)",
-  "function BARE_NAME_PRICE() view returns (uint256)",
   "function DEPLOYED_AT() view returns (uint64)",
   "function DETH() view returns (address)",
   "function EXCLUSIVITY_PERIOD() view returns (uint256)",
