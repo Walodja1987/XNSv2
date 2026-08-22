@@ -15,21 +15,19 @@ The following test cases are implemented in [XNS.test.ts](./XNS.test.ts) file.
 - Should initialize the contract correctly
   - Should initialize owner correctly.
   - Should set `deployedAt` to current block timestamp.
-  - Should register special namespace "x" with correct price (10 ETH).
-  - Should set special namespace owner to contract owner.
-  - Should set special namespace as public (`isPrivate = false`).
 - Should have correct constants
   - Should have correct `PUBLIC_NAMESPACE_REGISTRATION_FEE` (50 ether).
   - Should have correct `PRIVATE_NAMESPACE_REGISTRATION_FEE` (10 ether).
   - Should have correct `EXCLUSIVITY_PERIOD` (7 days).
   - Should have correct `ONBOARDING_PERIOD` (1 year).
   - Should have correct `PRICE_STEP` (0.001 ether / 1e15).
-  - Should have correct `BARE_NAME_NAMESPACE` ("x").
+  - Should have correct `PUBLIC_NAMESPACE_MIN_PRICE` (0.001 ether).
+  - Should have correct `PRIVATE_NAMESPACE_MIN_PRICE` (0.005 ether).
   - Should have correct `DETH` address.
 
 #### Events
 
-- Should emit `NamespaceRegistered` event for special namespace with `isPrivate = false`.
+- None
 
 #### Reverts
 
@@ -166,7 +164,6 @@ The following test cases are implemented in [XNS.test.ts](./XNS.test.ts) file.
 - Should allow anyone to register paid names in public namespace after exclusive period (30 days).
 - Should process the ETH payment correctly (90% burnt, 5% to namespace owner, 5% to contract owner) when fee is paid.
 - Should refund excess payment when `msg.value` exceeds namespace price.
-- Should permit anyone (non-namespace-owner) to register a name in the special "x" namespace (10 ETH) after the exclusive period ends.
 - Should credit correct amount of DETH to `msg.sender`.
 - Should credit correct amount of DETH to namespace owner (`msg.sender`) during exclusive period.
 - Should allow a contract to register a name for itself via `registerName` (in constructor).
@@ -207,7 +204,6 @@ The following test cases are implemented in [XNS.test.ts](./XNS.test.ts) file.
 - Should process the ETH payment correctly for private namespace (90% burnt, 10% to contract owner, 0% to namespace owner) when fee is paid.
 - Should allow sponsoring a name registration for an EIP-1271 contract wallet recipient.
 - Should refund excess payment when `msg.value` exceeds namespace price.
-- Should permit anyone (non-namespace-owner) to register a name in the special "x" namespace (10 ETH) after the exclusive period ends.
 
 #### Events
 
@@ -248,7 +244,6 @@ The following test cases are implemented in [XNS.test.ts](./XNS.test.ts) file.
 - Should allow anyone to sponsor batch registrations in public namespace after exclusive period (30 days).
 - Should allow namespace owner to sponsor batch registrations in private namespace (namespace-owner-only forever).
 - Should allow sponsoring name registrations including an EIP-1271 contract wallet recipient.
-- Should permit anyone (non-namespace-owner) to register multiple names in the special "x" namespace (10 ETH) after the exclusive period ends.
 
 #### Events
 
@@ -345,7 +340,7 @@ The following test cases are implemented in [XNS.test.ts](./XNS.test.ts) file.
 
 - Should return correct owner address for registered name.
 - Should return `address(0)` for unregistered name.
-- Should handle special namespace "x" correctly.
+- Should return `address(0)` for empty namespace.
 - Should return correct recipient address for sponsored name in private namespace.
 - Should return `address(0)` for unregistered name in private namespace.
 - Should return correct address for long private namespace (up to 20 characters).
@@ -357,14 +352,7 @@ The following test cases are implemented in [XNS.test.ts](./XNS.test.ts) file.
 #### Functionality
 
 - Should resolve full name with dot notation correctly (e.g., "alice.001").
-- Should resolve bare label with 1 character (e.g., "a").
-- Should resolve bare label with 2 characters (e.g., "ab").
-- Should resolve bare label with 3 characters (e.g., "abc").
-- Should resolve bare label with 4 characters (e.g., "nike").
-- Should resolve bare label with 5 characters (e.g., "alice").
-- Should resolve bare label with 6 characters (e.g., "snoopy").
-- Should resolve bare label with 7 characters (e.g., "bankless").
-- Should resolve explicit ".x" namespace (e.g., "nike.x").
+- Should return `address(0)` for names without a `.` namespace separator.
 - Should resolve correctly for one-character namespaces.
 - Should resolve correctly for two-character namespaces.
 - Should resolve correctly for three-character namespaces.
@@ -388,7 +376,6 @@ The following test cases are implemented in [XNS.test.ts](./XNS.test.ts) file.
 #### Functionality
 
 - Should return full name with namespace for regular names (e.g., returns "alice.001").
-- Should return bare name without ".x" suffix for names in the "x" namespace (e.g., returns "vitalik" not "vitalik.x").
 - Should return full name with namespace for private namespace names (e.g., returns "alice.my-private").
 - Should return empty string for address without a name.
 
@@ -416,7 +403,6 @@ The following test cases are implemented in [XNS.test.ts](./XNS.test.ts) file.
 
 - Should return correct price for public namespace.
 - Should return correct price for private namespace.
-- Should return correct price for special namespace 'x' (bare names).
 
 #### Reverts
 

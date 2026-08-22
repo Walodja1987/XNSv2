@@ -54,21 +54,14 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 ///   - Only the namespace owner can register names (via `registerNameWithAuthorization`
 ///     or `batchRegisterNameWithAuthorization`).
 ///   - Namespace owners do not receive fees; all fees go to the XNS contract owner.
-/// - During the first year post XNS contract deployment, the contract owner can register
+/// - During the first year after XNS contract deployment, the contract owner can register
 ///   namespaces for others at no cost.
 /// - The "eth" namespace is disallowed to avoid confusion with ENS.
-/// - The "x" namespace is associated with bare names (e.g. "vitalik" = "vitalik.x").
-/// - The contract owner is set as the namespace owner of the "x" namespace at deployment.
-///
-/// ### Bare Names
-/// - Bare names are names without a namespace (e.g., "vitalik" instead of "vitalik.x").
-/// - Internally, bare names use the special "x" namespace, so "vitalik" and "vitalik.x" resolve to the same address.
-/// - Bare names are premium and cost 10 ETH per name.
 ///
 /// ### Name Registration
 /// - Users can register names in public namespaces after the 7-day exclusivity period using `registerName`.
 /// - Each address can own at most one name.
-/// - Registration fees vary by namespace
+/// - Registration fees vary by namespace.
 ///
 /// ### Authorized Name Registration
 /// - XNS features authorized name registration via EIP-712 signatures.
@@ -165,13 +158,7 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
     /// @notice Minimum price per name for private namespaces (0.005 ETH = 5x public minimum).
     uint256 public constant PRIVATE_NAMESPACE_MIN_PRICE = 0.005 ether;
 
-    /// @notice Namespace associated with bare names (e.g. "vitalik" = "vitalik.x").
-    string public constant BARE_NAME_NAMESPACE = "x";
-
-    /// @notice Price for registering a bare name (e.g. "vitalik").
-    uint256 public constant BARE_NAME_PRICE = 10 ether;
-
-    /// @notice Address of DETH contract used to burn ETH and credit the recipient.
+    /// @notice Address of the DETH contract used to burn ETH and credit the recipient.
     address public constant DETH = 0xE46861C9f28c46F27949fb471986d59B256500a7;
 
     // -------------------------------------------------------------------------
@@ -181,7 +168,7 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
     /// @dev Emitted in name registration functions.
     event NameRegistered(string indexed label, string indexed namespace, address indexed owner);
 
-    /// @dev Emitted in constructor when "x" namespace is registered, and in namespace registration functions.
+    /// @dev Emitted in namespace registration functions.
     event NamespaceRegistered(string indexed namespace, uint256 pricePerName, address indexed owner, bool isPrivate);
 
     /// @dev Emitted in fee claiming functions.
@@ -199,31 +186,19 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
     // -------------------------------------------------------------------------
 
     /// @dev Initializes the contract by setting the XNS contract owner (via OpenZeppelin's `Ownable` contract)
-    /// and deployment timestamp. Also pre-registers the special public namespace "x" (associated with bare names) with the
-    /// given owner as its namespace owner and a price of 10 ETH per name.
+    /// and the deployment timestamp.
     /// @param initialOwner Address that will own the contract and receive protocol fees (should not be `address(0)`).
     constructor(address initialOwner) EIP712("XNS", "1") Ownable(initialOwner) {
-        // Zero address check on `initialOwner` is performed in the OpenZeppelin's `Ownable` contract.
+        // Zero address check on `initialOwner` is performed in OpenZeppelin's `Ownable` contract.
 
         DEPLOYED_AT = uint64(block.timestamp);
-
-        // Register special public namespace "x" associated with bare names as the very first namespace.
-        _namespaces[keccak256(bytes(BARE_NAME_NAMESPACE))] = NamespaceData({
-            pricePerName: BARE_NAME_PRICE,
-            owner: initialOwner,
-            createdAt: uint64(block.timestamp),
-            isPrivate: false
-        });
-
-        emit NamespaceRegistered(BARE_NAME_NAMESPACE, BARE_NAME_PRICE, initialOwner, false);
     }
     
     // =========================================================================
     // STATE-MODIFYING FUNCTIONS
     // =========================================================================
 
-    /// @notice Function to register a paid name for `msg.sender`. To register a bare name
-    /// (e.g., "vitalik"), use "x" as the namespace parameter.
+    /// @notice Function to register a paid name for `msg.sender`.
     /// This function only works for public namespaces after the exclusivity period (7 days) has ended.
     ///
     /// **Requirements:**
@@ -665,9 +640,9 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
     // GETTER / VIEW FUNCTIONS
     // =========================================================================
 
-    /// @notice Function to resolve a name string like "vitalik", "bob.007", "alice.gm-web3" to an address.
-    /// Returns `address(0)` for anything not registered or malformed. 
-    /// If `fullName` contains no '.', it is treated as a bare name.
+    /// @notice Function to resolve a name string like "bob.007" or "alice.gm-web3" to an address.
+    /// Returns `address(0)` for anything not registered or malformed.
+    /// Names must include a namespace separator `'.'`; strings without `'.'` are invalid and return `address(0)`.
     ///
     /// @param fullName The name string to resolve.
     /// @return addr The address associated with the name, or `address(0)` if not registered.
@@ -686,7 +661,7 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
         }
 
         if (dotIndex == type(uint256).max) {
-            return _getAddress(fullName, BARE_NAME_NAMESPACE);
+            return address(0);
         }
 
         // Extract label and namespace.
@@ -703,15 +678,10 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
     /// @notice Function to resolve a name to an address taking separate label and namespace parameters.
     /// This version is more gas efficient than `getAddress(string calldata fullName)` as it does not
     /// require string splitting. Returns `address(0)` if not registered.
-    /// If `namespace` is empty, it is treated as a bare name (equivalent to "x" namespace).
     /// @param label The label part of the name.
-    /// @param namespace The namespace part of the name. Use empty string "" for bare names.
+    /// @param namespace The namespace part of the name.
     /// @return addr The address associated with the name, or `address(0)` if not registered.
     function getAddress(string calldata label, string calldata namespace) external view returns (address addr) {
-        // If namespace is empty, treat as bare name (use "x" namespace)
-        if (bytes(namespace).length == 0) {
-            return _getAddress(label, BARE_NAME_NAMESPACE);
-        }
         return _getAddress(label, namespace);
     }
 
@@ -722,9 +692,8 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
     }
 
     /// @notice Function to lookup the XNS name for an address.
-    /// Returns an empty string if the address has no name. For bare names (namespace "x"),
-    /// returns just the label without the ".x" suffix. For regular names, returns the full name
-    /// in format "label.namespace".
+    /// Returns an empty string if the address has no name. Otherwise returns the full name
+    /// in format `"label.namespace"`.
     /// @param addr The address to lookup the XNS name for.
     /// @return name The XNS name for the address, or empty string if the address has no name.
     function getName(address addr) external view returns (string memory) {
@@ -732,11 +701,6 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
 
         if (bytes(n.label).length == 0) {
             return "";
-        }
-
-        if (keccak256(bytes(n.namespace)) == keccak256(bytes(BARE_NAME_NAMESPACE))) {
-            // Bare name: return just the label without ".x"
-            return n.label;
         }
 
         return string.concat(n.label, ".", n.namespace);
