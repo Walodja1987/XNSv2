@@ -198,7 +198,7 @@ Register a new public namespace.
 - `pricePerName` must be >= 0.001 ETH and a multiple of 0.001 ETH (0.001, 0.002, 0.003, etc.).
 
 **Note:**
-- During the onboarding period (1 year following contract deployment), the contract owner can
+- During the onboarding period (182 days following contract deployment), the contract owner can
   register namespaces for free (via `registerPublicNamespaceFor`) to foster adoption.
 - For the avoidance of doubt, anyone can register a new namespace during the onboarding period
   by paying the standard 50 ETH registration fee.
@@ -229,7 +229,7 @@ Register a new private namespace.
 - `pricePerName` must be >= 0.005 ETH and a multiple of 0.001 ETH (0.005, 0.006, 0.007, etc.).
 
 **Note:**
-- During the onboarding period (1 year following contract deployment), the contract owner can
+- During the onboarding period (182 days following contract deployment), the contract owner can
   register namespaces for free (via `registerPrivateNamespaceFor`) to foster adoption.
 - For the avoidance of doubt, anyone can register a new namespace during the onboarding period
   by paying the standard 10 ETH registration fee.
@@ -256,7 +256,7 @@ foster adoption. No ETH is processed (function is non-payable) and no fees are c
 
 **Requirements:**
 - `msg.sender` must be the contract owner.
-- Must be called during the onboarding period (first year after contract deployment).
+- Must be called during the onboarding period (182 days after contract deployment).
 - `nsOwner` must not be the zero address.
 - No ETH should be sent (function is non-payable).
 - All validation requirements from `registerPublicNamespace` apply.
@@ -284,7 +284,7 @@ foster adoption. No ETH is processed (function is non-payable) and no fees are c
 
 **Requirements:**
 - `msg.sender` must be the contract owner.
-- Must be called during the onboarding period (first year after contract deployment).
+- Must be called during the onboarding period (182 days after contract deployment).
 - `nsOwner` must not be the zero address.
 - No ETH should be sent (function is non-payable).
 - All validation requirements from `registerPrivateNamespace` apply.
@@ -643,7 +643,7 @@ function getPendingNamespaceOwner(string namespace) external view returns (addre
 
 
 ```solidity
-event NameRegistered(string label, string namespace, address owner)
+event NameRegistered(bytes32 nameHash, string label, string namespace, address owner)
 ```
 
 _Emitted in name registration functions._
@@ -657,7 +657,7 @@ _Emitted in name registration functions._
 
 
 ```solidity
-event NamespaceRegistered(string namespace, uint256 pricePerName, address owner, bool isPrivate)
+event NamespaceRegistered(bytes32 namespaceHash, string namespace, uint256 pricePerName, address owner, bool isPrivate)
 ```
 
 _Emitted in namespace registration functions._
@@ -685,7 +685,7 @@ _Emitted in fee claiming functions._
 
 
 ```solidity
-event NamespaceOwnerTransferStarted(string namespace, address oldOwner, address newOwner)
+event NamespaceOwnerTransferStarted(bytes32 namespaceHash, string namespace, address oldOwner, address newOwner)
 ```
 
 _Emitted when a namespace owner starts a transfer to a new namespace owner (address that shall receive the nsOwnerFee).
@@ -700,7 +700,7 @@ When `newOwner` is `address(0)`, this indicates cancellation of a pending transf
 
 
 ```solidity
-event NamespaceOwnerTransferAccepted(string namespace, address newOwner)
+event NamespaceOwnerTransferAccepted(bytes32 namespaceHash, string namespace, address newOwner)
 ```
 
 _Emitted when a pending namespace owner accepts the transfer._

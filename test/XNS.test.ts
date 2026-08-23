@@ -132,8 +132,8 @@ describe("XNS", function () {
         // Should have correct EXCLUSIVITY_PERIOD (7 days)
         expect(await s.xns.EXCLUSIVITY_PERIOD()).to.equal(7 * 24 * 60 * 60);
 
-        // Should have correct ONBOARDING_PERIOD (1 year)
-        expect(await s.xns.ONBOARDING_PERIOD()).to.equal(365 * 24 * 60 * 60);
+        // Should have correct ONBOARDING_PERIOD (182 days)
+        expect(await s.xns.ONBOARDING_PERIOD()).to.equal(182 * 24 * 60 * 60);
 
         // Should have correct PRICE_STEP (0.001 ether / 1e15)
         expect(await s.xns.PRICE_STEP()).to.equal(ethers.parseEther("0.001"));
@@ -587,7 +587,7 @@ describe("XNS", function () {
         // Verify NamespaceOwnerTransferStarted event was emitted
         await expect(transferTx)
             .to.emit(s.xns, "NamespaceOwnerTransferStarted")
-            .withArgs(namespace, s.user1.address, newOwnerAddress);
+            .withArgs(ethers.keccak256(ethers.toUtf8Bytes(namespace)), namespace, s.user1.address, newOwnerAddress);
 
         // ---------
         // Act: Pending namespace owner accepts transfer
@@ -605,7 +605,7 @@ describe("XNS", function () {
         // Verify NamespaceOwnerTransferAccepted event was emitted
         await expect(acceptTx)
             .to.emit(s.xns, "NamespaceOwnerTransferAccepted")
-            .withArgs(namespace, newOwnerAddress);
+            .withArgs(ethers.keccak256(ethers.toUtf8Bytes(namespace)), namespace, newOwnerAddress);
     });
 
     it("Should allow new namespace owner to use namespace-owner-only functions", async () => {
@@ -896,7 +896,7 @@ describe("XNS", function () {
         // Verify NamespaceOwnerTransferStarted event was emitted with zero address
         await expect(cancelTx)
             .to.emit(s.xns, "NamespaceOwnerTransferStarted")
-            .withArgs(namespace, s.user1.address, ethers.ZeroAddress);
+            .withArgs(ethers.keccak256(ethers.toUtf8Bytes(namespace)), namespace, s.user1.address, ethers.ZeroAddress);
 
         // Verify new namespace owner cannot accept (transfer was cancelled)
         await expect(
@@ -936,7 +936,7 @@ describe("XNS", function () {
         // Verify NamespaceOwnerTransferStarted event was emitted with second address
         await expect(overwriteTx)
             .to.emit(s.xns, "NamespaceOwnerTransferStarted")
-            .withArgs(namespace, s.user1.address, secondNewOwnerAddress);
+            .withArgs(ethers.keccak256(ethers.toUtf8Bytes(namespace)), namespace, s.user1.address, secondNewOwnerAddress);
 
         // Verify that the original pending namespace owner (user2) cannot accept anymore
         await expect(
@@ -1377,8 +1377,8 @@ describe("XNS", function () {
         const initialPeriod = await s.xns.ONBOARDING_PERIOD();
         const deployedAt = await s.xns.DEPLOYED_AT();
         
-        // Fast-forward time to be after the initial period (1 year + 1 day to be safe)
-        const timeToAdd = Number(initialPeriod) + 86400; // 1 year + 1 day in seconds
+        // Fast-forward time to be after the initial period (onboarding period + 1 day to be safe)
+        const timeToAdd = Number(initialPeriod) + 86400; // onboarding period + 1 day in seconds
         await time.increase(timeToAdd);
         
         // Verify we're past the initial period
@@ -1469,8 +1469,8 @@ describe("XNS", function () {
         const initialPeriod = await s.xns.ONBOARDING_PERIOD();
         const deployedAt = await s.xns.DEPLOYED_AT();
         
-        // Fast-forward time to be after the initial period (1 year + 1 day to be safe)
-        const timeToAdd = Number(initialPeriod) + 86400; // 1 year + 1 day in seconds
+        // Fast-forward time to be after the initial period (onboarding period + 1 day to be safe)
+        const timeToAdd = Number(initialPeriod) + 86400; // onboarding period + 1 day in seconds
         await time.increase(timeToAdd);
         
         // Verify we're past the initial period
@@ -1613,8 +1613,8 @@ describe("XNS", function () {
         const initialPeriod = await s.xns.ONBOARDING_PERIOD();
         const deployedAt = await s.xns.DEPLOYED_AT();
         
-        // Fast-forward time to be after the initial period (1 year + 1 day to be safe)
-        const timeToAdd = Number(initialPeriod) + 86400; // 1 year + 1 day in seconds
+        // Fast-forward time to be after the initial period (onboarding period + 1 day to be safe)
+        const timeToAdd = Number(initialPeriod) + 86400; // onboarding period + 1 day in seconds
         await time.increase(timeToAdd);
         
         // Verify we're past the initial period
@@ -1658,8 +1658,8 @@ describe("XNS", function () {
         const initialPeriod = await s.xns.ONBOARDING_PERIOD();
         const deployedAt = await s.xns.DEPLOYED_AT();
         
-        // Fast-forward time to be after the initial period (1 year + 1 day to be safe)
-        const timeToAdd = Number(initialPeriod) + 86400; // 1 year + 1 day in seconds
+        // Fast-forward time to be after the initial period (onboarding period + 1 day to be safe)
+        const timeToAdd = Number(initialPeriod) + 86400; // onboarding period + 1 day in seconds
         await time.increase(timeToAdd);
         
         // Verify we're past the initial period
@@ -1712,7 +1712,7 @@ describe("XNS", function () {
             s.xns.connect(s.user1).registerPublicNamespace(namespace, pricePerName, { value: fee })
         )
             .to.emit(s.xns, "NamespaceRegistered")
-            .withArgs(namespace, pricePerName, s.user1.address, false);
+            .withArgs(ethers.keccak256(ethers.toUtf8Bytes(namespace)), namespace, pricePerName, s.user1.address, false);
     });
 
     // -----------------------
@@ -1869,7 +1869,7 @@ describe("XNS", function () {
             s.xns.connect(s.user1).registerPublicNamespace(namespace, pricePerName, { value: fee })
         )
             .to.emit(s.xns, "NamespaceRegistered")
-            .withArgs(namespace, pricePerName, s.user1.address, false);
+            .withArgs(ethers.keccak256(ethers.toUtf8Bytes(namespace)), namespace, pricePerName, s.user1.address, false);
 
         // ---------
         // Assert: Verify namespace was created with correct price
@@ -1965,8 +1965,8 @@ describe("XNS", function () {
         const initialPeriod = await s.xns.ONBOARDING_PERIOD();
         const deployedAt = await s.xns.DEPLOYED_AT();
         
-        // Fast-forward time to be after the initial period (1 year + 1 day to be safe)
-        const timeToAdd = Number(initialPeriod) + 86400; // 1 year + 1 day in seconds
+        // Fast-forward time to be after the initial period (onboarding period + 1 day to be safe)
+        const timeToAdd = Number(initialPeriod) + 86400; // onboarding period + 1 day in seconds
         await time.increase(timeToAdd);
         
         // Verify we're past the initial period
@@ -2103,7 +2103,7 @@ describe("XNS", function () {
         await expect(
             s.xns.connect(s.owner).registerPublicNamespaceFor(nsOwner, namespace, pricePerName)
         ).to.emit(s.xns, "NamespaceRegistered")
-            .withArgs(namespace, pricePerName, nsOwner, false);
+            .withArgs(ethers.keccak256(ethers.toUtf8Bytes(namespace)), namespace, pricePerName, nsOwner, false);
     });
 
     it("Should not process any payment (no fees, no burns)", async () => {
@@ -2165,8 +2165,8 @@ describe("XNS", function () {
         const initialPeriod = await s.xns.ONBOARDING_PERIOD();
         const deployedAt = await s.xns.DEPLOYED_AT();
         
-        // Fast-forward time to be after the initial period (1 year + 1 day to be safe)
-        const timeToAdd = Number(initialPeriod) + 86400; // 1 year + 1 day in seconds
+        // Fast-forward time to be after the initial period (onboarding period + 1 day to be safe)
+        const timeToAdd = Number(initialPeriod) + 86400; // onboarding period + 1 day in seconds
         await time.increase(timeToAdd);
         
         // Verify we're past the initial period
@@ -2493,7 +2493,7 @@ describe("XNS", function () {
         await expect(
             s.xns.connect(s.owner).registerPrivateNamespaceFor(nsOwner, namespace, pricePerName)
         ).to.emit(s.xns, "NamespaceRegistered")
-            .withArgs(namespace, pricePerName, nsOwner, true);
+            .withArgs(ethers.keccak256(ethers.toUtf8Bytes(namespace)), namespace, pricePerName, nsOwner, true);
     });
 
     it("Should not process any payment (no fees, no burns)", async () => {
@@ -2555,8 +2555,8 @@ describe("XNS", function () {
         const initialPeriod = await s.xns.ONBOARDING_PERIOD();
         const deployedAt = await s.xns.DEPLOYED_AT();
         
-        // Fast-forward time to be after the initial period (1 year + 1 day to be safe)
-        const timeToAdd = Number(initialPeriod) + 86400; // 1 year + 1 day in seconds
+        // Fast-forward time to be after the initial period (onboarding period + 1 day to be safe)
+        const timeToAdd = Number(initialPeriod) + 86400; // onboarding period + 1 day in seconds
         await time.increase(timeToAdd);
         
         // Verify we're past the initial period
@@ -2923,8 +2923,8 @@ describe("XNS", function () {
         const initialPeriod = await s.xns.ONBOARDING_PERIOD();
         const deployedAt = await s.xns.DEPLOYED_AT();
         
-        // Fast-forward time to be after the initial period (1 year + 1 day to be safe)
-        const timeToAdd = Number(initialPeriod) + 86400; // 1 year + 1 day in seconds
+        // Fast-forward time to be after the initial period (onboarding period + 1 day to be safe)
+        const timeToAdd = Number(initialPeriod) + 86400; // onboarding period + 1 day in seconds
         await time.increase(timeToAdd);
         
         // Verify we're past the initial period
@@ -3013,8 +3013,8 @@ describe("XNS", function () {
         const initialPeriod = await s.xns.ONBOARDING_PERIOD();
         const deployedAt = await s.xns.DEPLOYED_AT();
         
-        // Fast-forward time to be after the initial period (1 year + 1 day to be safe)
-        const timeToAdd = Number(initialPeriod) + 86400; // 1 year + 1 day in seconds
+        // Fast-forward time to be after the initial period (onboarding period + 1 day to be safe)
+        const timeToAdd = Number(initialPeriod) + 86400; // onboarding period + 1 day in seconds
         await time.increase(timeToAdd);
         
         // Verify we're past the initial period
@@ -3156,8 +3156,8 @@ describe("XNS", function () {
         const initialPeriod = await s.xns.ONBOARDING_PERIOD();
         const deployedAt = await s.xns.DEPLOYED_AT();
         
-        // Fast-forward time to be after the initial period (1 year + 1 day to be safe)
-        const timeToAdd = Number(initialPeriod) + 86400; // 1 year + 1 day in seconds
+        // Fast-forward time to be after the initial period (onboarding period + 1 day to be safe)
+        const timeToAdd = Number(initialPeriod) + 86400; // onboarding period + 1 day in seconds
         await time.increase(timeToAdd);
         
         // Verify we're past the initial period
@@ -3201,8 +3201,8 @@ describe("XNS", function () {
         const initialPeriod = await s.xns.ONBOARDING_PERIOD();
         const deployedAt = await s.xns.DEPLOYED_AT();
         
-        // Fast-forward time to be after the initial period (1 year + 1 day to be safe)
-        const timeToAdd = Number(initialPeriod) + 86400; // 1 year + 1 day in seconds
+        // Fast-forward time to be after the initial period (onboarding period + 1 day to be safe)
+        const timeToAdd = Number(initialPeriod) + 86400; // onboarding period + 1 day in seconds
         await time.increase(timeToAdd);
         
         // Verify we're past the initial period
@@ -3303,7 +3303,7 @@ describe("XNS", function () {
             s.xns.connect(s.user1).registerPrivateNamespace(namespace, pricePerName, { value: fee })
         )
             .to.emit(s.xns, "NamespaceRegistered")
-            .withArgs(namespace, pricePerName, s.user1.address, true);
+            .withArgs(ethers.keccak256(ethers.toUtf8Bytes(namespace)), namespace, pricePerName, s.user1.address, true);
     });
 
     // -----------------------
@@ -3476,7 +3476,7 @@ describe("XNS", function () {
             s.xns.connect(s.user1).registerPrivateNamespace(namespace, pricePerName, { value: fee })
         )
             .to.emit(s.xns, "NamespaceRegistered")
-            .withArgs(namespace, pricePerName, s.user1.address, true);
+            .withArgs(ethers.keccak256(ethers.toUtf8Bytes(namespace)), namespace, pricePerName, s.user1.address, true);
 
         // ---------
         // Assert: Verify namespace was created with correct price
@@ -3556,8 +3556,8 @@ describe("XNS", function () {
         const initialPeriod = await s.xns.ONBOARDING_PERIOD();
         const deployedAt = await s.xns.DEPLOYED_AT();
         
-        // Fast-forward time to be after the initial period (1 year + 1 day to be safe)
-        const timeToAdd = Number(initialPeriod) + 86400; // 1 year + 1 day in seconds
+        // Fast-forward time to be after the initial period (onboarding period + 1 day to be safe)
+        const timeToAdd = Number(initialPeriod) + 86400; // onboarding period + 1 day in seconds
         await time.increase(timeToAdd);
         
         // Verify we're past the initial period
@@ -4109,7 +4109,7 @@ describe("XNS", function () {
             s.xns.connect(s.user2).registerName(label, namespace, { value: pricePerName })
         )
             .to.emit(s.xns, "NameRegistered")
-            .withArgs(label, namespace, s.user2.address);
+            .withArgs(ethers.keccak256(ethers.solidityPacked(["string","string","string"], [label, "@", namespace])), label, namespace, s.user2.address);
     });
 
     // -----------------------
@@ -4970,7 +4970,7 @@ describe("XNS", function () {
             )
         )
             .to.emit(s.xns, "NameRegistered")
-            .withArgs(label, namespace, recipient); // recipient is the owner, not msg.sender (owner)
+            .withArgs(ethers.keccak256(ethers.solidityPacked(["string","string","string"], [label, "@", namespace])), label, namespace, recipient); // recipient is the owner, not msg.sender (owner)
     });
 
     // -----------------------
@@ -6523,26 +6523,29 @@ describe("XNS", function () {
         expect(events.length).to.equal(registrations.length);
 
         // Verify each registration has a corresponding event
-        // Note: Events have indexed label and namespace (stored as bytes32 hashes in topics)
+        // Note: Events have indexed nameHash (keccak256(label + "@" + namespace)) and owner; label/namespace are plaintext in data
         for (const reg of registrations) {
-            const expectedLabelHash = ethers.keccak256(ethers.toUtf8Bytes(reg.label));
-            const expectedNamespaceHash = ethers.keccak256(ethers.toUtf8Bytes(namespace));
+            const expectedNameHash = ethers.keccak256(
+                ethers.solidityPacked(["string", "string", "string"], [reg.label, "@", namespace])
+            );
             
             const matchingEvent = events.find((event: any) => {
-                // Check if the event's label hash, namespace hash, and owner all match
+                // nameHash (indexed) + owner (indexed); label/namespace are in data
                 return event.args && 
                     event.args.owner && 
                     event.args.owner.toLowerCase() === reg.recipient.toLowerCase() &&
                     event.topics && 
-                    event.topics[1] === expectedLabelHash && // topics[0] is the event signature, topics[1] is first indexed param
-                    event.topics[2] === expectedNamespaceHash; // topics[2] is second indexed param
+                    event.topics[1] === expectedNameHash &&
+                    event.args.label === reg.label &&
+                    event.args.namespace === namespace;
             });
             expect(matchingEvent).to.not.be.undefined;
             expect(matchingEvent!.args!.owner).to.equal(reg.recipient);
             
-            // Verify the indexed parameters (label and namespace hashes)
-            expect(matchingEvent!.topics[1]).to.equal(expectedLabelHash);
-            expect(matchingEvent!.topics[2]).to.equal(expectedNamespaceHash);
+            // Verify indexed parameters: nameHash and owner
+            expect(matchingEvent!.topics[1]).to.equal(expectedNameHash);
+            expect(matchingEvent!.args!.label).to.equal(reg.label);
+            expect(matchingEvent!.args!.namespace).to.equal(namespace);
         }
 
     });

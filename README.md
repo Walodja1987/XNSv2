@@ -215,7 +215,7 @@ The private namespace owner registers names via the authorized flow (see [`regis
 
 **Notes:**
 * Regular users always pay the standard fees when registering namespaces via [`registerPublicNamespace`][api-registerPublicNamespace] or [`registerPrivateNamespace`][api-registerPrivateNamespace].
-* During the onboarding period (first year after contract deployment), the XNS contract owner can register public and private namespaces at no cost using [`registerPublicNamespaceFor`][api-registerPublicNamespaceFor] and [`registerPrivateNamespaceFor`][api-registerPrivateNamespaceFor], respectively, to foster adoption. These are OWNER-only functions that allow registering namespaces for other addresses during the onboarding period.
+* During the onboarding period (182-day onboarding period after contract deployment), the XNS contract owner can register public and private namespaces at no cost using [`registerPublicNamespaceFor`][api-registerPublicNamespaceFor] and [`registerPrivateNamespaceFor`][api-registerPrivateNamespaceFor], respectively, to foster adoption. These are OWNER-only functions that allow registering namespaces for other addresses during the onboarding period.
 * **Security recommendation:** Namespace owners should consider using multisig wallets to reduce the risk of wallet access loss or compromise. This is especially important for public namespace owners who receive ongoing fee rewards, and for private namespace owners who maintain exclusive control over their namespace.
 
   **Example scripts:**
