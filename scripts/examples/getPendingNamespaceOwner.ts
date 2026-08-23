@@ -48,7 +48,7 @@ async function main() {
   }
 
   // Get XNS contract instance
-  const xns = await hre.ethers.getContractAt("XNS", contractAddress);
+  const xns = await hre.ethers.getContractAt("XNSv2", contractAddress);
 
   // Get namespace info to verify namespace exists
   const namespaceInfo = await xns.getNamespaceInfo(namespace);

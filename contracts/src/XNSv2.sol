@@ -19,7 +19,7 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 //                          //
 //////////////////////////////
 
-/// @title XNS
+/// @title XNSv2
 /// @author Wladimir Weinbender (DIVA Technologies AG)
 /// @notice An Ethereum-native name registry that maps human-readable names to Ethereum addresses.
 /// Names are **permanent, immutable, and non-transferable**.
@@ -67,7 +67,7 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 /// - 20% is credited as fees:
 ///   - Public namespaces: 10% to namespace owner, 10% to XNS contract owner
 ///   - Private namespaces: 20% to XNS owner
-contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
+contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
     // -------------------------------------------------------------------------
     // Types
     // -------------------------------------------------------------------------
@@ -202,7 +202,7 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
     /// @dev Initializes the contract by setting the XNS contract owner (via OpenZeppelin's `Ownable` contract)
     /// and the deployment timestamp.
     /// @param initialOwner Address that will own the contract and receive protocol fees (should not be `address(0)`).
-    constructor(address initialOwner) EIP712("XNS", "1") Ownable(initialOwner) {
+    constructor(address initialOwner) EIP712("XNSv2", "1") Ownable(initialOwner) {
         // Zero address check on `initialOwner` is performed in OpenZeppelin's `Ownable` contract.
 
         DEPLOYED_AT = uint64(block.timestamp);

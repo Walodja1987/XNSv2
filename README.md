@@ -360,11 +360,11 @@ There are three ways to integrate XNS:
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.28;
 
-import {IXNS} from "./interfaces/IXNS.sol";
+import {IXNSv2} from "./interfaces/IXNSv2.sol";
 
 contract MyProtocol {
     constructor(address _xns, string memory label, string memory namespace) payable {
-        IXNS(_xns).registerName{value: msg.value}(label, namespace);
+        IXNSv2(_xns).registerName{value: msg.value}(label, namespace);
     }
 
     /// @notice Optional: Accept ETH refunds from XNS if excess payment is sent.
@@ -387,13 +387,13 @@ See [`MockERC20A`][contract-MockERC20A] and the [`registerNameForERC20A.ts`][scr
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.28;
 
-import {IXNS} from "./interfaces/IXNS.sol";
+import {IXNSv2} from "./interfaces/IXNSv2.sol";
 
 contract MyProtocol {
-    IXNS public immutable xns;
+    IXNSv2 public immutable xns;
 
     constructor(address _xns) {
-        xns = IXNS(_xns);
+        xns = IXNSv2(_xns);
     }
 
     /// @notice Register an XNS name for this contract

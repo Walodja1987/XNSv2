@@ -59,7 +59,7 @@ async function main() {
   }
 
   // Get XNS contract instance
-  const xns = await hre.ethers.getContractAt("XNS", contractAddress);
+  const xns = await hre.ethers.getContractAt("XNSv2", contractAddress);
 
   // Get signers
   const signers = await hre.ethers.getSigners();

@@ -85,7 +85,7 @@ async function main() {
   );
 
   // Get namespace info to determine price and validate usage
-  const xns = await hre.ethers.getContractAt("XNS", contractAddress);
+  const xns = await hre.ethers.getContractAt("XNSv2", contractAddress);
   console.log(`Fetching namespace info for "${namespace}"...\n`);
   const getNamespaceInfo = xns.getFunction("getNamespaceInfo(string)");
   const [pricePerName, creator, createdAt, isPrivate] = await getNamespaceInfo(namespace);

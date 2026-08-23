@@ -2,7 +2,7 @@
 
 This is an automatically generated documentation (using `solidity-docgen` package) for the XNS contract based on the NatSpec comments in the code.
 
-## XNS
+## XNSv2
 
 An Ethereum-native name registry that maps human-readable names to Ethereum addresses.
 Names are **permanent, immutable, and non-transferable**.
@@ -125,14 +125,14 @@ Supports both EOA signatures and EIP-1271 contract wallet signatures.
 the name resolves correctly using the `getAddress` or `getName` function before sharing it publicly.
 
 ```solidity
-function registerNameWithAuthorization(struct XNS.RegisterNameAuth registerNameAuth, bytes signature) external payable
+function registerNameWithAuthorization(struct XNSv2.RegisterNameAuth registerNameAuth, bytes signature) external payable
 ```
 
 #### Parameters
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| registerNameAuth | struct XNS.RegisterNameAuth | The argument for the function, including recipient, label, and namespace. |
+| registerNameAuth | struct XNSv2.RegisterNameAuth | The argument for the function, including recipient, label, and namespace. |
 | signature | bytes | EIP-712 signature by `recipient` (EOA) or EIP-1271 contract signature. |
 
 ### batchRegisterNameWithAuthorization
@@ -157,14 +157,14 @@ cause the entire batch to revert. Errors that could occur due to front-running t
 has a name, or name already registered) are skipped (i.e. batch tx does not revert) to provide griefing protection.
 
 ```solidity
-function batchRegisterNameWithAuthorization(struct XNS.RegisterNameAuth[] registerNameAuths, bytes[] signatures) external payable returns (uint256 successfulCount)
+function batchRegisterNameWithAuthorization(struct XNSv2.RegisterNameAuth[] registerNameAuths, bytes[] signatures) external payable returns (uint256 successfulCount)
 ```
 
 #### Parameters
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| registerNameAuths | struct XNS.RegisterNameAuth[] | Array of `RegisterNameAuth` structs, each including recipient, label, and namespace. |
+| registerNameAuths | struct XNSv2.RegisterNameAuth[] | Array of `RegisterNameAuth` structs, each including recipient, label, and namespace. |
 | signatures | bytes[] | Array of EIP-712 signatures by recipients (EOA) or EIP-1271 contract signatures. |
 
 #### Return Values
@@ -552,14 +552,14 @@ Function to check if a signature is valid (be used in `registerNameWithAuthoriza
 or `batchRegisterNameWithAuthorization`).
 
 ```solidity
-function isValidSignature(struct XNS.RegisterNameAuth registerNameAuth, bytes signature) external view returns (bool isValid)
+function isValidSignature(struct XNSv2.RegisterNameAuth registerNameAuth, bytes signature) external view returns (bool isValid)
 ```
 
 #### Parameters
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| registerNameAuth | struct XNS.RegisterNameAuth | The struct containing recipient, label, and namespace. |
+| registerNameAuth | struct XNSv2.RegisterNameAuth | The struct containing recipient, label, and namespace. |
 | signature | bytes | The signature to check. |
 
 #### Return Values
