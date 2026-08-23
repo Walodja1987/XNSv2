@@ -49,6 +49,8 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 ///   - Namespace owners do not receive fees; all fees go to the XNS contract owner.
 /// - During the onboarding period (182 days after XNSv2 contract deployment, 1 year after v1 deployment),
 ///   the contract owner can register namespaces for others at no cost.
+/// - During the migration period (7 days after deployment, or until `endMigrationPeriod`), the contract owner
+///   can mint existing v1 names onto v2 addresses via `registerNameFor` at no cost.
 ///
 /// ### Name Registration
 /// - Users can register names in public namespaces after the 7-day exclusivity period using `registerName`.
@@ -110,6 +112,10 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
     // Mapping from namespace hash to pending namespace owner address.
     mapping(bytes32 => address) private _pendingNamespaceOwner;
 
+    /// @dev Whether the one-off v1 name migration window has been permanently ended by the owner.
+    /// Starts `false`; set to `true` via `endMigrationPeriod()` (one-way). Query via `isMigrationOpen()`.
+    bool private _migrationEnded;
+
     // EIP-712 struct type hash for `RegisterNameAuth`.
     bytes32 private constant _REGISTER_NAME_AUTH_TYPEHASH =
         keccak256("RegisterNameAuth(address recipient,string label,string namespace)");
@@ -137,6 +143,11 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
     /// namespace registrations (including by the owner) require standard fees via `registerPublicNamespace` or
     /// `registerPrivateNamespace`.
     uint256 public constant ONBOARDING_PERIOD = 182 days;
+
+    /// @dev Period after contract deployment during which the owner can mint existing v1 names onto v2 via
+    /// `registerNameFor` at no cost (no exclusivity check, no payment). Not exposed in the ABI; use
+    /// `isMigrationOpen()` to check whether the window is still open.
+    uint256 private constant MIGRATION_PERIOD = 7 days;
 
     /// @notice Unit price step (0.001 ETH).
     uint256 public constant PRICE_STEP = 0.001 ether;
@@ -180,6 +191,9 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
 
     /// @dev Emitted when a pending namespace owner accepts the transfer.
     event NamespaceOwnerTransferAccepted(bytes32 indexed namespaceHash, string namespace, address indexed newOwner);
+
+    /// @dev Emitted when the owner permanently ends the name migration window early (or explicitly closes it).
+    event MigrationPeriodEnded();
 
     // -------------------------------------------------------------------------
     // Constructor
@@ -513,6 +527,44 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
         _registerNamespace(namespace, pricePerName, nsOwner, true);
     }
 
+    /// @notice Contract owner-only function to mint a name for `recipient` during the v1→v2 migration window.
+    /// No payment and no exclusivity check. Used to re-create existing v1 names on v2 addresses.
+    ///
+    /// **Requirements:**
+    /// - `msg.sender` must be the contract owner.
+    /// - Migration must still be open (`isMigrationOpen()`).
+    /// - `recipient` must not be the zero address and must not already have a name.
+    /// - Label must be valid; namespace must exist; name must not already be registered.
+    ///
+    /// @param recipient The address that will own the name.
+    /// @param label The label part of the name.
+    /// @param namespace The namespace part of the name.
+    function registerNameFor(address recipient, string calldata label, string calldata namespace) external {
+        require(msg.sender == owner(), "XNS: not contract owner");
+        require(isMigrationOpen(), "XNS: migration ended");
+        require(recipient != address(0), "XNS: 0x recipient");
+        require(_isValidLabelOrNamespace(label), "XNS: invalid label");
+        require(_namespaces[keccak256(bytes(namespace))].owner != address(0), "XNS: namespace not found");
+        require(bytes(_addressToName[recipient].label).length == 0, "XNS: address already has a name");
+
+        bytes32 key = keccak256(abi.encodePacked(label, "@", namespace));
+        require(_nameHashToAddress[key] == address(0), "XNS: name already registered");
+
+        _nameHashToAddress[key] = recipient;
+        _addressToName[recipient] = Name({label: label, namespace: namespace});
+
+        emit NameRegistered(key, label, namespace, recipient);
+    }
+
+    /// @notice Permanently ends the name migration window. One-way; cannot be re-opened.
+    /// **Requirements:** `msg.sender` must be the contract owner; migration must not already have ended.
+    function endMigrationPeriod() external {
+        require(msg.sender == owner(), "XNS: not contract owner");
+        require(!_migrationEnded, "XNS: migration ended");
+        _migrationEnded = true;
+        emit MigrationPeriodEnded();
+    }
+
     /// @dev Helper function to register a namespace (used in namespace registration functions):
     /// - Validates namespace and pricePerName
     /// - Checks namespace doesn't exist
@@ -777,6 +829,14 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
     function getPendingNamespaceOwner(string calldata namespace) external view returns (address pendingOwner) {
         return _pendingNamespaceOwner[keccak256(bytes(namespace))];
     }
+
+    /// @notice Returns whether the v1→v2 name migration window is still open.
+    /// True only if the owner has not called `endMigrationPeriod()` and `block.timestamp` is still within
+    /// the private migration period.
+    function isMigrationOpen() public view returns (bool) {
+        return !_migrationEnded && block.timestamp <= DEPLOYED_AT + MIGRATION_PERIOD;
+    }
+
 
     // =========================================================================
     // INTERNAL MULTI-USE HELPER FUNCTIONS

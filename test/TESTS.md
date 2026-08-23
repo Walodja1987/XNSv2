@@ -20,6 +20,7 @@ The following test cases are implemented in [XNS.test.ts](./XNS.test.ts).
   - Should have correct `PRIVATE_NAMESPACE_REGISTRATION_FEE` (10 ether).
   - Should have correct `EXCLUSIVITY_PERIOD` (7 days).
   - Should have correct `ONBOARDING_PERIOD` (182 days).
+  - Migration should be open at deployment (`isMigrationOpen() = true`).
   - Should have correct `PRICE_STEP` (0.001 ether / 1e15).
   - Should have correct `PUBLIC_NAMESPACE_MIN_PRICE` (0.001 ether).
   - Should have correct `PRIVATE_NAMESPACE_MIN_PRICE` (0.005 ether).
@@ -539,3 +540,27 @@ The following test cases are implemented in [XNS.test.ts](./XNS.test.ts).
 
 - Should return zero for address with no pending fees.
 - Should return correct amount for address with pending fees.
+
+
+---
+
+### Name migration (`registerNameFor` / `endMigrationPeriod`)
+
+#### Functionality
+
+- Should allow owner to register a name for a recipient during migration.
+- Should allow registering into a private namespace during migration (no exclusivity check).
+- Should allow owner to end migration period early.
+
+#### Reverts
+
+- Should revert `registerNameFor` when caller is not contract owner.
+- Should revert `registerNameFor` after migration period elapses.
+- Should revert `registerNameFor` for zero recipient.
+- Should revert `registerNameFor` for invalid label.
+- Should revert `registerNameFor` for non-existent namespace.
+- Should revert `registerNameFor` if recipient already has a name.
+- Should revert `registerNameFor` if name already registered.
+- Should revert `endMigrationPeriod` when caller is not owner.
+- Should revert `endMigrationPeriod` if migration already ended.
+
