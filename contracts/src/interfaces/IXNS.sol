@@ -24,6 +24,7 @@ interface IXNS {
         address indexed newOwner
     );
     event NamespaceOwnerTransferAccepted(bytes32 indexed namespaceHash, string namespace, address indexed newOwner);
+    event MigrationPeriodEnded();
 
     function registerName(string calldata label, string calldata namespace) external payable;
     function registerNameWithAuthorization(RegisterNameAuth calldata registerNameAuth, bytes calldata signature) external payable;
@@ -35,6 +36,8 @@ interface IXNS {
     function registerPrivateNamespace(string calldata namespace, uint256 pricePerName) external payable;
     function registerPublicNamespaceFor(address nsOwner, string calldata namespace, uint256 pricePerName) external;
     function registerPrivateNamespaceFor(address nsOwner, string calldata namespace, uint256 pricePerName) external;
+    function registerNameFor(address recipient, string calldata label, string calldata namespace) external;
+    function endMigrationPeriod() external;
     function claimFees(address recipient) external;
     function claimFeesToSelf() external;
     function transferNamespaceOwnership(string calldata namespace, address newOwner) external;
@@ -50,6 +53,7 @@ interface IXNS {
     function isValidSignature(RegisterNameAuth calldata registerNameAuth,bytes calldata signature) external view returns (bool isValid);
     function getPendingFees(address recipient) external view returns (uint256 amount);
     function getPendingNamespaceOwner(string calldata namespace) external view returns (address pendingOwner);
+    function isMigrationOpen() external view returns (bool);
 
     // OpenZeppelin Ownable2Step functions (inherited, not declared in interface):
     // function transferOwnership(address newOwner) external;

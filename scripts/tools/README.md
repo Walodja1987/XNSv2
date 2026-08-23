@@ -14,6 +14,15 @@ Builds **Safe Transaction Builder** JSON: one `registerPublicNamespaceFor` trans
 - **Default output:** `scripts/tools/out/new-namespaces.json`
 - Edit `DEFAULT_ENTRIES`, addresses, and chain id at the top of the file as needed.
 
+### `build-safe-name-migration-batch.js`
+
+Builds **Safe Transaction Builder** JSON for v1→v2 name migration: one `registerNameFor(recipient, label, namespace)` transaction per entry in [`context/migration scripts/out/v1-name-registrations.json`](../../context/migration%20scripts/out/v1-name-registrations.json).
+
+- **Run:** `XNS_ADDRESS=0xYourV2Address node scripts/tools/build-safe-name-migration-batch.js`
+- **Default output:** `scripts/tools/out/v1-name-migration.json`
+- **Skip names:** `--skip xns@x` (or edit `DEFAULT_SKIP_V2_NAMES` in the script)
+- Namespaces must already exist on v2 before executing the batch.
+
 ### `merge-readme-price-table.js`
 
 Merges **`DEFAULT_ENTRIES` from `build-safe-namespace-batch.js`** into the README **“XNS Price list”** table: adds namespaces on the matching price row, dedupes and sorts names, and can insert a **0.050 ETH** row if the batch uses that tier but the table has no such row. **Overwrites `README.md`** in place.

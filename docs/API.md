@@ -32,6 +32,8 @@ Label and namespace string requirements:
   - Namespace owners do not receive fees; all fees go to the XNS contract owner.
 - During the onboarding period (182 days after XNSv2 contract deployment, 1 year after v1 deployment),
   the contract owner can register namespaces for others at no cost.
+- During the migration period (7 days after deployment, or until `endMigrationPeriod`), the contract owner
+  can mint existing v1 names onto v2 addresses via `registerNameFor` at no cost.
 
 ### Name Registration
 - Users can register names in public namespaces after the 7-day exclusivity period using `registerName`.
@@ -235,7 +237,7 @@ foster adoption. No ETH is processed (function is non-payable) and no fees are c
 
 **Requirements:**
 - `msg.sender` must be the contract owner.
-- Must be called during the onboarding period (onboarding period after contract deployment).
+- Must be called during the onboarding period.
 - `nsOwner` must not be the zero address.
 - No ETH should be sent (function is non-payable).
 - All validation requirements from `registerPublicNamespace` apply.
@@ -260,7 +262,7 @@ foster adoption. No ETH is processed (function is non-payable) and no fees are c
 
 **Requirements:**
 - `msg.sender` must be the contract owner.
-- Must be called during the onboarding period (onboarding period after contract deployment).
+- Must be called during the onboarding period.
 - `nsOwner` must not be the zero address.
 - No ETH should be sent (function is non-payable).
 - All validation requirements from `registerPrivateNamespace` apply.
@@ -276,6 +278,38 @@ function registerPrivateNamespaceFor(address nsOwner, string namespace, uint256 
 | nsOwner | address | The address that will be assigned as the namespace owner. |
 | namespace | string | The namespace to register. |
 | pricePerName | uint256 | The price per name for the namespace. |
+
+### registerNameFor
+
+Contract owner-only function to mint a name for `recipient` during the v1→v2 migration window.
+No payment and no exclusivity check. Used to re-create existing v1 names on v2 addresses.
+
+**Requirements:**
+- `msg.sender` must be the contract owner.
+- Migration must still be open (`isMigrationOpen()`).
+- `recipient` must not be the zero address and must not already have a name.
+- Label must be valid; namespace must exist; name must not already be registered.
+
+```solidity
+function registerNameFor(address recipient, string label, string namespace) external
+```
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| recipient | address | The address that will own the name. |
+| label | string | The label part of the name. |
+| namespace | string | The namespace part of the name. |
+
+### endMigrationPeriod
+
+Permanently ends the name migration window early. One-way; cannot be re-opened.
+**Requirements:** `msg.sender` must be the contract owner; migration must still be open (`isMigrationOpen()`).
+
+```solidity
+function endMigrationPeriod() external
+```
 
 ### claimFees
 
@@ -575,6 +609,16 @@ function getPendingNamespaceOwner(string namespace) external view returns (addre
 | ---- | ---- | ----------- |
 | pendingOwner | address | The address of the pending namespace owner, or `address(0)` if none. |
 
+### isMigrationOpen
+
+Returns whether the v1→v2 name migration window is still open.
+True only if the owner has not called `endMigrationPeriod()` and `block.timestamp` is still within
+the private migration period.
+
+```solidity
+function isMigrationOpen() public view returns (bool)
+```
+
 ## Events
 
 ### NameRegistered
@@ -617,6 +661,14 @@ event NamespaceOwnerTransferAccepted(bytes32 namespaceHash, string namespace, ad
 ```
 
 _Emitted when a pending namespace owner accepts the transfer._
+
+### MigrationPeriodEnded
+
+```solidity
+event MigrationPeriodEnded()
+```
+
+_Emitted when the owner permanently ends the name migration window early (or explicitly closes it)._
 
 ## State Variables
 

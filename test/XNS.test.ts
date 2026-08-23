@@ -135,6 +135,9 @@ describe("XNS", function () {
         // Should have correct ONBOARDING_PERIOD (182 days)
         expect(await s.xns.ONBOARDING_PERIOD()).to.equal(182 * 24 * 60 * 60);
 
+        // Migration should be open at deployment
+        expect(await s.xns.isMigrationOpen()).to.equal(true);
+
         // Should have correct PRICE_STEP (0.001 ether / 1e15)
         expect(await s.xns.PRICE_STEP()).to.equal(ethers.parseEther("0.001"));
 
@@ -9241,5 +9244,129 @@ describe("XNS", function () {
     });
 
   });
+
+  describe("Name migration (registerNameFor / endMigrationPeriod)", function () {
+    let s: SetupOutput;
+    const getAddressByLabelAndNamespace = (xns: XNS) => xns.getFunction("getAddress(string,string)");
+    const MIGRATION_PERIOD_SECONDS = 7 * 24 * 60 * 60; // private constant; documented as 7 days
+
+    beforeEach(async () => {
+      s = await loadFixture(setup);
+    });
+
+    // -----------------------
+    // Functionality
+    // -----------------------
+
+    it("Should allow owner to register a name for a recipient during migration", async () => {
+      const recipient = s.user2.address;
+      const label = "vitalik";
+      const namespace = "xns"; // registered in setup
+      const nameHash = ethers.keccak256(ethers.solidityPacked(["string", "string", "string"], [label, "@", namespace]));
+
+      await expect(s.xns.connect(s.owner).registerNameFor(recipient, label, namespace))
+        .to.emit(s.xns, "NameRegistered")
+        .withArgs(nameHash, label, namespace, recipient);
+
+      expect(await getAddressByLabelAndNamespace(s.xns)(label, namespace)).to.equal(recipient);
+      expect(await s.xns.getName(recipient)).to.equal(`${label}@${namespace}`);
+    });
+
+    it("Should allow registering into a private namespace during migration (no exclusivity check)", async () => {
+      const privateNs = "privatemig";
+      const price = ethers.parseEther("0.005");
+      const fee = await s.xns.PRIVATE_NAMESPACE_REGISTRATION_FEE();
+      await s.xns.connect(s.user1).registerPrivateNamespace(privateNs, price, { value: fee });
+
+      await s.xns.connect(s.owner).registerNameFor(s.user3.address, "secret", privateNs);
+      expect(await getAddressByLabelAndNamespace(s.xns)("secret", privateNs)).to.equal(s.user3.address);
+    });
+
+    it("Should allow owner to end migration period early", async () => {
+      await expect(s.xns.connect(s.owner).endMigrationPeriod())
+        .to.emit(s.xns, "MigrationPeriodEnded");
+
+      expect(await s.xns.isMigrationOpen()).to.equal(false);
+
+      await expect(
+        s.xns.connect(s.owner).registerNameFor(s.user2.address, "late", "xns")
+      ).to.be.revertedWith("XNS: migration ended");
+    });
+
+    // -----------------------
+    // Reverts
+    // -----------------------
+
+    it("Should revert registerNameFor when caller is not contract owner", async () => {
+      await expect(
+        s.xns.connect(s.user1).registerNameFor(s.user2.address, "bob", "xns")
+      ).to.be.revertedWith("XNS: not contract owner");
+    });
+
+    it("Should revert registerNameFor after migration period elapses", async () => {
+      await time.increase(MIGRATION_PERIOD_SECONDS + 1);
+      expect(await s.xns.isMigrationOpen()).to.equal(false);
+
+      await expect(
+        s.xns.connect(s.owner).registerNameFor(s.user2.address, "bob", "xns")
+      ).to.be.revertedWith("XNS: migration ended");
+    });
+
+    it("Should revert registerNameFor for zero recipient", async () => {
+      await expect(
+        s.xns.connect(s.owner).registerNameFor(ethers.ZeroAddress, "bob", "xns")
+      ).to.be.revertedWith("XNS: 0x recipient");
+    });
+
+    it("Should revert registerNameFor for invalid label", async () => {
+      await expect(
+        s.xns.connect(s.owner).registerNameFor(s.user2.address, "Bad_Label", "xns")
+      ).to.be.revertedWith("XNS: invalid label");
+    });
+
+    it("Should revert registerNameFor for non-existent namespace", async () => {
+      await expect(
+        s.xns.connect(s.owner).registerNameFor(s.user2.address, "bob", "doesnotexist")
+      ).to.be.revertedWith("XNS: namespace not found");
+    });
+
+    it("Should revert registerNameFor if recipient already has a name", async () => {
+      await s.xns.connect(s.owner).registerNameFor(s.user2.address, "alice", "xns");
+      await expect(
+        s.xns.connect(s.owner).registerNameFor(s.user2.address, "bob", "xns")
+      ).to.be.revertedWith("XNS: address already has a name");
+    });
+
+    it("Should revert registerNameFor if name already registered", async () => {
+      await s.xns.connect(s.owner).registerNameFor(s.user2.address, "alice", "xns");
+      await expect(
+        s.xns.connect(s.owner).registerNameFor(s.user3.address, "alice", "xns")
+      ).to.be.revertedWith("XNS: name already registered");
+    });
+
+    it("Should revert endMigrationPeriod when caller is not owner", async () => {
+      await expect(s.xns.connect(s.user1).endMigrationPeriod()).to.be.revertedWith(
+        "XNS: not contract owner"
+      );
+    });
+
+    it("Should revert endMigrationPeriod if migration already ended", async () => {
+      await s.xns.connect(s.owner).endMigrationPeriod();
+      await expect(s.xns.connect(s.owner).endMigrationPeriod()).to.be.revertedWith(
+        "XNS: migration ended"
+      );
+    });
+
+    it("Should revert endMigrationPeriod after migration period elapses", async () => {
+      await time.increase(MIGRATION_PERIOD_SECONDS + 1);
+      expect(await s.xns.isMigrationOpen()).to.equal(false);
+
+      await expect(s.xns.connect(s.owner).endMigrationPeriod()).to.be.revertedWith(
+        "XNS: migration ended"
+      );
+    });
+  });
+
+
 });
 
