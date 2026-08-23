@@ -47,8 +47,8 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 ///   - Only the namespace owner can register names (via `registerNameWithAuthorization`
 ///     or `batchRegisterNameWithAuthorization`).
 ///   - Namespace owners do not receive fees; all fees go to the XNS contract owner.
-/// - During the onboarding period (182 days after XNS contract deployment), the contract owner can register
-///   namespaces for others at no cost.
+/// - During the onboarding period (182 days after XNSv2 contract deployment, 1 year after v1 deployment),
+///   the contract owner can register namespaces for others at no cost.
 ///
 /// ### Name Registration
 /// - Users can register names in public namespaces after the 7-day exclusivity period using `registerName`.
@@ -474,7 +474,7 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
     ///
     /// **Requirements:**
     /// - `msg.sender` must be the contract owner.
-    /// - Must be called during the onboarding period (onboarding period after contract deployment).
+    /// - Must be called during the onboarding period.
     /// - `nsOwner` must not be the zero address.
     /// - No ETH should be sent (function is non-payable).
     /// - All validation requirements from `registerPublicNamespace` apply.
@@ -497,7 +497,7 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
     ///
     /// **Requirements:**
     /// - `msg.sender` must be the contract owner.
-    /// - Must be called during the onboarding period (onboarding period after contract deployment).
+    /// - Must be called during the onboarding period.
     /// - `nsOwner` must not be the zero address.
     /// - No ETH should be sent (function is non-payable).
     /// - All validation requirements from `registerPrivateNamespace` apply.
