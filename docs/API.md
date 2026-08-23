@@ -4,7 +4,6 @@ This is an automatically generated documentation (using `solidity-docgen` packag
 
 ## XNS
 
-
 An Ethereum-native name registry that maps human-readable names to Ethereum addresses.
 Names are **permanent, immutable, and non-transferable**.
 
@@ -31,8 +30,8 @@ Label and namespace string requirements:
   - Only the namespace owner can register names (via `registerNameWithAuthorization`
     or `batchRegisterNameWithAuthorization`).
   - Namespace owners do not receive fees; all fees go to the XNS contract owner.
-- During the first year after XNS contract deployment, the contract owner can register
-  namespaces for others at no cost.
+- During the onboarding period (182 days after XNSv2 contract deployment, 1 year after v1 deployment),
+  the contract owner can register namespaces for others at no cost.
 
 ### Name Registration
 - Users can register names in public namespaces after the 7-day exclusivity period using `registerName`.
@@ -50,15 +49,9 @@ Label and namespace string requirements:
   - Public namespaces: 10% to namespace owner, 10% to XNS contract owner
   - Private namespaces: 20% to XNS owner
 
-
-
-
-
-
 ## Functions
 
 ### registerName
-
 
 Function to register a paid name for `msg.sender`.
 This function only works for public namespaces after the exclusivity period (7 days) has ended.
@@ -87,7 +80,6 @@ This function only works for public namespaces after the exclusivity period (7 d
 function registerName(string label, string namespace) external payable
 ```
 
-
 #### Parameters
 
 | Name | Type | Description |
@@ -95,9 +87,7 @@ function registerName(string label, string namespace) external payable
 | label | string | The label part of the name to register. |
 | namespace | string | The namespace part of the name to register. |
 
-
 ### registerNameWithAuthorization
-
 
 Function to sponsor a paid name registration for `recipient` who explicitly authorized it via
 an EIP-712 signature.
@@ -136,7 +126,6 @@ the name resolves correctly using the `getAddress` or `getName` function before 
 function registerNameWithAuthorization(struct XNS.RegisterNameAuth registerNameAuth, bytes signature) external payable
 ```
 
-
 #### Parameters
 
 | Name | Type | Description |
@@ -144,9 +133,7 @@ function registerNameWithAuthorization(struct XNS.RegisterNameAuth registerNameA
 | registerNameAuth | struct XNS.RegisterNameAuth | The argument for the function, including recipient, label, and namespace. |
 | signature | bytes | EIP-712 signature by `recipient` (EOA) or EIP-1271 contract signature. |
 
-
 ### batchRegisterNameWithAuthorization
-
 
 Batch version of `registerNameWithAuthorization` to register multiple names with a single transaction.
 All registrations must be in the same namespace. Skips registrations (i.e. does not revert) where the recipient already has
@@ -171,7 +158,6 @@ has a name, or name already registered) are skipped (i.e. batch tx does not reve
 function batchRegisterNameWithAuthorization(struct XNS.RegisterNameAuth[] registerNameAuths, bytes[] signatures) external payable returns (uint256 successfulCount)
 ```
 
-
 #### Parameters
 
 | Name | Type | Description |
@@ -187,7 +173,6 @@ function batchRegisterNameWithAuthorization(struct XNS.RegisterNameAuth[] regist
 
 ### registerPublicNamespace
 
-
 Register a new public namespace.
 
 **Requirements:**
@@ -198,7 +183,7 @@ Register a new public namespace.
 - `pricePerName` must be >= 0.001 ETH and a multiple of 0.001 ETH (0.001, 0.002, 0.003, etc.).
 
 **Note:**
-- During the onboarding period (1 year following contract deployment), the contract owner can
+- During the onboarding period (182 days following contract deployment), the contract owner can
   register namespaces for free (via `registerPublicNamespaceFor`) to foster adoption.
 - For the avoidance of doubt, anyone can register a new namespace during the onboarding period
   by paying the standard 50 ETH registration fee.
@@ -207,7 +192,6 @@ Register a new public namespace.
 function registerPublicNamespace(string namespace, uint256 pricePerName) external payable
 ```
 
-
 #### Parameters
 
 | Name | Type | Description |
@@ -215,9 +199,7 @@ function registerPublicNamespace(string namespace, uint256 pricePerName) externa
 | namespace | string | The namespace to register. |
 | pricePerName | uint256 | The price per name for the namespace. |
 
-
 ### registerPrivateNamespace
-
 
 Register a new private namespace.
 
@@ -229,7 +211,7 @@ Register a new private namespace.
 - `pricePerName` must be >= 0.005 ETH and a multiple of 0.001 ETH (0.005, 0.006, 0.007, etc.).
 
 **Note:**
-- During the onboarding period (1 year following contract deployment), the contract owner can
+- During the onboarding period (182 days following contract deployment), the contract owner can
   register namespaces for free (via `registerPrivateNamespaceFor`) to foster adoption.
 - For the avoidance of doubt, anyone can register a new namespace during the onboarding period
   by paying the standard 10 ETH registration fee.
@@ -238,7 +220,6 @@ Register a new private namespace.
 function registerPrivateNamespace(string namespace, uint256 pricePerName) external payable
 ```
 
-
 #### Parameters
 
 | Name | Type | Description |
@@ -246,17 +227,15 @@ function registerPrivateNamespace(string namespace, uint256 pricePerName) extern
 | namespace | string | The namespace to register. |
 | pricePerName | uint256 | The price per name for the namespace. |
 
-
 ### registerPublicNamespaceFor
 
-
 Contract owner-only function to register a public namespace for another address during the onboarding period.
-This function allows the contract owner to register namespaces for free during the first year to
+This function allows the contract owner to register namespaces for free during the onboarding period to
 foster adoption. No ETH is processed (function is non-payable) and no fees are charged.
 
 **Requirements:**
 - `msg.sender` must be the contract owner.
-- Must be called during the onboarding period (first year after contract deployment).
+- Must be called during the onboarding period (onboarding period after contract deployment).
 - `nsOwner` must not be the zero address.
 - No ETH should be sent (function is non-payable).
 - All validation requirements from `registerPublicNamespace` apply.
@@ -264,7 +243,6 @@ foster adoption. No ETH is processed (function is non-payable) and no fees are c
 ```solidity
 function registerPublicNamespaceFor(address nsOwner, string namespace, uint256 pricePerName) external
 ```
-
 
 #### Parameters
 
@@ -274,17 +252,15 @@ function registerPublicNamespaceFor(address nsOwner, string namespace, uint256 p
 | namespace | string | The namespace to register. |
 | pricePerName | uint256 | The price per name for the namespace. |
 
-
 ### registerPrivateNamespaceFor
 
-
 Contract owner-only function to register a private namespace for another address during the onboarding period.
-This function allows the contract owner to register namespaces for free during the first year to
+This function allows the contract owner to register namespaces for free during the onboarding period to
 foster adoption. No ETH is processed (function is non-payable) and no fees are charged.
 
 **Requirements:**
 - `msg.sender` must be the contract owner.
-- Must be called during the onboarding period (first year after contract deployment).
+- Must be called during the onboarding period (onboarding period after contract deployment).
 - `nsOwner` must not be the zero address.
 - No ETH should be sent (function is non-payable).
 - All validation requirements from `registerPrivateNamespace` apply.
@@ -292,7 +268,6 @@ foster adoption. No ETH is processed (function is non-payable) and no fees are c
 ```solidity
 function registerPrivateNamespaceFor(address nsOwner, string namespace, uint256 pricePerName) external
 ```
-
 
 #### Parameters
 
@@ -302,9 +277,7 @@ function registerPrivateNamespaceFor(address nsOwner, string namespace, uint256 
 | namespace | string | The namespace to register. |
 | pricePerName | uint256 | The price per name for the namespace. |
 
-
 ### claimFees
-
 
 Function to claim accumulated fees for `msg.sender` and send to `recipient`.
 Withdraws all pending fees. Partial claims are not possible.
@@ -317,16 +290,13 @@ Withdraws all pending fees. Partial claims are not possible.
 function claimFees(address recipient) external
 ```
 
-
 #### Parameters
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | recipient | address | The address that will receive the claimed fees. |
 
-
 ### claimFeesToSelf
-
 
 Function to claim accumulated fees for `msg.sender` and send to `msg.sender`.
 Withdraws all pending fees. Partial claims are not possible.
@@ -335,11 +305,7 @@ Withdraws all pending fees. Partial claims are not possible.
 function claimFeesToSelf() external
 ```
 
-
-
-
 ### transferNamespaceOwnership
-
 
 Start a 2-step transfer of namespace ownership to a new address.
 The new namespace owner must call `acceptNamespaceOwnership` to complete the transfer.
@@ -359,7 +325,6 @@ Only fees accrued **after** acceptance are credited to the new namespace owner a
 function transferNamespaceOwnership(string namespace, address newOwner) external
 ```
 
-
 #### Parameters
 
 | Name | Type | Description |
@@ -367,9 +332,7 @@ function transferNamespaceOwnership(string namespace, address newOwner) external
 | namespace | string | The namespace to transfer ownership for. |
 | newOwner | address | The address that will become the new namespace owner, or `address(0)` to cancel a pending transfer. |
 
-
 ### acceptNamespaceOwnership
-
 
 Accept a pending namespace ownership transfer.
 Completes the 2-step transfer process started by `transferNamespaceOwnership`.
@@ -383,16 +346,13 @@ Completes the 2-step transfer process started by `transferNamespaceOwnership`.
 function acceptNamespaceOwnership(string namespace) external
 ```
 
-
 #### Parameters
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
 | namespace | string | The namespace to accept ownership for. |
 
-
 ### getAddress
-
 
 Function to resolve a name string including the @ sign to an address.
 Returns `address(0)` for anything not registered or malformed.
@@ -401,7 +361,6 @@ Provided strings without an @ sign are invalid and return `address(0)`.
 ```solidity
 function getAddress(string fullName) external view returns (address addr)
 ```
-
 
 #### Parameters
 
@@ -417,7 +376,6 @@ function getAddress(string fullName) external view returns (address addr)
 
 ### getAddress
 
-
 Function to resolve a name to an address taking separate label and namespace parameters.
 This version is more gas efficient than `getAddress(string calldata fullName)` as it does not
 require string splitting. Returns `address(0)` if not registered.
@@ -425,7 +383,6 @@ require string splitting. Returns `address(0)` if not registered.
 ```solidity
 function getAddress(string label, string namespace) external view returns (address addr)
 ```
-
 
 #### Parameters
 
@@ -442,7 +399,6 @@ function getAddress(string label, string namespace) external view returns (addre
 
 ### getName
 
-
 Function to lookup the XNS name for an address.
 Returns an empty string if the address has no name. Otherwise returns the full name
 in format "label" + @ + "namespace".
@@ -450,7 +406,6 @@ in format "label" + @ + "namespace".
 ```solidity
 function getName(address addr) external view returns (string)
 ```
-
 
 #### Parameters
 
@@ -466,13 +421,11 @@ function getName(address addr) external view returns (string)
 
 ### getNamespaceInfo
 
-
 Function to retrieve the namespace metadata associated with `namespace`.
 
 ```solidity
 function getNamespaceInfo(string namespace) external view returns (uint256 pricePerName, address owner, uint64 createdAt, bool isPrivate)
 ```
-
 
 #### Parameters
 
@@ -491,14 +444,12 @@ function getNamespaceInfo(string namespace) external view returns (uint256 price
 
 ### getNamespacePrice
 
-
 Function to retrieve only the price per name for a given namespace.
 More gas efficient than `getNamespaceInfo` if only the price is needed.
 
 ```solidity
 function getNamespacePrice(string namespace) external view returns (uint256 pricePerName)
 ```
-
 
 #### Parameters
 
@@ -514,7 +465,6 @@ function getNamespacePrice(string namespace) external view returns (uint256 pric
 
 ### isInExclusivityPeriod
 
-
 Function to check if a namespace is currently within its exclusivity period.
 Returns `true` if `block.timestamp <= createdAt + EXCLUSIVITY_PERIOD`, `false` otherwise.
 For private namespaces, this function will return `false` after the exclusivity period, but private namespaces
@@ -523,7 +473,6 @@ remain namespace-owner-only forever regardless of this value.
 ```solidity
 function isInExclusivityPeriod(string namespace) external view returns (bool inExclusivityPeriod)
 ```
-
 
 #### Parameters
 
@@ -539,7 +488,6 @@ function isInExclusivityPeriod(string namespace) external view returns (bool inE
 
 ### isValidLabelOrNamespace
 
-
 Function to check if a label or namespace is valid (returns bool, does not revert).
 
 **Requirements:**
@@ -551,7 +499,6 @@ Function to check if a label or namespace is valid (returns bool, does not rever
 ```solidity
 function isValidLabelOrNamespace(string labelOrNamespace) external pure returns (bool isValid)
 ```
-
 
 #### Parameters
 
@@ -567,14 +514,12 @@ function isValidLabelOrNamespace(string labelOrNamespace) external pure returns 
 
 ### isValidSignature
 
-
 Function to check if a signature is valid (be used in `registerNameWithAuthorization`
 or `batchRegisterNameWithAuthorization`).
 
 ```solidity
 function isValidSignature(struct XNS.RegisterNameAuth registerNameAuth, bytes signature) external view returns (bool isValid)
 ```
-
 
 #### Parameters
 
@@ -591,13 +536,11 @@ function isValidSignature(struct XNS.RegisterNameAuth registerNameAuth, bytes si
 
 ### getPendingFees
 
-
 Function to retrieve the amount of pending fees that can be claimed by an address.
 
 ```solidity
 function getPendingFees(address recipient) external view returns (uint256 amount)
 ```
-
 
 #### Parameters
 
@@ -613,14 +556,12 @@ function getPendingFees(address recipient) external view returns (uint256 amount
 
 ### getPendingNamespaceOwner
 
-
 Get the pending namespace owner for a given namespace.
 Returns `address(0)` if there is no pending transfer.
 
 ```solidity
 function getPendingNamespaceOwner(string namespace) external view returns (address pendingOwner)
 ```
-
 
 #### Parameters
 
@@ -634,41 +575,25 @@ function getPendingNamespaceOwner(string namespace) external view returns (addre
 | ---- | ---- | ----------- |
 | pendingOwner | address | The address of the pending namespace owner, or `address(0)` if none. |
 
-
 ## Events
 
 ### NameRegistered
 
-
-
-
 ```solidity
-event NameRegistered(string label, string namespace, address owner)
+event NameRegistered(bytes32 nameHash, string label, string namespace, address owner)
 ```
 
 _Emitted in name registration functions._
 
-
-
-
 ### NamespaceRegistered
 
-
-
-
 ```solidity
-event NamespaceRegistered(string namespace, uint256 pricePerName, address owner, bool isPrivate)
+event NamespaceRegistered(bytes32 namespaceHash, string namespace, uint256 pricePerName, address owner, bool isPrivate)
 ```
 
 _Emitted in namespace registration functions._
 
-
-
-
 ### FeesClaimed
-
-
-
 
 ```solidity
 event FeesClaimed(address recipient, uint256 amount)
@@ -676,45 +601,26 @@ event FeesClaimed(address recipient, uint256 amount)
 
 _Emitted in fee claiming functions._
 
-
-
-
 ### NamespaceOwnerTransferStarted
 
-
-
-
 ```solidity
-event NamespaceOwnerTransferStarted(string namespace, address oldOwner, address newOwner)
+event NamespaceOwnerTransferStarted(bytes32 namespaceHash, string namespace, address oldOwner, address newOwner)
 ```
 
 _Emitted when a namespace owner starts a transfer to a new namespace owner (address that shall receive the nsOwnerFee).
 When `newOwner` is `address(0)`, this indicates cancellation of a pending transfer._
 
-
-
-
 ### NamespaceOwnerTransferAccepted
 
-
-
-
 ```solidity
-event NamespaceOwnerTransferAccepted(string namespace, address newOwner)
+event NamespaceOwnerTransferAccepted(bytes32 namespaceHash, string namespace, address newOwner)
 ```
 
 _Emitted when a pending namespace owner accepts the transfer._
 
-
-
-
-
-
-
 ## State Variables
 
 ### DEPLOYED_AT
-
 
 XNS contract deployment timestamp.
 
@@ -722,12 +628,7 @@ XNS contract deployment timestamp.
 uint64 DEPLOYED_AT
 ```
 
-
-
-
-
 ### PUBLIC_NAMESPACE_REGISTRATION_FEE
-
 
 Fee to register a public namespace.
 
@@ -735,12 +636,7 @@ Fee to register a public namespace.
 uint256 PUBLIC_NAMESPACE_REGISTRATION_FEE
 ```
 
-
-
-
-
 ### PRIVATE_NAMESPACE_REGISTRATION_FEE
-
 
 Fee to register a private namespace.
 
@@ -748,12 +644,7 @@ Fee to register a private namespace.
 uint256 PRIVATE_NAMESPACE_REGISTRATION_FEE
 ```
 
-
-
-
-
 ### EXCLUSIVITY_PERIOD
-
 
 Duration of the exclusive namespace-owner window for paid registrations
 (relevant for public namespace registrations only).
@@ -762,12 +653,7 @@ Duration of the exclusive namespace-owner window for paid registrations
 uint256 EXCLUSIVITY_PERIOD
 ```
 
-
-
-
-
 ### ONBOARDING_PERIOD
-
 
 Period after contract deployment during which the owner can use `registerPublicNamespaceFor` and
 `registerPrivateNamespaceFor` to bootstrap namespaces for participants at no cost. After this period, all
@@ -778,12 +664,7 @@ namespace registrations (including by the owner) require standard fees via `regi
 uint256 ONBOARDING_PERIOD
 ```
 
-
-
-
-
 ### PRICE_STEP
-
 
 Unit price step (0.001 ETH).
 
@@ -791,12 +672,7 @@ Unit price step (0.001 ETH).
 uint256 PRICE_STEP
 ```
 
-
-
-
-
 ### PUBLIC_NAMESPACE_MIN_PRICE
-
 
 Minimum price per name for public namespaces (0.001 ETH).
 
@@ -804,12 +680,7 @@ Minimum price per name for public namespaces (0.001 ETH).
 uint256 PUBLIC_NAMESPACE_MIN_PRICE
 ```
 
-
-
-
-
 ### PRIVATE_NAMESPACE_MIN_PRICE
-
 
 Minimum price per name for private namespaces (0.005 ETH = 5x public minimum).
 
@@ -817,23 +688,13 @@ Minimum price per name for private namespaces (0.005 ETH = 5x public minimum).
 uint256 PRIVATE_NAMESPACE_MIN_PRICE
 ```
 
-
-
-
-
 ### DETH
-
 
 Address of the DETH contract used to burn ETH and credit the recipient.
 
 ```solidity
 address DETH
 ```
-
-
-
-
-
 
 ## Types
 
@@ -847,13 +708,7 @@ struct NamespaceData {
   bool isPrivate;
 ```
 
-
-
-
 _Data structure to store namespace metadata._
-
-
-
 
 ### Name
 
@@ -863,13 +718,7 @@ struct Name {
   string namespace;
 ```
 
-
-
-
 _Data structure to store a name (label, namespace) associated with an address._
-
-
-
 
 ### RegisterNameAuth
 
@@ -880,12 +729,5 @@ struct RegisterNameAuth {
   string namespace;
 ```
 
-
-
-
 _Argument for `registerNameWithAuthorization` function (EIP-712 based)._
-
-
-
-
 

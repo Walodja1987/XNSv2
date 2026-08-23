@@ -8,11 +8,22 @@ interface IXNS {
         string namespace;
     }
 
-    event NameRegistered(string indexed label, string indexed namespace, address indexed owner);
-    event NamespaceRegistered(string indexed namespace, uint256 pricePerName, address indexed owner, bool isPrivate);
+    event NameRegistered(bytes32 indexed nameHash, string label, string namespace, address indexed owner);
+    event NamespaceRegistered(
+        bytes32 indexed namespaceHash,
+        string namespace,
+        uint256 pricePerName,
+        address indexed owner,
+        bool isPrivate
+    );
     event FeesClaimed(address indexed recipient, uint256 amount);
-    event NamespaceOwnerTransferStarted(string indexed namespace, address indexed oldOwner, address indexed newOwner);
-    event NamespaceOwnerTransferAccepted(string indexed namespace, address indexed newOwner);
+    event NamespaceOwnerTransferStarted(
+        bytes32 indexed namespaceHash,
+        string namespace,
+        address indexed oldOwner,
+        address indexed newOwner
+    );
+    event NamespaceOwnerTransferAccepted(bytes32 indexed namespaceHash, string namespace, address indexed newOwner);
 
     function registerName(string calldata label, string calldata namespace) external payable;
     function registerNameWithAuthorization(RegisterNameAuth calldata registerNameAuth, bytes calldata signature) external payable;

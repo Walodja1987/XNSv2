@@ -21,7 +21,7 @@
  *
  * NOTE:
  * - Only the contract OWNER can call this function
- * - Only works during the onboarding period (1 year after contract deployment)
+ * - Only works during the onboarding period
  * - No fees are charged for onboarding registrations
  * - The creator address will be set as the namespace creator (can be different from OWNER)
  */

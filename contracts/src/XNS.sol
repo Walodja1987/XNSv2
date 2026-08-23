@@ -47,8 +47,8 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 ///   - Only the namespace owner can register names (via `registerNameWithAuthorization`
 ///     or `batchRegisterNameWithAuthorization`).
 ///   - Namespace owners do not receive fees; all fees go to the XNS contract owner.
-/// - During the first year after XNS contract deployment, the contract owner can register
-///   namespaces for others at no cost.
+/// - During the onboarding period (182 days after XNSv2 contract deployment, 1 year after v1 deployment),
+///   the contract owner can register namespaces for others at no cost.
 ///
 /// ### Name Registration
 /// - Users can register names in public namespaces after the 7-day exclusivity period using `registerName`.
@@ -136,7 +136,7 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
     /// `registerPrivateNamespaceFor` to bootstrap namespaces for participants at no cost. After this period, all
     /// namespace registrations (including by the owner) require standard fees via `registerPublicNamespace` or
     /// `registerPrivateNamespace`.
-    uint256 public constant ONBOARDING_PERIOD = 365 days;
+    uint256 public constant ONBOARDING_PERIOD = 182 days;
 
     /// @notice Unit price step (0.001 ETH).
     uint256 public constant PRICE_STEP = 0.001 ether;
@@ -155,20 +155,31 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
     // -------------------------------------------------------------------------
 
     /// @dev Emitted in name registration functions.
-    event NameRegistered(string indexed label, string indexed namespace, address indexed owner);
+    event NameRegistered(bytes32 indexed nameHash, string label, string namespace, address indexed owner);
 
     /// @dev Emitted in namespace registration functions.
-    event NamespaceRegistered(string indexed namespace, uint256 pricePerName, address indexed owner, bool isPrivate);
+    event NamespaceRegistered(
+        bytes32 indexed namespaceHash,
+        string namespace,
+        uint256 pricePerName,
+        address indexed owner,
+        bool isPrivate
+    );
 
     /// @dev Emitted in fee claiming functions.
     event FeesClaimed(address indexed recipient, uint256 amount);
 
     /// @dev Emitted when a namespace owner starts a transfer to a new namespace owner (address that shall receive the nsOwnerFee).
     /// When `newOwner` is `address(0)`, this indicates cancellation of a pending transfer.
-    event NamespaceOwnerTransferStarted(string indexed namespace, address indexed oldOwner, address indexed newOwner);
+    event NamespaceOwnerTransferStarted(
+        bytes32 indexed namespaceHash,
+        string namespace,
+        address indexed oldOwner,
+        address indexed newOwner
+    );
 
     /// @dev Emitted when a pending namespace owner accepts the transfer.
-    event NamespaceOwnerTransferAccepted(string indexed namespace, address indexed newOwner);
+    event NamespaceOwnerTransferAccepted(bytes32 indexed namespaceHash, string namespace, address indexed newOwner);
 
     // -------------------------------------------------------------------------
     // Constructor
@@ -231,7 +242,7 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
         _nameHashToAddress[key] = msg.sender;
         _addressToName[msg.sender] = Name({label: label, namespace: namespace});
 
-        emit NameRegistered(label, namespace, msg.sender);
+        emit NameRegistered(key, label, namespace, msg.sender);
 
         // Process payment: burn 80%, credit fees, and refund excess.
         _processETHPayment(ns.pricePerName, ns.owner);
@@ -307,7 +318,7 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
             namespace: registerNameAuth.namespace
         });
 
-        emit NameRegistered(registerNameAuth.label, registerNameAuth.namespace, registerNameAuth.recipient);
+        emit NameRegistered(key, registerNameAuth.label, registerNameAuth.namespace, registerNameAuth.recipient);
 
         // Process payment: burn 80%, credit fees, and refund excess.
         address nsOwnerFeeRecipient = ns.isPrivate ? owner() : ns.owner;
@@ -385,7 +396,7 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
                 namespace: auth.namespace
             });
 
-            emit NameRegistered(auth.label, auth.namespace, auth.recipient);
+            emit NameRegistered(key, auth.label, auth.namespace, auth.recipient);
             successful++;
         }
 
@@ -417,7 +428,7 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
     /// - `pricePerName` must be >= 0.001 ETH and a multiple of 0.001 ETH (0.001, 0.002, 0.003, etc.).
     ///
     /// **Note:**
-    /// - During the onboarding period (1 year following contract deployment), the contract owner can
+    /// - During the onboarding period (182 days following contract deployment), the contract owner can
     ///   register namespaces for free (via `registerPublicNamespaceFor`) to foster adoption.
     /// - For the avoidance of doubt, anyone can register a new namespace during the onboarding period
     ///   by paying the standard 50 ETH registration fee.
@@ -442,7 +453,7 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
     /// - `pricePerName` must be >= 0.005 ETH and a multiple of 0.001 ETH (0.005, 0.006, 0.007, etc.).
     ///
     /// **Note:**
-    /// - During the onboarding period (1 year following contract deployment), the contract owner can
+    /// - During the onboarding period (182 days following contract deployment), the contract owner can
     ///   register namespaces for free (via `registerPrivateNamespaceFor`) to foster adoption.
     /// - For the avoidance of doubt, anyone can register a new namespace during the onboarding period
     ///   by paying the standard 10 ETH registration fee.
@@ -458,12 +469,12 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
     }
 
     /// @notice Contract owner-only function to register a public namespace for another address during the onboarding period.
-    /// This function allows the contract owner to register namespaces for free during the first year to
+    /// This function allows the contract owner to register namespaces for free during the onboarding period to
     /// foster adoption. No ETH is processed (function is non-payable) and no fees are charged.
     ///
     /// **Requirements:**
     /// - `msg.sender` must be the contract owner.
-    /// - Must be called during the onboarding period (first year after contract deployment).
+    /// - Must be called during the onboarding period.
     /// - `nsOwner` must not be the zero address.
     /// - No ETH should be sent (function is non-payable).
     /// - All validation requirements from `registerPublicNamespace` apply.
@@ -481,12 +492,12 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
     }
 
     /// @notice Contract owner-only function to register a private namespace for another address during the onboarding period.
-    /// This function allows the contract owner to register namespaces for free during the first year to
+    /// This function allows the contract owner to register namespaces for free during the onboarding period to
     /// foster adoption. No ETH is processed (function is non-payable) and no fees are charged.
     ///
     /// **Requirements:**
     /// - `msg.sender` must be the contract owner.
-    /// - Must be called during the onboarding period (first year after contract deployment).
+    /// - Must be called during the onboarding period.
     /// - `nsOwner` must not be the zero address.
     /// - No ETH should be sent (function is non-payable).
     /// - All validation requirements from `registerPrivateNamespace` apply.
@@ -534,7 +545,7 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
             isPrivate: isPrivate
         });
 
-        emit NamespaceRegistered(namespace, pricePerName, owner, isPrivate);
+        emit NamespaceRegistered(nsHash, namespace, pricePerName, owner, isPrivate);
     }
 
     /// @notice Function to claim accumulated fees for `msg.sender` and send to `recipient`.
@@ -593,7 +604,7 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
         require(msg.sender == ns.owner, "XNS: not namespace owner");
 
         _pendingNamespaceOwner[nsHash] = newOwner;
-        emit NamespaceOwnerTransferStarted(namespace, ns.owner, newOwner);
+        emit NamespaceOwnerTransferStarted(nsHash, namespace, ns.owner, newOwner);
     }
 
     /// @notice Accept a pending namespace ownership transfer.
@@ -617,7 +628,7 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
         ns.owner = pending;
         delete _pendingNamespaceOwner[nsHash];
 
-        emit NamespaceOwnerTransferAccepted(namespace, pending);
+        emit NamespaceOwnerTransferAccepted(nsHash, namespace, pending);
     }
 
     // =========================================================================

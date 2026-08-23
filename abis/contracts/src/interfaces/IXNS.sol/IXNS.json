@@ -1,9 +1,9 @@
 [
   "event FeesClaimed(address indexed,uint256)",
-  "event NameRegistered(string indexed,string indexed,address indexed)",
-  "event NamespaceOwnerTransferAccepted(string indexed,address indexed)",
-  "event NamespaceOwnerTransferStarted(string indexed,address indexed,address indexed)",
-  "event NamespaceRegistered(string indexed,uint256,address indexed,bool)",
+  "event NameRegistered(bytes32 indexed,string,string,address indexed)",
+  "event NamespaceOwnerTransferAccepted(bytes32 indexed,string,address indexed)",
+  "event NamespaceOwnerTransferStarted(bytes32 indexed,string,address indexed,address indexed)",
+  "event NamespaceRegistered(bytes32 indexed,string,uint256,address indexed,bool)",
   "function acceptNamespaceOwnership(string)",
   "function batchRegisterNameWithAuthorization(tuple(address,string,string)[],bytes[]) payable returns (uint256)",
   "function claimFees(address)",
