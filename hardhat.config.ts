@@ -1688,8 +1688,8 @@ const config: HardhatUserConfig = {
     outputDir: "./docs",
     templates: "./docgen-templates", // Path to your custom templates directory
     pages: (item, file, config) => {
-      // Only include XNS contract
-      if (item.nodeType === "ContractDefinition" && item.name !== "XNS") {
+      // Only include XNSv2 contract
+      if (item.nodeType === "ContractDefinition" && item.name !== "XNSv2") {
         return undefined;
       }
 
@@ -1705,7 +1705,7 @@ const config: HardhatUserConfig = {
       ) {
         return undefined;
       }
-      // Include XNS contract and its functions
+      // Include XNSv2 contract and its functions
       return "API" + config.pageExtension;
     },
   },

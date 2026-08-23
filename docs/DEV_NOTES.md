@@ -113,7 +113,7 @@ The contract uses `require` statements with descriptive error messages for error
 
 ### Interface Organization
 
-`XNS.sol` intentionally does not inherit from the `IXNS.sol` interface to keep all struct definitions grouped together within the implementation contract to make it easier to read. If `XNS.sol` inherited from the interface, the `RegisterNameAuth` struct definition would need to reside in `IXNS.sol` while all the other structs would remain in `XNS.sol`. This separation would scatter data structures between files, making the code harder to read. 
+`XNSv2.sol` intentionally does not inherit from the `IXNSv2.sol` interface to keep all struct definitions grouped together within the implementation contract to make it easier to read. If `XNS.sol` inherited from the interface, the `RegisterNameAuth` struct definition would need to reside in `IXNSv2.sol` while all the other structs would remain in `XNSv2.sol`. This separation would scatter data structures between files, making the code harder to read. 
 
 ### Assembly
 

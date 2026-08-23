@@ -4,12 +4,12 @@
  */
 
 import { ethers } from "hardhat";
-import { XNS } from "../../typechain-types";
+import { XNSv2 } from "../../typechain-types";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 
 /**
  * Signs a RegisterNameAuth struct using EIP-712 for use in registerNameWithAuthorization
- * @param xns The XNS contract instance
+ * @param xns The XNSv2 contract instance
  * @param signer The signer that will authorize the registration
  * @param recipient The address that will receive the name (must match signer for EOA, or be the contract for EIP-1271)
  * @param label The label part of the name
@@ -17,7 +17,7 @@ import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
  * @returns The EIP-712 signature
  */
 export async function signRegisterNameAuth(
-  xns: XNS,
+  xns: XNSv2,
   signer: SignerWithAddress,
   recipient: string,
   label: string,
@@ -25,7 +25,7 @@ export async function signRegisterNameAuth(
 ): Promise<string> {
   const chainId = (await ethers.provider.getNetwork()).chainId;
   const domain = {
-    name: "XNS",
+    name: "XNSv2",
     version: "1",
     chainId: Number(chainId),
     verifyingContract: await xns.getAddress(),

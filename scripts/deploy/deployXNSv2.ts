@@ -1,8 +1,8 @@
 /**
- * Deploy XNS Contract and Register Namespace Tiers
+ * Deploy XNSv2 Contract and Register Namespace Tiers
  *
  * DEPLOYMENT COMMAND (using Sepolia as an example):
- * `npx hardhat run scripts/deploy/deployXNS.ts --network sepolia`
+ * `npx hardhat run scripts/deploy/deployXNSv2.ts --network sepolia`
  *
  * REQUIRED SETUP:
  * Before first deployment, set these environment variables using hardhat-vars:
@@ -92,8 +92,8 @@ export default async function main(hre: HardhatRuntimeEnvironment) {
   );
 
   // Deploy XNS
-  const XNS = await hre.ethers.getContractFactory("XNS");
-  const xns = await XNS.deploy(ownerAddress);
+  const XNSv2Factory = await hre.ethers.getContractFactory("XNSv2");
+  const xns = await XNSv2Factory.deploy(ownerAddress);
   await xns.waitForDeployment();
 
   const contractAddress = await xns.getAddress();

@@ -1,13 +1,13 @@
 import { expect } from "chai";
 import { ethers } from "hardhat";
 import { loadFixture, time, impersonateAccount } from "@nomicfoundation/hardhat-network-helpers";
-import { XNS, DETH } from "../typechain-types";
+import { XNSv2, DETH } from "../typechain-types";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 
-describe("XNS", function () {
+describe("XNSv2", function () {
   // Types
   interface SetupOutput {
-    xns: XNS;
+    xns: XNSv2;
     owner: SignerWithAddress;
     user1: SignerWithAddress;
     user2: SignerWithAddress;
@@ -22,7 +22,7 @@ describe("XNS", function () {
 
   // Helper function to sign RegisterNameAuth for EIP-712
   async function signRegisterNameAuth(
-    xns: XNS,
+    xns: XNSv2,
     signer: SignerWithAddress,
     recipient: string,
     label: string,
@@ -30,7 +30,7 @@ describe("XNS", function () {
   ): Promise<string> {
     const chainId = (await ethers.provider.getNetwork()).chainId;
     const domain = {
-      name: "XNS",
+      name: "XNSv2",
       version: "1",
       chainId: Number(chainId),
       verifyingContract: await xns.getAddress(),
@@ -69,7 +69,7 @@ describe("XNS", function () {
     // Get the DETH contract instance at the hardcoded address
     const deth = await ethers.getContractAt("DETH", DETH_ADDRESS);
 
-    const xns = await ethers.deployContract("XNS", [owner.address]);
+    const xns = await ethers.deployContract("XNSv2", [owner.address]);
     const deploymentTx = xns.deploymentTransaction();
     await xns.waitForDeployment();
     const deploymentReceipt = await deploymentTx!.wait();
@@ -162,10 +162,10 @@ describe("XNS", function () {
         // Note: Ownable constructor checks first and reverts with OwnableInvalidOwner custom error
         // before our require statement is reached
         // ---------
-        const XNSFactory = await ethers.getContractFactory("XNS");
+        const XNSv2Factory = await ethers.getContractFactory("XNSv2");
         await expect(
-            XNSFactory.deploy(ethers.ZeroAddress)
-        ).to.be.revertedWithCustomError(XNSFactory, "OwnableInvalidOwner");
+            XNSv2Factory.deploy(ethers.ZeroAddress)
+        ).to.be.revertedWithCustomError(XNSv2Factory, "OwnableInvalidOwner");
     });
 
     
@@ -1996,7 +1996,7 @@ describe("XNS", function () {
         const revertingReceiverAddress = await revertingReceiver.getAddress();
 
         // Deploy a new XNS contract
-        const xnsWithRevertingUser = await ethers.deployContract("XNS", [s.owner.address]);
+        const xnsWithRevertingUser = await ethers.deployContract("XNSv2", [s.owner.address]);
         await xnsWithRevertingUser.waitForDeployment();
 
         const namespace = "rfnd";
@@ -3587,7 +3587,7 @@ describe("XNS", function () {
         const revertingReceiverAddress = await revertingReceiver.getAddress();
 
         // Deploy a new XNS contract
-        const xnsWithRevertingUser = await ethers.deployContract("XNS", [s.owner.address]);
+        const xnsWithRevertingUser = await ethers.deployContract("XNSv2", [s.owner.address]);
         await xnsWithRevertingUser.waitForDeployment();
 
         const namespace = "rfnd-private";
@@ -9247,7 +9247,7 @@ describe("XNS", function () {
 
   describe("Name migration (registerNameFor / endMigrationPeriod)", function () {
     let s: SetupOutput;
-    const getAddressByLabelAndNamespace = (xns: XNS) => xns.getFunction("getAddress(string,string)");
+    const getAddressByLabelAndNamespace = (xns: XNSv2) => xns.getFunction("getAddress(string,string)");
     const MIGRATION_PERIOD_SECONDS = 7 * 24 * 60 * 60; // private constant; documented as 7 days
 
     beforeEach(async () => {

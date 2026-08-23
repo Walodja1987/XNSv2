@@ -22,7 +22,7 @@
 
 import hre from "hardhat";
 import { formatEther, parseEther } from "ethers";
-import { XNS } from "../../typechain-types";
+import { XNSv2 } from "../../typechain-types";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { XNS_ADDRESS } from "../../constants/addresses";
 import { signRegisterNameAuth } from "../utils/signRegisterNameAuth";
@@ -86,7 +86,7 @@ async function main() {
   );
 
   // Get namespace info to determine price
-  const xns = await hre.ethers.getContractAt("XNS", contractAddress) as unknown as XNS;
+  const xns = await hre.ethers.getContractAt("XNSv2", contractAddress) as unknown as XNSv2;
   console.log(`Fetching namespace info for "${namespace}"...\n`);
   const getNamespaceInfo = xns.getFunction("getNamespaceInfo(string)");
   const [pricePerName, creator, createdAt] = await getNamespaceInfo(namespace);

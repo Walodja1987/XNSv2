@@ -22,7 +22,7 @@
 
 import hre from "hardhat";
 import { formatEther } from "ethers";
-import { XNS } from "../../typechain-types";
+import { XNSv2 } from "../../typechain-types";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { XNS_ADDRESS } from "../../constants/addresses";
 import { signRegisterNameAuth } from "../utils/signRegisterNameAuth";
@@ -62,7 +62,7 @@ async function main() {
   }
 
   // Get XNS contract instance
-  const xns = await hre.ethers.getContractAt("XNS", contractAddress) as unknown as XNS;
+  const xns = await hre.ethers.getContractAt("XNSv2", contractAddress) as unknown as XNSv2;
 
   // Get signers
   const signers = await hre.ethers.getSigners();

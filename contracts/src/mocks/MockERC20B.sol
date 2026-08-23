@@ -2,13 +2,13 @@
 pragma solidity 0.8.28;
 
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import {IXNS} from "../interfaces/IXNS.sol";
+import {IXNSv2} from "../interfaces/IXNSv2.sol";
 
 /// @title MockERC20B
 /// @notice Mock ERC20 contract that demonstrates how to assign a name to an ERC20 token contract via
 /// a separate `registerName` function.
 contract MockERC20B is ERC20 {
-    IXNS public immutable xns;
+    IXNSv2 public immutable xns;
 
     /// @notice Constructor
     /// @param _name Token name
@@ -21,7 +21,7 @@ contract MockERC20B is ERC20 {
         address _xns,
         uint256 _initialSupply
     ) ERC20(_name, _symbol) {
-        xns = IXNS(_xns);
+        xns = IXNSv2(_xns);
         _mint(msg.sender, _initialSupply);
     }
 
