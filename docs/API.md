@@ -304,8 +304,8 @@ function registerNameFor(address recipient, string label, string namespace) exte
 
 ### endMigrationPeriod
 
-Permanently ends the name migration window. One-way; cannot be re-opened.
-**Requirements:** `msg.sender` must be the contract owner; migration must not already have ended.
+Permanently ends the name migration window early. One-way; cannot be re-opened.
+**Requirements:** `msg.sender` must be the contract owner; migration must still be open (`isMigrationOpen()`).
 
 ```solidity
 function endMigrationPeriod() external

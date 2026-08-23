@@ -563,4 +563,5 @@ The following test cases are implemented in [XNS.test.ts](./XNS.test.ts).
 - Should revert `registerNameFor` if name already registered.
 - Should revert `endMigrationPeriod` when caller is not owner.
 - Should revert `endMigrationPeriod` if migration already ended.
+- Should revert `endMigrationPeriod` after migration period elapses.
 

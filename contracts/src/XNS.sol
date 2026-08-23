@@ -145,8 +145,8 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
     uint256 public constant ONBOARDING_PERIOD = 182 days;
 
     /// @dev Period after contract deployment during which the owner can mint existing v1 names onto v2 via
-    /// `registerNameFor` at no cost (no exclusivity check, no payment). Not exposed in the ABI; can be
-    // terminated early via `endMigrationPeriod()`. Use `isMigrationOpen()` to check whether the window is still open.
+    /// `registerNameFor` at no cost (no exclusivity check, no payment). Can be terminated early via
+    /// `endMigrationPeriod()`. Use `isMigrationOpen()` to check whether the window is still open.
     uint256 private constant _MIGRATION_PERIOD = 7 days;
 
     /// @notice Unit price step (0.001 ETH).
@@ -556,11 +556,11 @@ contract XNS is EIP712, Ownable2Step, ReentrancyGuard {
         emit NameRegistered(key, label, namespace, recipient);
     }
 
-    /// @notice Permanently ends the name migration window. One-way; cannot be re-opened.
-    /// **Requirements:** `msg.sender` must be the contract owner; migration must not already have ended.
+    /// @notice Permanently ends the name migration window early. One-way; cannot be re-opened.
+    /// **Requirements:** `msg.sender` must be the contract owner; migration must still be open (`isMigrationOpen()`).
     function endMigrationPeriod() external {
         require(msg.sender == owner(), "XNS: not contract owner");
-        require(!_migrationEnded, "XNS: migration ended");
+        require(isMigrationOpen(), "XNS: migration ended");
         _migrationEnded = true;
         emit MigrationPeriodEnded();
     }

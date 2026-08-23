@@ -9356,6 +9356,15 @@ describe("XNS", function () {
         "XNS: migration ended"
       );
     });
+
+    it("Should revert endMigrationPeriod after migration period elapses", async () => {
+      await time.increase(MIGRATION_PERIOD_SECONDS + 1);
+      expect(await s.xns.isMigrationOpen()).to.equal(false);
+
+      await expect(s.xns.connect(s.owner).endMigrationPeriod()).to.be.revertedWith(
+        "XNS: migration ended"
+      );
+    });
   });
 
 
