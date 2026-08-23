@@ -180,7 +180,7 @@
     "@nomicfoundation/hardhat-network-helpers": "^1.0.12",
     "@nomicfoundation/hardhat-verify": "^2.0.11",
     "@nomicfoundation/ignition-core": "^0.15.6",
-    "@openzeppelin/contracts": "^5.5.0",
+    "@openzeppelin/contracts": "^5.6.1",
     "@tenderly/hardhat-tenderly": "^2.4.0",
     "@truffle/dashboard-hardhat-plugin": "^0.2.15",
     "@typechain/ethers-v6": "^0.5.1",
