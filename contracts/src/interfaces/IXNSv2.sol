@@ -59,4 +59,5 @@ interface IXNSv2 {
     // function acceptOwnership() external;
     // function owner() external view returns (address);
     // function pendingOwner() external view returns (address);
+    // renounceOwnership is overridden to always revert ("XNS: renounce disabled").
 }

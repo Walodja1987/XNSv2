@@ -36,6 +36,8 @@ The following test cases are implemented in [XNS.test.ts](./XNS.test.ts).
 
 #### Functionality
 
+- Should revert when owner calls `renounceOwnership`.
+- Should revert with `XNS: renounce disabled` when non-owner calls `renounceOwnership`.
 - Should allow owner to transfer ownership.
 - Should allow new owner to use owner-only functions.
 - Should not migrate pending fees (old owner can still claim).

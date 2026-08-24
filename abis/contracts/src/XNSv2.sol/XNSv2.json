@@ -49,7 +49,7 @@
   "function registerPrivateNamespaceFor(address,string,uint256)",
   "function registerPublicNamespace(string,uint256) payable",
   "function registerPublicNamespaceFor(address,string,uint256)",
-  "function renounceOwnership()",
+  "function renounceOwnership() pure",
   "function transferNamespaceOwnership(string,address)",
   "function transferOwnership(address)"
 ]

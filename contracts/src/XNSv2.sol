@@ -204,7 +204,13 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
 
         DEPLOYED_AT = uint64(block.timestamp);
     }
-    
+
+    /// @dev Disables OpenZeppelin's `renounceOwnership` so the protocol cannot trap protocol fees.
+    /// Unconditional revert for all callers; `onlyOwner` would only obscure that this action is permanently disabled.
+    function renounceOwnership() public pure override {
+        revert("XNS: renounce disabled");
+    }
+
     // =========================================================================
     // STATE-MODIFYING FUNCTIONS
     // =========================================================================

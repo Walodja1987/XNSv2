@@ -53,6 +53,15 @@ Label and namespace string requirements:
 
 ## Functions
 
+### renounceOwnership
+
+```solidity
+function renounceOwnership() public pure
+```
+
+_Disables OpenZeppelin's `renounceOwnership` so the protocol cannot trap protocol fees.
+Unconditional revert for all callers; `onlyOwner` would only obscure that this action is permanently disabled._
+
 ### registerName
 
 Function to register a paid name for `msg.sender`.

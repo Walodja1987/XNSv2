@@ -182,6 +182,19 @@ describe("XNSv2", function () {
     // Functionality
     // -----------------------
 
+    it("Should revert when owner calls renounceOwnership", async () => {
+      await expect(s.xns.connect(s.owner).renounceOwnership()).to.be.revertedWith(
+        "XNS: renounce disabled"
+      );
+      expect(await s.xns.owner()).to.equal(s.owner.address);
+    });
+
+    it("Should revert with renounce disabled when non-owner calls renounceOwnership", async () => {
+      await expect(s.xns.connect(s.user1).renounceOwnership()).to.be.revertedWith(
+        "XNS: renounce disabled"
+      );
+    });
+
     it("Should allow owner to transfer ownership", async () => {
         // ---------
         // Arrange: Get a new owner address

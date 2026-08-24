@@ -531,6 +531,9 @@ The XNS contract uses OpenZeppelin's `Ownable2Step` for 2-step contract ownershi
 - The current owner can cancel a pending transfer by calling `transferOwnership(address(0))`.
 - Alternatively, the owner can overwrite a pending transfer by calling `transferOwnership(differentAddress)` again.
 
+**Renounce disabled:**
+`renounceOwnership()` is overridden and always reverts (`XNS: renounce disabled`) so the protocol cannot become permanently ownerless.
+
 **Fee Accounting:**
 Ownership transfers do **not** migrate already-accrued `_pendingFees`. Any fees accumulated before `acceptOwnership()` remain claimable by the previous owner address. Only fees accrued **after** acceptance are credited to the new owner address.
 
