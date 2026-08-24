@@ -6,6 +6,7 @@ interface IXNSv2 {
         address recipient;
         string label;
         string namespace;
+        uint256 validUntil;
     }
 
     event NameRegistered(bytes32 indexed nameHash, string label, string namespace, address indexed owner);

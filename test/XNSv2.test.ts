@@ -17,7 +17,7 @@ describe("XNSv2", function () {
     eip1271Wallet: any; // EIP-1271 contract wallet instance
     deploymentBlockTimestamp: number;
     deploymentReceipt: any;
-    signRegisterNameAuth: (signer: SignerWithAddress, recipient: string, label: string, namespace: string) => Promise<string>;
+    signRegisterNameAuth: (signer: SignerWithAddress, recipient: string, label: string, namespace: string, validUntil?: bigint) => Promise<string>;
   }
 
   // Helper function to sign RegisterNameAuth for EIP-712
@@ -26,7 +26,8 @@ describe("XNSv2", function () {
     signer: SignerWithAddress,
     recipient: string,
     label: string,
-    namespace: string
+    namespace: string,
+    validUntil: bigint = ethers.MaxUint256
   ): Promise<string> {
     const chainId = (await ethers.provider.getNetwork()).chainId;
     const domain = {
@@ -41,6 +42,7 @@ describe("XNSv2", function () {
         { name: "recipient", type: "address" },
         { name: "label", type: "string" },
         { name: "namespace", type: "string" },
+        { name: "validUntil", type: "uint256" },
       ],
     };
 
@@ -48,6 +50,7 @@ describe("XNSv2", function () {
       recipient: recipient,
       label: label,
       namespace: namespace,
+      validUntil: validUntil,
     };
 
     return await signer.signTypedData(domain, types, value);
@@ -97,8 +100,8 @@ describe("XNSv2", function () {
       eip1271Wallet,
       deploymentBlockTimestamp: deploymentBlock!.timestamp,
       deploymentReceipt: deploymentReceipt!,
-      signRegisterNameAuth: (signer: SignerWithAddress, recipient: string, label: string, namespace: string) =>
-        signRegisterNameAuth(xns, signer, recipient, label, namespace),
+      signRegisterNameAuth: (signer: SignerWithAddress, recipient: string, label: string, namespace: string, validUntil?: bigint) =>
+        signRegisterNameAuth(xns, signer, recipient, label, namespace, validUntil),
     };
   }
 
@@ -675,6 +678,7 @@ describe("XNSv2", function () {
                     recipient: publicRecipient,
                     label: publicLabel,
                     namespace: publicNamespace,
+                    validUntil: ethers.MaxUint256,
                 },
                 publicSignature,
                 { value: publicPricePerName }
@@ -701,6 +705,7 @@ describe("XNSv2", function () {
                     recipient: privateRecipient,
                     label: privateLabel,
                     namespace: privateNamespace,
+                    validUntil: ethers.MaxUint256,
                 },
                 privateSignature,
                 { value: privatePricePerName }
@@ -725,6 +730,7 @@ describe("XNSv2", function () {
                     recipient: oldOwnerPublicRecipient,
                     label: oldOwnerPublicLabel,
                     namespace: publicNamespace,
+                    validUntil: ethers.MaxUint256,
                 },
                 oldOwnerPublicSignature,
                 { value: publicPricePerName }
@@ -742,6 +748,7 @@ describe("XNSv2", function () {
                     recipient: oldOwnerPrivateRecipient,
                     label: oldOwnerPrivateLabel,
                     namespace: privateNamespace,
+                    validUntil: ethers.MaxUint256,
                 },
                 oldOwnerPrivateSignature,
                 { value: privatePricePerName }
@@ -4340,6 +4347,7 @@ describe("XNSv2", function () {
                 recipient: recipient,
                 label: label,
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             },
             signature,
             { value: pricePerName }
@@ -4414,6 +4422,7 @@ describe("XNSv2", function () {
                 recipient: recipient,
                 label: label,
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             },
             signature,
             { value: pricePerName }
@@ -4497,6 +4506,7 @@ describe("XNSv2", function () {
                 recipient: recipient,
                 label: label,
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             },
             signature,
             { value: pricePerName }
@@ -4557,6 +4567,7 @@ describe("XNSv2", function () {
                 recipient: recipient,
                 label: label,
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             },
             signature,
             { value: pricePerName }
@@ -4622,6 +4633,7 @@ describe("XNSv2", function () {
                 recipient: recipient,
                 label: label,
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             },
             signature,
             { value: pricePerName }
@@ -4687,6 +4699,7 @@ describe("XNSv2", function () {
                 recipient: recipient,
                 label: label,
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             },
             signature,
             { value: pricePerName }
@@ -4752,6 +4765,7 @@ describe("XNSv2", function () {
                 recipient: recipient,
                 label: label,
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             },
             signature,
             { value: pricePerName }
@@ -4811,6 +4825,7 @@ describe("XNSv2", function () {
                 recipient: recipient,
                 label: label,
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             },
             signature,
             { value: pricePerName }
@@ -4862,6 +4877,7 @@ describe("XNSv2", function () {
                 recipient: walletAddress,
                 label: label,
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             },
             signature,
             { value: pricePerName }
@@ -4922,6 +4938,7 @@ describe("XNSv2", function () {
                 recipient: recipient,
                 label: label,
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             },
             signature,
             { value: totalPayment }
@@ -4980,6 +4997,7 @@ describe("XNSv2", function () {
                     recipient: recipient,
                     label: label,
                     namespace: namespace,
+                    validUntil: ethers.MaxUint256,
                 },
                 signature,
                 { value: pricePerName }
@@ -5018,6 +5036,7 @@ describe("XNSv2", function () {
                     recipient: recipient,
                     label: invalidLabel,
                     namespace: namespace,
+                    validUntil: ethers.MaxUint256,
                 },
                 signature,
                 { value: pricePerName }
@@ -5050,6 +5069,7 @@ describe("XNSv2", function () {
                     recipient: recipient,
                     label: label,
                     namespace: namespace,
+                    validUntil: ethers.MaxUint256,
                 },
                 signature,
                 { value: pricePerName }
@@ -5082,6 +5102,7 @@ describe("XNSv2", function () {
                     recipient: recipient,
                     label: label,
                     namespace: namespace,
+                    validUntil: ethers.MaxUint256,
                 },
                 signature,
                 { value: pricePerName }
@@ -5115,6 +5136,7 @@ describe("XNSv2", function () {
                     recipient: recipient,
                     label: label,
                     namespace: namespace,
+                    validUntil: ethers.MaxUint256,
                 },
                 signature,
                 { value: insufficientPayment }
@@ -5153,6 +5175,7 @@ describe("XNSv2", function () {
                     recipient: recipient,
                     label: label,
                     namespace: namespace,
+                    validUntil: ethers.MaxUint256,
                 },
                 signature,
                 { value: pricePerName }
@@ -5195,6 +5218,7 @@ describe("XNSv2", function () {
                     recipient: recipient,
                     label: label,
                     namespace: namespace,
+                    validUntil: ethers.MaxUint256,
                 },
                 signature,
                 { value: pricePerName }
@@ -5236,6 +5260,7 @@ describe("XNSv2", function () {
                     recipient: recipient,
                     label: secondLabel,
                     namespace: namespace,
+                    validUntil: ethers.MaxUint256,
                 },
                 signature,
                 { value: pricePerName }
@@ -5282,6 +5307,7 @@ describe("XNSv2", function () {
                     recipient: secondRecipient,
                     label: label,
                     namespace: namespace,
+                    validUntil: ethers.MaxUint256,
                 },
                 signature,
                 { value: pricePerName }
@@ -5314,6 +5340,7 @@ describe("XNSv2", function () {
                     recipient: recipient,
                     label: label,
                     namespace: namespace,
+                    validUntil: ethers.MaxUint256,
                 },
                 invalidSignature,
                 { value: pricePerName }
@@ -5346,13 +5373,41 @@ describe("XNSv2", function () {
                     recipient: recipient,
                     label: label,
                     namespace: namespace,
+                    validUntil: ethers.MaxUint256,
                 },
                 signature,
                 { value: pricePerName }
             )
         ).to.be.revertedWith("XNS: bad authorization");
     });
-    
+
+    it("Should revert with `XNS: authorization expired` when validUntil is in the past", async () => {
+        const namespace = "xns";
+        const label = "expired";
+        const recipient = s.user2.address;
+        const pricePerName = ethers.parseEther("0.001");
+
+        const exclusivityPeriod = await s.xns.EXCLUSIVITY_PERIOD();
+        await time.increase(Number(exclusivityPeriod) + 86400);
+
+        const latest = await time.latest();
+        const validUntil = BigInt(latest - 1);
+        const signature = await s.signRegisterNameAuth(s.user2, recipient, label, namespace, validUntil);
+
+        await expect(
+            s.xns.connect(s.user1).registerNameWithAuthorization(
+                {
+                    recipient: recipient,
+                    label: label,
+                    namespace: namespace,
+                    validUntil: validUntil,
+                },
+                signature,
+                { value: pricePerName }
+            )
+        ).to.be.revertedWith("XNS: authorization expired");
+    });
+
   });
 
   describe("batchRegisterNameWithAuthorization", function () {
@@ -5410,6 +5465,7 @@ describe("XNSv2", function () {
                 recipient: reg.recipient,
                 label: reg.label,
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             });
             signatures.push(signature);
         }
@@ -5528,6 +5584,7 @@ describe("XNSv2", function () {
                 recipient: reg.recipient,
                 label: reg.label,
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             });
             signatures.push(signature);
         }
@@ -5645,6 +5702,7 @@ describe("XNSv2", function () {
                 recipient: reg.recipient,
                 label: reg.label,
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             });
             signatures.push(signature);
         }
@@ -5761,6 +5819,7 @@ describe("XNSv2", function () {
                 recipient: reg.recipient,
                 label: reg.label,
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             });
             signatures.push(signature);
         }
@@ -5865,6 +5924,7 @@ describe("XNSv2", function () {
                 recipient: reg.recipient,
                 label: reg.label,
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             });
             signatures.push(signature);
         }
@@ -5936,6 +5996,7 @@ describe("XNSv2", function () {
                 recipient: s.user2.address,
                 label: "existing",
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             },
             await s.signRegisterNameAuth(s.user2, s.user2.address, "existing", namespace),
             { value: pricePerName }
@@ -5974,6 +6035,7 @@ describe("XNSv2", function () {
                 recipient: reg.recipient,
                 label: reg.label,
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             });
             signatures.push(signature);
         }
@@ -6064,6 +6126,7 @@ describe("XNSv2", function () {
                 recipient: reg.recipient,
                 label: reg.label,
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             });
             signatures.push(signature);
         }
@@ -6153,6 +6216,7 @@ describe("XNSv2", function () {
                 recipient: reg.recipient,
                 label: reg.label,
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             });
             signatures.push(signature);
         }
@@ -6243,6 +6307,7 @@ describe("XNSv2", function () {
                 recipient: reg.recipient,
                 label: reg.label,
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             });
             signatures.push(signature);
         }
@@ -6335,6 +6400,7 @@ describe("XNSv2", function () {
                 recipient: reg.recipient,
                 label: reg.label,
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             });
             signatures.push(signature);
         }
@@ -6416,6 +6482,7 @@ describe("XNSv2", function () {
                 recipient: reg.recipient,
                 label: reg.label,
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             });
             signatures.push(signature);
         }
@@ -6512,6 +6579,7 @@ describe("XNSv2", function () {
                 recipient: reg.recipient,
                 label: reg.label,
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             });
             signatures.push(signature);
         }
@@ -6583,11 +6651,13 @@ describe("XNSv2", function () {
                 recipient: s.user1.address,
                 label: "alice",
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             },
             {
                 recipient: s.user2.address,
                 label: "bob",
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             },
         ];
 
@@ -6647,6 +6717,7 @@ describe("XNSv2", function () {
                 recipient: s.user1.address,
                 label: "alice",
                 namespace: nonExistentNamespace,
+                validUntil: ethers.MaxUint256,
             },
         ];
 
@@ -6711,6 +6782,7 @@ describe("XNSv2", function () {
                 recipient: reg.recipient,
                 label: reg.label,
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             });
             signatures.push(signature);
         }
@@ -6779,6 +6851,7 @@ describe("XNSv2", function () {
                 recipient: reg.recipient,
                 label: reg.label,
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             });
             signatures.push(signature);
         }
@@ -6850,6 +6923,7 @@ describe("XNSv2", function () {
                 recipient: reg.recipient,
                 label: reg.label,
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             });
             signatures.push(signature);
         }
@@ -6893,11 +6967,13 @@ describe("XNSv2", function () {
                 recipient: s.user1.address,
                 label: "alice",
                 namespace: namespace1, // First namespace
+                validUntil: ethers.MaxUint256,
             },
             {
                 recipient: s.user2.address,
                 label: "bob",
                 namespace: namespace2, // Different namespace - will cause mismatch
+                validUntil: ethers.MaxUint256,
             },
         ];
 
@@ -6940,11 +7016,13 @@ describe("XNSv2", function () {
                 recipient: s.user1.address,
                 label: "alice", // Valid label
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             },
             {
                 recipient: s.user2.address,
                 label: "InvalidLabel", // Invalid label (contains uppercase)
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             },
         ];
 
@@ -6987,11 +7065,13 @@ describe("XNSv2", function () {
                 recipient: s.user1.address,
                 label: "alice", // Valid recipient
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             },
             {
                 recipient: ethers.ZeroAddress, // Zero address - will cause revert
                 label: "bob",
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             },
         ];
 
@@ -7034,11 +7114,13 @@ describe("XNSv2", function () {
                 recipient: s.user1.address,
                 label: "alice",
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             },
             {
                 recipient: s.user2.address,
                 label: "bob",
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             },
         ];
 
@@ -7081,11 +7163,13 @@ describe("XNSv2", function () {
                 recipient: s.user1.address,
                 label: "alice",
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             },
             {
                 recipient: s.user2.address, // Recipient is user2
                 label: "bob",
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             },
         ];
 
@@ -7139,11 +7223,13 @@ describe("XNSv2", function () {
                 recipient: s.user1.address, // Already has a name
                 label: "charlie",
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             },
             {
                 recipient: s.user2.address, // Already has a name
                 label: "david",
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             },
         ];
 
@@ -7326,6 +7412,7 @@ describe("XNSv2", function () {
                     recipient: reg.recipient,
                     label: reg.label,
                     namespace: namespace,
+                    validUntil: ethers.MaxUint256,
                 },
                 signature,
                 { value: pricePerName }
@@ -7416,6 +7503,7 @@ describe("XNSv2", function () {
                     recipient: reg.recipient,
                     label: reg.label,
                     namespace: namespace,
+                    validUntil: ethers.MaxUint256,
                 },
                 signature,
                 { value: pricePerName }
@@ -7881,6 +7969,7 @@ describe("XNSv2", function () {
                     recipient: reg.recipient,
                     label: reg.label,
                     namespace: namespace,
+                    validUntil: ethers.MaxUint256,
                 },
                 signature,
                 { value: pricePerName }
@@ -8045,6 +8134,7 @@ describe("XNSv2", function () {
                 recipient: recipient,
                 label: label,
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             },
             signature
         );
@@ -8074,6 +8164,7 @@ describe("XNSv2", function () {
                 recipient: walletAddress,
                 label: label,
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             },
             signature
         );
@@ -8103,6 +8194,7 @@ describe("XNSv2", function () {
                 recipient: recipient,
                 label: label,
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             },
             invalidSignature
         );
@@ -8133,6 +8225,7 @@ describe("XNSv2", function () {
                 recipient: wrongRecipient, // Wrong recipient
                 label: label,
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             },
             signature
         );
@@ -8163,6 +8256,7 @@ describe("XNSv2", function () {
                 recipient: recipient,
                 label: wrongLabel, // Wrong label
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             },
             signature
         );
@@ -8193,6 +8287,7 @@ describe("XNSv2", function () {
                 recipient: recipient,
                 label: label,
                 namespace: wrongNamespace, // Wrong namespace
+                validUntil: ethers.MaxUint256,
             },
             signature
         );
@@ -8306,6 +8401,7 @@ describe("XNSv2", function () {
                 recipient: recipient,
                 label: label,
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             },
             signature,
             { value: pricePerName }
@@ -8380,6 +8476,7 @@ describe("XNSv2", function () {
                 recipient: recipient,
                 label: label,
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             },
             signature,
             { value: pricePerName }
@@ -8755,6 +8852,7 @@ describe("XNSv2", function () {
                 recipient: recipient,
                 label: label,
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             },
             signature,
             { value: pricePerName }
@@ -8800,6 +8898,7 @@ describe("XNSv2", function () {
                 recipient: recipient,
                 label: label,
                 namespace: namespace,
+                validUntil: ethers.MaxUint256,
             },
             signature,
             { value: pricePerName }
@@ -8892,6 +8991,7 @@ describe("XNSv2", function () {
               recipient: recipient,
               label: label,
               namespace: namespace,
+              validUntil: ethers.MaxUint256,
           },
           signature,
           { value: pricePerName }

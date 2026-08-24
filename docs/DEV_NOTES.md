@@ -150,7 +150,7 @@ While it cannot be technically prevented that someone deploys a similar contract
 * The `batchRegisterNameWithAuthorization` function intentionally only supports batching within the same namespace, as this matches the most common use case—especially after a new namespace is registered.
 * **Error Handling in Batch Registration:** The `batchRegisterNameWithAuthorization` function uses a hybrid error-handling approach:
   * **Input validation errors** (invalid label, zero recipient, namespace mismatch) cause the entire batch to revert
-  * **Invalid signatures** revert only for otherwise eligible registrations; signatures are not checked for entries skipped because the recipient already has a name or the name is already registered
+  * **Invalid signatures / expired authorizations** revert only for otherwise eligible registrations; they are not checked for entries skipped because the recipient already has a name or the name is already registered
   * **State-based conflicts** (recipient already has a name, name already registered) are skipped to allow processing to continue
 * This design provides griefing resistance: if someone front-runs the transaction and registers a name for one recipient, that specific registration is skipped while other valid registrations proceed. The function only charges for successful registrations.
 * **Event emission**: Events are emitted for every successfully processed item. If the returned count doesn't match the expected number, users can inspect events to identify which registrations were skipped.
@@ -187,29 +187,23 @@ Block reorganizations (reorgs) pose a risk to name registrations. If a registrat
 
 The contract intentionally does not implement protocol-level reorg mitigation, as such mechanisms would force additional complexity on users and interfaces, such as requiring multiple confirmation or registration steps.
 
-## EIP-712 Signature Revocation
+## EIP-712 Authorization Expiry
 
-The `RegisterNameAuth` struct does not include a `nonce` or `deadline` field, and there is no on-chain mechanism to revoke authorization signatures. As a result, signatures can, in theory, be used indefinitely after they are issued. The following explains the reasoning behind this design decision.
+`RegisterNameAuth` includes a `validUntil` unix timestamp. Sponsored registration reverts with `XNS: authorization expired` when `block.timestamp > validUntil`. There is no on-chain nonce or revocation list.
 
-**Why `nonce` is not needed:**
+**Why `validUntil`:**
 
-Replay attacks are not considered a problem because:
+Authorizations are otherwise reusable until the recipient already has a name. Without an expiry, a signed `label@namespace` could be executed long after the recipient changed their mind (including for a namespace that did not exist when they signed). A deadline bounds that consent window. Recipients who want a long-lived authorization can still set `validUntil` far in the future.
 
-- **No financial loss for recipients**: If someone sponsors a registration for a recipient's name using an old signature, the recipient incurs no cost—the sponsor pays the registration fee. The worst that can happen is that the recipient address might get a name assigned that they no longer want.
-- **One-name-per-address limit**: Each address can have exactly one name. Once a name is registered to an address, any subsequent authorization attempts for different names will fail due to the existing name check. Incrementing a nonce on successful use would not provide meaningful protection beyond what already exists.
+**Why `nonce` / explicit revocation is not implemented:**
 
-**Why `deadline` is not needed:**
-
-A `deadline` parameter does not any value. A user who is confident about receiving a specific name via the authorization flow may choose a `deadline` far in the future. If they later change their mind, the `deadline` provides no practical way to cancel the authorization. As a result, adding a `deadline` parameter does not materially reduce risk and adds protocol complexity without clear benefit.
-
-**Why explicit on-chain revocation is not implemented:**
-
-An explicit on-chain invalidation function that accepts the `RegisterNameAuth` struct and signature, and invalidates the authorization if the recovered signer matches the recipient, was considered but rejected. This approach does not work for contract recipients (e.g., ERC20 token contracts) that rely on the EIP-1271 authorization flow (e.g., name registrations within private namespaces) but do not expose an execution mechanism to call the invalidation function. In such cases, revocation would be impossible, leading to inconsistent behavior across recipient types.
+Replay across successful registrations is already limited by the one-name-per-address rule. An on-chain invalidation path was considered but rejected for EIP-1271 / non-executable contract recipients (e.g. many ERC-20s), which cannot call a revoke function — leading to inconsistent revocation across recipient types.
 
 **Mitigation:**
 
-- Recipients should only sign authorizations they are comfortable with executing at any point in the future.
-- Recipients can register a name themselves to prevent any sponsored registration attempts.
+- Prefer short `validUntil` values for one-off sponsor flows.
+- Recipients should only sign authorizations they are comfortable with executing until `validUntil`.
+- Recipients can register a name themselves to prevent any further sponsored registration attempts.
 
 ## EIP-7702 Compatibility
 

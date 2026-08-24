@@ -120,6 +120,7 @@ Supports both EOA signatures and EIP-1271 contract wallet signatures.
   or the contract owner for private namespaces.
 - Recipient must not already have a name.
 - Name must not already be registered.
+- `block.timestamp` must be <= `registerNameAuth.validUntil`.
 - Signature must be valid EIP-712 signature from `recipient` (EOA) or EIP-1271 contract signature.
 
 **Fee Distribution:**
@@ -162,7 +163,7 @@ a name or the name is already registered (griefing protection). Skipped items ar
 - For private namespaces: 20% is credited to the contract owner.
 
 **Note:** Input validation errors (invalid label, zero recipient, namespace mismatch) cause the entire batch
-to revert. Invalid signatures revert only for otherwise eligible registrations — signatures are not evaluated
+to revert. Expired authorizations and invalid signatures revert only for otherwise eligible registrations — they are not evaluated
 for entries skipped because the recipient already has a name or the name is already registered. Those
 state-based conflicts are skipped (batch does not revert) for griefing protection.
 
@@ -781,7 +782,8 @@ struct RegisterNameAuth {
   address recipient;
   string label;
   string namespace;
+  uint256 validUntil;
 ```
 
-_Argument for `registerNameWithAuthorization` function (EIP-712 based)._
+_Argument for `registerNameWithAuthorization` function (EIP-712 based). `validUntil` is a unix timestamp; the authorization is invalid after that time._
 

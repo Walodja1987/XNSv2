@@ -25,7 +25,7 @@ import hre from "hardhat";
 import { XNSv2 } from "../../typechain-types";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { XNS_ADDRESS } from "../../constants/addresses";
-import { signRegisterNameAuth } from "../utils/signRegisterNameAuth";
+import { signRegisterNameAuth, DEFAULT_AUTH_VALID_UNTIL } from "../utils/signRegisterNameAuth";
 
 // Colour codes for terminal prints
 const RESET = "\x1b[0m";
@@ -104,7 +104,8 @@ async function main() {
   console.log(`RegisterNameAuth struct values:`);
   console.log(`  recipient: ${GREEN}${recipient}${RESET}`);
   console.log(`  label: ${GREEN}"${label}"${RESET}`);
-  console.log(`  namespace: ${GREEN}"${namespace}"${RESET}\n`);
+  console.log(`  namespace: ${GREEN}"${namespace}"${RESET}`);
+  console.log(`  validUntil: ${GREEN}${DEFAULT_AUTH_VALID_UNTIL}${RESET}\n`);
 
   console.log(`Full name: ${GREEN}${fullName}${RESET}\n`);
 
@@ -122,6 +123,7 @@ async function main() {
   console.log(`     recipient: ${GREEN}${recipient}${RESET}`);
   console.log(`     label: ${GREEN}"${label}"${RESET}`);
   console.log(`     namespace: ${GREEN}"${namespace}"${RESET}`);
+  console.log(`     validUntil: ${GREEN}${DEFAULT_AUTH_VALID_UNTIL}${RESET}`);
   console.log(`   signature: ${GREEN}${signature}${RESET}\n`);
   console.log(`5. Send the transaction with the required ETH value (check namespace price)\n`);
 
@@ -137,6 +139,7 @@ async function main() {
       recipient: recipient,
       label: label,
       namespace: namespace,
+      validUntil: DEFAULT_AUTH_VALID_UNTIL,
     },
     signature: signature,
     fullName: fullName,
