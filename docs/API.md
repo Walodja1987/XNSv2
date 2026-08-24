@@ -53,6 +53,15 @@ Label and namespace string requirements:
 
 ## Functions
 
+### renounceOwnership
+
+```solidity
+function renounceOwnership() public pure
+```
+
+_Disables OpenZeppelin's `renounceOwnership` so the protocol cannot trap protocol fees.
+Unconditional revert for all callers; `onlyOwner` would only obscure that this action is permanently disabled._
+
 ### registerName
 
 Function to register a paid name for `msg.sender`.
@@ -111,6 +120,7 @@ Supports both EOA signatures and EIP-1271 contract wallet signatures.
   or the contract owner for private namespaces.
 - Recipient must not already have a name.
 - Name must not already be registered.
+- `block.timestamp` must be <= `registerNameAuth.validUntil`.
 - Signature must be valid EIP-712 signature from `recipient` (EOA) or EIP-1271 contract signature.
 
 **Fee Distribution:**
@@ -152,9 +162,10 @@ a name or the name is already registered (griefing protection). Skipped items ar
 - For public namespaces: 10% is credited to the namespace owner and 10% to the contract owner.
 - For private namespaces: 20% is credited to the contract owner.
 
-**Note:** Input validation errors (invalid label, zero recipient, namespace mismatch, invalid signature)
-cause the entire batch to revert. Errors that could occur due to front-running the batch tx (recipient already
-has a name, or name already registered) are skipped (i.e. batch tx does not revert) to provide griefing protection.
+**Note:** Input validation errors (invalid label, zero recipient, namespace mismatch) cause the entire batch
+to revert. Expired authorizations and invalid signatures revert only for otherwise eligible registrations — they are not evaluated
+for entries skipped because the recipient already has a name or the name is already registered. Those
+state-based conflicts are skipped (batch does not revert) for griefing protection.
 
 ```solidity
 function batchRegisterNameWithAuthorization(struct XNSv2.RegisterNameAuth[] registerNameAuths, bytes[] signatures) external payable returns (uint256 successfulCount)
@@ -662,14 +673,6 @@ event NamespaceOwnerTransferAccepted(bytes32 namespaceHash, string namespace, ad
 
 _Emitted when a pending namespace owner accepts the transfer._
 
-### MigrationPeriodEnded
-
-```solidity
-event MigrationPeriodEnded()
-```
-
-_Emitted when the owner permanently ends the name migration window early (or explicitly closes it)._
-
 ## State Variables
 
 ### DEPLOYED_AT
@@ -779,7 +782,8 @@ struct RegisterNameAuth {
   address recipient;
   string label;
   string namespace;
+  uint256 validUntil;
 ```
 
-_Argument for `registerNameWithAuthorization` function (EIP-712 based)._
+_Argument for `registerNameWithAuthorization` function (EIP-712 based). `validUntil` is a unix timestamp; the authorization is invalid after that time._
 

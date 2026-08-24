@@ -25,7 +25,7 @@ import { formatEther } from "ethers";
 import { XNSv2 } from "../../typechain-types";
 import { SignerWithAddress } from "@nomicfoundation/hardhat-ethers/signers";
 import { XNS_ADDRESS } from "../../constants/addresses";
-import { signRegisterNameAuth } from "../utils/signRegisterNameAuth";
+import { signRegisterNameAuth, DEFAULT_AUTH_VALID_UNTIL } from "../utils/signRegisterNameAuth";
 
 // Colour codes for terminal prints
 const RESET = "\x1b[0m";
@@ -128,6 +128,7 @@ async function main() {
     recipient: recipient.address,
     label: label,
     namespace: namespace,
+    validUntil: DEFAULT_AUTH_VALID_UNTIL,
   };
 
   // Register name with authorization

@@ -6,6 +6,7 @@ interface IXNSv2 {
         address recipient;
         string label;
         string namespace;
+        uint256 validUntil;
     }
 
     event NameRegistered(bytes32 indexed nameHash, string label, string namespace, address indexed owner);
@@ -24,7 +25,6 @@ interface IXNSv2 {
         address indexed newOwner
     );
     event NamespaceOwnerTransferAccepted(bytes32 indexed namespaceHash, string namespace, address indexed newOwner);
-    event MigrationPeriodEnded();
 
     function registerName(string calldata label, string calldata namespace) external payable;
     function registerNameWithAuthorization(RegisterNameAuth calldata registerNameAuth, bytes calldata signature) external payable;
@@ -60,4 +60,5 @@ interface IXNSv2 {
     // function acceptOwnership() external;
     // function owner() external view returns (address);
     // function pendingOwner() external view returns (address);
+    // renounceOwnership is overridden to always revert ("XNS: renounce disabled").
 }

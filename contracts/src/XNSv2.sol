@@ -87,10 +87,12 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
     }
 
     /// @dev Argument for `registerNameWithAuthorization` function (EIP-712 based).
+    /// `validUntil` is a unix timestamp; the authorization is invalid after that time.
     struct RegisterNameAuth {
         address recipient;
         string label;
         string namespace;
+        uint256 validUntil;
     }
 
     // -------------------------------------------------------------------------
@@ -118,7 +120,7 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
 
     // EIP-712 struct type hash for `RegisterNameAuth`.
     bytes32 private constant _REGISTER_NAME_AUTH_TYPEHASH =
-        keccak256("RegisterNameAuth(address recipient,string label,string namespace)");
+        keccak256("RegisterNameAuth(address recipient,string label,string namespace,uint256 validUntil)");
 
 
     // -------------------------------------------------------------------------
@@ -192,9 +194,6 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
     /// @dev Emitted when a pending namespace owner accepts the transfer.
     event NamespaceOwnerTransferAccepted(bytes32 indexed namespaceHash, string namespace, address indexed newOwner);
 
-    /// @dev Emitted when the owner permanently ends the name migration window early (or explicitly closes it).
-    event MigrationPeriodEnded();
-
     // -------------------------------------------------------------------------
     // Constructor
     // -------------------------------------------------------------------------
@@ -207,7 +206,13 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
 
         DEPLOYED_AT = uint64(block.timestamp);
     }
-    
+
+    /// @dev Disables OpenZeppelin's `renounceOwnership` so the protocol cannot trap protocol fees.
+    /// Unconditional revert for all callers; `onlyOwner` would only obscure that this action is permanently disabled.
+    function renounceOwnership() public pure override {
+        revert("XNS: renounce disabled");
+    }
+
     // =========================================================================
     // STATE-MODIFYING FUNCTIONS
     // =========================================================================
@@ -282,6 +287,7 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
     ///   or the contract owner for private namespaces.
     /// - Recipient must not already have a name.
     /// - Name must not already be registered.
+    /// - `block.timestamp` must be <= `registerNameAuth.validUntil`.
     /// - Signature must be valid EIP-712 signature from `recipient` (EOA) or EIP-1271 contract signature.
     ///
     /// **Fee Distribution:**
@@ -295,7 +301,7 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
     /// - Due to block reorganization risks, users should wait for a few blocks and verify
     /// the name resolves correctly using the `getAddress` or `getName` function before sharing it publicly.
     /// 
-    /// @param registerNameAuth The argument for the function, including recipient, label, and namespace.
+    /// @param registerNameAuth The argument for the function, including recipient, label, namespace, and validUntil.
     /// @param signature EIP-712 signature by `recipient` (EOA) or EIP-1271 contract signature.
     function registerNameWithAuthorization(
         RegisterNameAuth calldata registerNameAuth,
@@ -324,6 +330,7 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
         bytes32 key = keccak256(abi.encodePacked(registerNameAuth.label, "@", registerNameAuth.namespace));
         require(_nameHashToAddress[key] == address(0), "XNS: name already registered");
 
+        require(block.timestamp <= registerNameAuth.validUntil, "XNS: authorization expired");
         require(_isValidSignature(registerNameAuth, signature), "XNS: bad authorization");
 
         _nameHashToAddress[key] = registerNameAuth.recipient;
@@ -354,11 +361,12 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
     /// - For public namespaces: 10% is credited to the namespace owner and 10% to the contract owner.
     /// - For private namespaces: 20% is credited to the contract owner.
     ///
-    /// **Note:** Input validation errors (invalid label, zero recipient, namespace mismatch, invalid signature)
-    /// cause the entire batch to revert. Errors that could occur due to front-running the batch tx (recipient already
-    /// has a name, or name already registered) are skipped (i.e. batch tx does not revert) to provide griefing protection.
+    /// **Note:** Input validation errors (invalid label, zero recipient, namespace mismatch) cause the entire batch
+    /// to revert. Expired authorizations and invalid signatures revert only for otherwise eligible registrations —
+    /// they are not evaluated for entries skipped because the recipient already has a name or the name is already
+    /// registered. Those state-based conflicts are skipped (batch does not revert) for griefing protection.
     ///
-    /// @param registerNameAuths Array of `RegisterNameAuth` structs, each including recipient, label, and namespace.
+    /// @param registerNameAuths Array of `RegisterNameAuth` structs, each including recipient, label, namespace, and validUntil.
     /// @param signatures Array of EIP-712 signatures by recipients (EOA) or EIP-1271 contract signatures.
     /// @return successfulCount The number of names successfully registered.
     function batchRegisterNameWithAuthorization(
@@ -402,6 +410,7 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
                 continue;
             }
 
+            require(block.timestamp <= auth.validUntil, "XNS: authorization expired");
             require(_isValidSignature(auth, signatures[i]), "XNS: bad authorization");
 
             _nameHashToAddress[key] = auth.recipient;
@@ -562,7 +571,6 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
         require(msg.sender == owner(), "XNS: not contract owner");
         require(isMigrationOpen(), "XNS: migration ended");
         _migrationEnded = true;
-        emit MigrationPeriodEnded();
     }
 
     /// @dev Helper function to register a namespace (used in namespace registration functions):
@@ -805,7 +813,7 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
 
     /// @notice Function to check if a signature is valid (be used in `registerNameWithAuthorization`
     /// or `batchRegisterNameWithAuthorization`).
-    /// @param registerNameAuth The struct containing recipient, label, and namespace.
+    /// @param registerNameAuth The struct containing recipient, label, namespace, and validUntil.
     /// @param signature The signature to check.
     /// @return isValid True if the signature is valid, false otherwise.
     function isValidSignature(
@@ -897,7 +905,7 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
 
 
     /// @dev Internal function to verify EIP-712 signature for `RegisterNameAuth`.
-    /// @param registerNameAuth The struct containing recipient, label, and namespace.
+    /// @param registerNameAuth The struct containing recipient, label, namespace, and validUntil.
     /// @param signature The signature to verify.
     /// @return isValid True if the signature is valid, false otherwise.
     function _isValidSignature(
@@ -909,7 +917,7 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
     }
 
     /// @dev Helper function to return hash of `RegisterNameAuth` details.
-    /// @param registerNameAuth The struct containing recipient, label, and namespace.
+    /// @param registerNameAuth The struct containing recipient, label, namespace, and validUntil.
     /// @return registerNameAuthHash The keccak256 hash of the `RegisterNameAuth` struct.
     function _getRegisterNameAuthHash(
         RegisterNameAuth calldata registerNameAuth
@@ -919,7 +927,8 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
                 _REGISTER_NAME_AUTH_TYPEHASH,
                 registerNameAuth.recipient,
                 keccak256(bytes(registerNameAuth.label)),
-                keccak256(bytes(registerNameAuth.namespace))
+                keccak256(bytes(registerNameAuth.namespace)),
+                registerNameAuth.validUntil
             )
         );
     }
