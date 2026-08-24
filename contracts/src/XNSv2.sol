@@ -357,9 +357,10 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
     /// - For public namespaces: 10% is credited to the namespace owner and 10% to the contract owner.
     /// - For private namespaces: 20% is credited to the contract owner.
     ///
-    /// **Note:** Input validation errors (invalid label, zero recipient, namespace mismatch, invalid signature)
-    /// cause the entire batch to revert. Errors that could occur due to front-running the batch tx (recipient already
-    /// has a name, or name already registered) are skipped (i.e. batch tx does not revert) to provide griefing protection.
+    /// **Note:** Input validation errors (invalid label, zero recipient, namespace mismatch) cause the entire batch
+    /// to revert. Invalid signatures revert only for otherwise eligible registrations — signatures are not evaluated
+    /// for entries skipped because the recipient already has a name or the name is already registered. Those
+    /// state-based conflicts are skipped (batch does not revert) for griefing protection.
     ///
     /// @param registerNameAuths Array of `RegisterNameAuth` structs, each including recipient, label, and namespace.
     /// @param signatures Array of EIP-712 signatures by recipients (EOA) or EIP-1271 contract signatures.

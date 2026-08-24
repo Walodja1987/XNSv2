@@ -149,7 +149,8 @@ While it cannot be technically prevented that someone deploys a similar contract
 
 * The `batchRegisterNameWithAuthorization` function intentionally only supports batching within the same namespace, as this matches the most common use case—especially after a new namespace is registered.
 * **Error Handling in Batch Registration:** The `batchRegisterNameWithAuthorization` function uses a hybrid error-handling approach:
-  * **Input validation errors** (invalid label, zero recipient, namespace mismatch, invalid signature) cause the entire batch to revert
+  * **Input validation errors** (invalid label, zero recipient, namespace mismatch) cause the entire batch to revert
+  * **Invalid signatures** revert only for otherwise eligible registrations; signatures are not checked for entries skipped because the recipient already has a name or the name is already registered
   * **State-based conflicts** (recipient already has a name, name already registered) are skipped to allow processing to continue
 * This design provides griefing resistance: if someone front-runs the transaction and registers a name for one recipient, that specific registration is skipped while other valid registrations proceed. The function only charges for successful registrations.
 * **Event emission**: Events are emitted for every successfully processed item. If the returned count doesn't match the expected number, users can inspect events to identify which registrations were skipped.

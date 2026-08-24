@@ -161,9 +161,10 @@ a name or the name is already registered (griefing protection). Skipped items ar
 - For public namespaces: 10% is credited to the namespace owner and 10% to the contract owner.
 - For private namespaces: 20% is credited to the contract owner.
 
-**Note:** Input validation errors (invalid label, zero recipient, namespace mismatch, invalid signature)
-cause the entire batch to revert. Errors that could occur due to front-running the batch tx (recipient already
-has a name, or name already registered) are skipped (i.e. batch tx does not revert) to provide griefing protection.
+**Note:** Input validation errors (invalid label, zero recipient, namespace mismatch) cause the entire batch
+to revert. Invalid signatures revert only for otherwise eligible registrations — signatures are not evaluated
+for entries skipped because the recipient already has a name or the name is already registered. Those
+state-based conflicts are skipped (batch does not revert) for griefing protection.
 
 ```solidity
 function batchRegisterNameWithAuthorization(struct XNSv2.RegisterNameAuth[] registerNameAuths, bytes[] signatures) external payable returns (uint256 successfulCount)
