@@ -24,7 +24,6 @@ interface IXNSv2 {
         address indexed newOwner
     );
     event NamespaceOwnerTransferAccepted(bytes32 indexed namespaceHash, string namespace, address indexed newOwner);
-    event MigrationPeriodEnded();
 
     function registerName(string calldata label, string calldata namespace) external payable;
     function registerNameWithAuthorization(RegisterNameAuth calldata registerNameAuth, bytes calldata signature) external payable;

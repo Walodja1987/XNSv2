@@ -7,7 +7,6 @@
   "error StringTooLong(string)",
   "event EIP712DomainChanged()",
   "event FeesClaimed(address indexed,uint256)",
-  "event MigrationPeriodEnded()",
   "event NameRegistered(bytes32 indexed,string,string,address indexed)",
   "event NamespaceOwnerTransferAccepted(bytes32 indexed,string,address indexed)",
   "event NamespaceOwnerTransferStarted(bytes32 indexed,string,address indexed,address indexed)",

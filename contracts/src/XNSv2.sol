@@ -192,9 +192,6 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
     /// @dev Emitted when a pending namespace owner accepts the transfer.
     event NamespaceOwnerTransferAccepted(bytes32 indexed namespaceHash, string namespace, address indexed newOwner);
 
-    /// @dev Emitted when the owner permanently ends the name migration window early (or explicitly closes it).
-    event MigrationPeriodEnded();
-
     // -------------------------------------------------------------------------
     // Constructor
     // -------------------------------------------------------------------------
@@ -562,7 +559,6 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
         require(msg.sender == owner(), "XNS: not contract owner");
         require(isMigrationOpen(), "XNS: migration ended");
         _migrationEnded = true;
-        emit MigrationPeriodEnded();
     }
 
     /// @dev Helper function to register a namespace (used in namespace registration functions):

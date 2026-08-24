@@ -662,14 +662,6 @@ event NamespaceOwnerTransferAccepted(bytes32 namespaceHash, string namespace, ad
 
 _Emitted when a pending namespace owner accepts the transfer._
 
-### MigrationPeriodEnded
-
-```solidity
-event MigrationPeriodEnded()
-```
-
-_Emitted when the owner permanently ends the name migration window early (or explicitly closes it)._
-
 ## State Variables
 
 ### DEPLOYED_AT

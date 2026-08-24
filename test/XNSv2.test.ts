@@ -9283,8 +9283,7 @@ describe("XNSv2", function () {
     });
 
     it("Should allow owner to end migration period early", async () => {
-      await expect(s.xns.connect(s.owner).endMigrationPeriod())
-        .to.emit(s.xns, "MigrationPeriodEnded");
+      await s.xns.connect(s.owner).endMigrationPeriod();
 
       expect(await s.xns.isMigrationOpen()).to.equal(false);
 
