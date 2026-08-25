@@ -1,0 +1,4 @@
+[
+  "constructor(address)",
+  "function getOwner() view returns (address)"
+]

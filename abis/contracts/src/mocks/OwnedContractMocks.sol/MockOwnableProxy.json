@@ -1,0 +1,5 @@
+[
+  "constructor(address)",
+  "function implementation() view returns (address)",
+  "function owner() view returns (address)"
+]
