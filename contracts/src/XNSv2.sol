@@ -326,8 +326,9 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
     /// - `recipient` must not be the zero address.
     /// - Namespace must exist.
     /// - `msg.value` must be >= the namespace's registered price (excess will be refunded).
-    /// - `msg.sender` must be the namespace owner for public namespaces during the exclusivity period
-    ///   or the contract owner for private namespaces.
+    /// - For private namespaces: `msg.sender` must be the namespace owner.
+    /// - For public namespaces during the exclusivity period: `msg.sender` must be the namespace owner.
+    ///   After exclusivity, anyone may sponsor.
     /// - Recipient must not already have a name.
     /// - Name must not already be registered.
     /// - `block.timestamp` must be <= `registerNameAuth.validUntil`.
