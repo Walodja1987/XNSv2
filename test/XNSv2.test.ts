@@ -4312,6 +4312,313 @@ describe("XNSv2", function () {
     
   });
 
+  describe("registerNameForOwnedContract", function () {
+    let s: SetupOutput;
+
+    beforeEach(async () => {
+      s = await loadFixture(setup);
+    });
+
+    async function pastExclusivity() {
+      const exclusivityPeriod = await s.xns.EXCLUSIVITY_PERIOD();
+      await time.increase(Number(exclusivityPeriod) + 86400);
+    }
+
+    // -----------------------
+    // Functionality
+    // -----------------------
+
+    it("Should register a name for contract when owner() returns caller", async () => {
+        const namespace = "xns";
+        const label = "owned-alice";
+        const pricePerName = ethers.parseEther("0.001");
+        await pastExclusivity();
+
+        const MockOwnableTarget = await ethers.getContractFactory("MockOwnableTarget");
+        const target = await MockOwnableTarget.deploy(s.user2.address);
+        await target.waitForDeployment();
+        const recipient = await target.getAddress();
+
+        await s.xns.connect(s.user2).registerNameForOwnedContract(recipient, label, namespace, { value: pricePerName });
+
+        const fullName = `${label}@${namespace}`;
+        const getAddressByLabelAndNamespace = s.xns.getFunction("getAddress(string,string)");
+        expect(await getAddressByLabelAndNamespace(label, namespace)).to.equal(recipient);
+
+        const getName = s.xns.getFunction("getName(address)");
+        expect(await getName(recipient)).to.equal(fullName);
+        expect(await getName(s.user2.address)).to.equal("");
+    });
+
+    it("Should register a name for contract when getOwner() returns caller", async () => {
+        const namespace = "xns";
+        const label = "owned-getowner";
+        const pricePerName = ethers.parseEther("0.001");
+        await pastExclusivity();
+
+        const MockGetOwnerTarget = await ethers.getContractFactory("MockGetOwnerTarget");
+        const target = await MockGetOwnerTarget.deploy(s.user2.address);
+        await target.waitForDeployment();
+        const recipient = await target.getAddress();
+
+        await s.xns.connect(s.user2).registerNameForOwnedContract(recipient, label, namespace, { value: pricePerName });
+
+        const getAddressByLabelAndNamespace = s.xns.getFunction("getAddress(string,string)");
+        expect(await getAddressByLabelAndNamespace(label, namespace)).to.equal(recipient);
+    });
+
+    it("Should register a name when owner() reverts but getOwner() returns caller", async () => {
+        const namespace = "xns";
+        const label = "owned-fallback";
+        const pricePerName = ethers.parseEther("0.001");
+        await pastExclusivity();
+
+        const MockOwnerRevertsTarget = await ethers.getContractFactory("MockOwnerRevertsTarget");
+        const target = await MockOwnerRevertsTarget.deploy(s.user2.address);
+        await target.waitForDeployment();
+        const recipient = await target.getAddress();
+
+        await s.xns.connect(s.user2).registerNameForOwnedContract(recipient, label, namespace, { value: pricePerName });
+
+        const getAddressByLabelAndNamespace = s.xns.getFunction("getAddress(string,string)");
+        expect(await getAddressByLabelAndNamespace(label, namespace)).to.equal(recipient);
+    });
+
+    it("Should register a name for proxy contract where owner() reads from implementation", async () => {
+        const namespace = "xns";
+        const label = "owned-proxy";
+        const pricePerName = ethers.parseEther("0.001");
+        await pastExclusivity();
+
+        const MockOwnableImplementation = await ethers.getContractFactory("MockOwnableImplementation");
+        const impl = await MockOwnableImplementation.deploy(s.user2.address);
+        await impl.waitForDeployment();
+
+        const MockOwnableProxy = await ethers.getContractFactory("MockOwnableProxy");
+        const proxy = await MockOwnableProxy.deploy(await impl.getAddress());
+        await proxy.waitForDeployment();
+        const recipient = await proxy.getAddress();
+
+        await s.xns.connect(s.user2).registerNameForOwnedContract(recipient, label, namespace, { value: pricePerName });
+
+        const getAddressByLabelAndNamespace = s.xns.getFunction("getAddress(string,string)");
+        expect(await getAddressByLabelAndNamespace(label, namespace)).to.equal(recipient);
+
+        const getName = s.xns.getFunction("getName(address)");
+        expect(await getName(recipient)).to.equal(`${label}@${namespace}`);
+        expect(await getName(s.user2.address)).to.equal("");
+    });
+
+    it("Should register in public namespace after exclusivity with correct getAddress and getName", async () => {
+        const namespace = "xns";
+        const label = "owned-post-excl";
+        const pricePerName = ethers.parseEther("0.001");
+        await pastExclusivity();
+
+        const MockOwnableTarget = await ethers.getContractFactory("MockOwnableTarget");
+        const target = await MockOwnableTarget.deploy(s.user2.address);
+        await target.waitForDeployment();
+        const recipient = await target.getAddress();
+        const fullName = `${label}@${namespace}`;
+
+        await s.xns.connect(s.user2).registerNameForOwnedContract(recipient, label, namespace, { value: pricePerName });
+
+        const getAddressByLabelAndNamespace = s.xns.getFunction("getAddress(string,string)");
+        const getAddressByFullName = s.xns.getFunction("getAddress(string)");
+        const getName = s.xns.getFunction("getName(address)");
+
+        expect(await getAddressByLabelAndNamespace(label, namespace)).to.equal(recipient);
+        expect(await getAddressByFullName(fullName)).to.equal(recipient);
+        expect(await getName(recipient)).to.equal(fullName);
+        expect(await getName(s.user2.address)).to.equal("");
+    });
+
+    it("Should process ETH payment identically to registerName (80% burn, 10% ns owner, 10% contract owner)", async () => {
+        const namespace = "xns";
+        const label = "owned-fees";
+        const pricePerName = ethers.parseEther("0.001");
+        await pastExclusivity();
+
+        const MockOwnableTarget = await ethers.getContractFactory("MockOwnableTarget");
+        const target = await MockOwnableTarget.deploy(s.user2.address);
+        await target.waitForDeployment();
+        const recipient = await target.getAddress();
+
+        const initialDETHBurned = await s.deth.burned(s.user2.address);
+        const initialNsOwnerFees = await s.xns.getPendingFees(s.user1.address);
+        const initialOwnerFees = await s.xns.getPendingFees(s.owner.address);
+
+        const expectedBurnAmount = (pricePerName * 80n) / 100n;
+        const expectedNsOwnerFee = (pricePerName * 10n) / 100n;
+        const expectedOwnerFee = pricePerName - expectedBurnAmount - expectedNsOwnerFee;
+
+        await s.xns.connect(s.user2).registerNameForOwnedContract(recipient, label, namespace, { value: pricePerName });
+
+        expect((await s.deth.burned(s.user2.address)) - initialDETHBurned).to.equal(expectedBurnAmount);
+        expect((await s.xns.getPendingFees(s.user1.address)) - initialNsOwnerFees).to.equal(expectedNsOwnerFee);
+        expect((await s.xns.getPendingFees(s.owner.address)) - initialOwnerFees).to.equal(expectedOwnerFee);
+    });
+
+    it("Should refund excess payment when msg.value exceeds namespace price", async () => {
+        const namespace = "xns";
+        const label = "owned-refund";
+        const pricePerName = ethers.parseEther("0.001");
+        const excessPayment = ethers.parseEther("0.0005");
+        const totalPayment = pricePerName + excessPayment;
+        await pastExclusivity();
+
+        const MockOwnableTarget = await ethers.getContractFactory("MockOwnableTarget");
+        const target = await MockOwnableTarget.deploy(s.user2.address);
+        await target.waitForDeployment();
+        const recipient = await target.getAddress();
+
+        const balanceBefore = await ethers.provider.getBalance(s.user2.address);
+        const tx = await s.xns.connect(s.user2).registerNameForOwnedContract(recipient, label, namespace, { value: totalPayment });
+        const receipt = await tx.wait();
+        const gasCost = receipt!.gasUsed * (receipt!.gasPrice || tx.gasPrice || 0n);
+        const balanceAfter = await ethers.provider.getBalance(s.user2.address);
+
+        expect(balanceAfter).to.equal(balanceBefore - pricePerName - gasCost);
+    });
+
+    // -----------------------
+    // Reverts
+    // -----------------------
+
+    it("Should revert with `XNS: recipient not contract` when recipient is an EOA", async () => {
+        const namespace = "xns";
+        const label = "owned-eoa";
+        const pricePerName = ethers.parseEther("0.001");
+        await pastExclusivity();
+
+        await expect(
+            s.xns.connect(s.user2).registerNameForOwnedContract(s.user3.address, label, namespace, { value: pricePerName })
+        ).to.be.revertedWith("XNS: recipient not contract");
+    });
+
+    it("Should revert with `XNS: not authorized` when owner() returns another address", async () => {
+        const namespace = "xns";
+        const label = "owned-wrong";
+        const pricePerName = ethers.parseEther("0.001");
+        await pastExclusivity();
+
+        const MockOwnableTarget = await ethers.getContractFactory("MockOwnableTarget");
+        const target = await MockOwnableTarget.deploy(s.user3.address);
+        await target.waitForDeployment();
+        const recipient = await target.getAddress();
+
+        await expect(
+            s.xns.connect(s.user2).registerNameForOwnedContract(recipient, label, namespace, { value: pricePerName })
+        ).to.be.revertedWith("XNS: not authorized");
+    });
+
+    it("Should revert with `XNS: not authorized` when both owner() and getOwner() are absent", async () => {
+        const namespace = "xns";
+        const label = "owned-noowner";
+        const pricePerName = ethers.parseEther("0.001");
+        await pastExclusivity();
+
+        const MockNoOwnerTarget = await ethers.getContractFactory("MockNoOwnerTarget");
+        const target = await MockNoOwnerTarget.deploy();
+        await target.waitForDeployment();
+        const recipient = await target.getAddress();
+
+        await expect(
+            s.xns.connect(s.user2).registerNameForOwnedContract(recipient, label, namespace, { value: pricePerName })
+        ).to.be.revertedWith("XNS: not authorized");
+    });
+
+    it("Should revert with `XNS: not authorized` when owner() returns zero", async () => {
+        const namespace = "xns";
+        const label = "owned-zero";
+        const pricePerName = ethers.parseEther("0.001");
+        await pastExclusivity();
+
+        const MockOwnableTarget = await ethers.getContractFactory("MockOwnableTarget");
+        const target = await MockOwnableTarget.deploy(ethers.ZeroAddress);
+        await target.waitForDeployment();
+        const recipient = await target.getAddress();
+
+        await expect(
+            s.xns.connect(s.user2).registerNameForOwnedContract(recipient, label, namespace, { value: pricePerName })
+        ).to.be.revertedWith("XNS: not authorized");
+    });
+
+    it("Should revert with `XNS: only for public namespaces` in private namespace", async () => {
+        const namespace = "privowned";
+        const label = "owned-private";
+        const pricePerName = ethers.parseEther("0.005");
+        const privateNamespaceFee = await s.xns.PRIVATE_NAMESPACE_REGISTRATION_FEE();
+        await s.xns.connect(s.user1).registerPrivateNamespace(namespace, pricePerName, { value: privateNamespaceFee });
+        await pastExclusivity();
+
+        const MockOwnableTarget = await ethers.getContractFactory("MockOwnableTarget");
+        const target = await MockOwnableTarget.deploy(s.user2.address);
+        await target.waitForDeployment();
+        const recipient = await target.getAddress();
+
+        await expect(
+            s.xns.connect(s.user2).registerNameForOwnedContract(recipient, label, namespace, { value: pricePerName })
+        ).to.be.revertedWith("XNS: only for public namespaces");
+    });
+
+    it("Should revert with `XNS: in exclusivity period` during exclusivity", async () => {
+        const namespace = "xns";
+        const label = "owned-excl";
+        const pricePerName = ethers.parseEther("0.001");
+
+        const MockOwnableTarget = await ethers.getContractFactory("MockOwnableTarget");
+        const target = await MockOwnableTarget.deploy(s.user2.address);
+        await target.waitForDeployment();
+        const recipient = await target.getAddress();
+
+        await expect(
+            s.xns.connect(s.user2).registerNameForOwnedContract(recipient, label, namespace, { value: pricePerName })
+        ).to.be.revertedWith("XNS: in exclusivity period");
+    });
+
+    it("Should revert with `XNS: address already has a name` when recipient already has a name", async () => {
+        const namespace = "xns";
+        const firstLabel = "owned-first";
+        const secondLabel = "owned-second";
+        const pricePerName = ethers.parseEther("0.001");
+        await pastExclusivity();
+
+        const MockOwnableTarget = await ethers.getContractFactory("MockOwnableTarget");
+        const target = await MockOwnableTarget.deploy(s.user2.address);
+        await target.waitForDeployment();
+        const recipient = await target.getAddress();
+
+        await s.xns.connect(s.user2).registerNameForOwnedContract(recipient, firstLabel, namespace, { value: pricePerName });
+
+        await expect(
+            s.xns.connect(s.user2).registerNameForOwnedContract(recipient, secondLabel, namespace, { value: pricePerName })
+        ).to.be.revertedWith("XNS: address already has a name");
+    });
+
+    it("Should revert with `XNS: name already registered` when name is taken", async () => {
+        const namespace = "xns";
+        const label = "owned-dup";
+        const pricePerName = ethers.parseEther("0.001");
+        await pastExclusivity();
+
+        const MockOwnableTarget = await ethers.getContractFactory("MockOwnableTarget");
+        const target1 = await MockOwnableTarget.deploy(s.user2.address);
+        await target1.waitForDeployment();
+        const recipient1 = await target1.getAddress();
+
+        const target2 = await MockOwnableTarget.deploy(s.user2.address);
+        await target2.waitForDeployment();
+        const recipient2 = await target2.getAddress();
+
+        await s.xns.connect(s.user2).registerNameForOwnedContract(recipient1, label, namespace, { value: pricePerName });
+
+        await expect(
+            s.xns.connect(s.user2).registerNameForOwnedContract(recipient2, label, namespace, { value: pricePerName })
+        ).to.be.revertedWith("XNS: name already registered");
+    });
+  });
+
   describe("registerNameWithAuthorization", function () {
     let s: SetupOutput;
 
