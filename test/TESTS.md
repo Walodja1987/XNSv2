@@ -294,6 +294,31 @@ The following test cases are implemented in [XNS.test.ts](./XNS.test.ts).
 
 ---
 
+### registerNameForOwnedContract
+
+#### Functionality
+
+- Should register a name for contract when `owner()` returns caller.
+- Should register a name for contract when `getOwner()` returns caller.
+- Should register a name when `owner()` reverts but `getOwner()` returns caller.
+- Should register a name for proxy contract where `owner()` reads from implementation.
+- Should register in public namespace after exclusivity with correct `getAddress` and `getName` (caller does not receive the name).
+- Should process ETH payment identically to `registerName` (80% burn, 10% ns owner, 10% contract owner).
+- Should refund excess payment when `msg.value` exceeds namespace price.
+
+#### Reverts
+
+- Should revert with `XNS: recipient not contract` when recipient is an EOA.
+- Should revert with `XNS: not authorized` when `owner()` returns another address.
+- Should revert with `XNS: not authorized` when both `owner()` and `getOwner()` are absent.
+- Should revert with `XNS: not authorized` when `owner()` returns zero.
+- Should revert with `XNS: only for public namespaces` in private namespace.
+- Should revert with `XNS: in exclusivity period` during exclusivity.
+- Should revert with `XNS: address already has a name` when recipient already has a name.
+- Should revert with `XNS: name already registered` when name is taken.
+
+---
+
 ### registerNameWithAuthorization
 
 #### Functionality

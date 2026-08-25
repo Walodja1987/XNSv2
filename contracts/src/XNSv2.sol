@@ -2,6 +2,8 @@
 pragma solidity 0.8.28;
 
 import {IDETH} from "./interfaces/IDETH.sol";
+import {IOwnableContract} from "./interfaces/IOwnableContract.sol";
+import {IGetOwnerContract} from "./interfaces/IGetOwnerContract.sol";
 import {SignatureChecker} from "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import {Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
@@ -56,6 +58,8 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 /// - Users can register names in public namespaces after the 7-day exclusivity period using `registerName`.
 /// - Each address can own at most one name.
 /// - Registration fees vary by namespace.
+/// - Smart-contract owners can register a name directly for an owned contract in a public namespace after
+///   the exclusivity period using `registerNameForOwnedContract`.
 ///
 /// ### Authorized Name Registration
 /// - XNS features authorized name registration via EIP-712 signatures.
@@ -243,6 +247,45 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
     /// @param label The label part of the name to register.
     /// @param namespace The namespace part of the name to register.
     function registerName(string calldata label, string calldata namespace) external payable nonReentrant {
+        _registerName(msg.sender, label, namespace);
+    }
+
+    /// @notice Register a paid name for a smart contract controlled by `msg.sender`.
+    /// Authorization is checked via the recipient's `owner()` or, if that call fails, `getOwner()`.
+    /// If `owner()` succeeds, its return value alone is used (including `address(0)`); `getOwner()` is not tried.
+    /// This function is only available for public namespaces after the exclusivity period.
+    ///
+    /// The ownership check is performed exclusively against the contract deployed at `recipient` on Ethereum.
+    /// XNS does not verify ownership of contracts at the same address on other chains.
+    ///
+    /// **Requirements:**
+    /// - `recipient` must contain contract code.
+    /// - `recipient.owner()` must equal `msg.sender` when that call succeeds; otherwise `recipient.getOwner()`
+    ///   must equal `msg.sender` when that call succeeds.
+    /// - Otherwise, same requirements, fee distribution, and notes as `registerName` (name assigned to
+    ///   `recipient` instead of `msg.sender`).
+    ///
+    /// @param recipient The Ethereum smart contract that will receive the XNS name.
+    /// @param label The label part of the name.
+    /// @param namespace The namespace part of the name.
+    function registerNameForOwnedContract(
+        address recipient,
+        string calldata label,
+        string calldata namespace
+    ) external payable nonReentrant {
+        require(recipient.code.length > 0, "XNS: recipient not contract");
+        require(_isOwnerOf(recipient, msg.sender), "XNS: not authorized");
+
+        _registerName(recipient, label, namespace);
+    }
+
+    /// @dev Shared body for `registerName` and `registerNameForOwnedContract`: public namespace, post-exclusivity,
+    /// paid registration assigning `nameOwner` as the name holder.
+    function _registerName(
+        address nameOwner,
+        string calldata label,
+        string calldata namespace
+    ) private {
         require(_isValidLabelOrNamespace(label), "XNS: invalid label");
 
         NamespaceData memory ns = _namespaces[keccak256(bytes(namespace))];
@@ -253,15 +296,15 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
 
         require(block.timestamp > ns.createdAt + EXCLUSIVITY_PERIOD, "XNS: in exclusivity period");
 
-        require(bytes(_addressToName[msg.sender].label).length == 0, "XNS: address already has a name");
+        require(bytes(_addressToName[nameOwner].label).length == 0, "XNS: address already has a name");
 
         bytes32 key = keccak256(abi.encodePacked(label, "@", namespace));
         require(_nameHashToAddress[key] == address(0), "XNS: name already registered");
 
-        _nameHashToAddress[key] = msg.sender;
-        _addressToName[msg.sender] = Name({label: label, namespace: namespace});
+        _nameHashToAddress[key] = nameOwner;
+        _addressToName[nameOwner] = Name({label: label, namespace: namespace});
 
-        emit NameRegistered(key, label, namespace, msg.sender);
+        emit NameRegistered(key, label, namespace, nameOwner);
 
         // Process payment: burn 80%, credit fees, and refund excess.
         _processETHPayment(ns.pricePerName, ns.owner);
@@ -283,8 +326,9 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
     /// - `recipient` must not be the zero address.
     /// - Namespace must exist.
     /// - `msg.value` must be >= the namespace's registered price (excess will be refunded).
-    /// - `msg.sender` must be the namespace owner for public namespaces during the exclusivity period
-    ///   or the contract owner for private namespaces.
+    /// - For private namespaces: `msg.sender` must be the namespace owner.
+    /// - For public namespaces during the exclusivity period: `msg.sender` must be the namespace owner.
+    ///   After exclusivity, anyone may sponsor.
     /// - Recipient must not already have a name.
     /// - Name must not already be registered.
     /// - `block.timestamp` must be <= `registerNameAuth.validUntil`.
@@ -854,7 +898,7 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
     // INTERNAL MULTI-USE HELPER FUNCTIONS
     // =========================================================================
 
-    /// @dev Helper function to process ETH payment (used in `registerName`, `registerNameWithAuthorization`,
+    /// @dev Helper function to process ETH payment (used in `_registerName`, `registerNameWithAuthorization`,
     /// `batchRegisterNameWithAuthorization`, `registerPublicNamespace`, and `registerPrivateNamespace`):
     /// - Burn 80% via DETH (credits `msg.sender` with DETH)
     /// - Credit fees: 10% to `nsOwnerFeeRecipient` and 10% to contract owner
@@ -905,6 +949,21 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
 
         if (b[0] == 0x2D || b[len - 1] == 0x2D) return false; // no leading/trailing '-'
         return true;
+    }
+
+    /// @dev Returns whether `caller` controls `target` via `owner()` or `getOwner()` on Ethereum.
+    /// If `owner()` succeeds, its return value is authoritative (including `address(0)`); `getOwner()` is
+    /// only tried when the `owner()` call reverts or is absent. Target reverts do not bubble up.
+    function _isOwnerOf(address target, address caller) private view returns (bool) {
+        try IOwnableContract(target).owner() returns (address contractOwner) {
+            return contractOwner == caller;
+        } catch {}
+
+        try IGetOwnerContract(target).getOwner() returns (address contractOwner) {
+            return contractOwner == caller;
+        } catch {}
+
+        return false;
     }
 
 

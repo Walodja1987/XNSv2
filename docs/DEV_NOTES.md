@@ -59,6 +59,7 @@ Available example scripts:
 - [`registerName.ts`](../scripts/examples/registerName.ts) - Register a name for an EOA
 - [`registerNameForERC20A.ts`](../scripts/examples/registerNameForERC20A.ts) - Register name via constructor
 - [`registerNameForERC20B.ts`](../scripts/examples/registerNameForERC20B.ts) - Register name via separate function
+- [`registerNameForOwnedContract.ts`](../scripts/examples/registerNameForOwnedContract.ts) - Register name for owned contract via `owner()` / `getOwner()`
 
 **Name Registration With Authorization:**
 - [`registerNameWithAuthorization.ts`](../scripts/examples/registerNameWithAuthorization.ts) - Register a name with EIP-712 authorization
@@ -204,6 +205,16 @@ Replay across successful registrations is already limited by the one-name-per-ad
 - Prefer short `validUntil` values for one-off sponsor flows.
 - Recipients should only sign authorizations they are comfortable with executing until `validUntil`.
 - Recipients can register a name themselves to prevent any further sponsored registration attempts.
+
+## Owned-Contract Registration
+
+`registerNameForOwnedContract` lets the owner of an already-deployed smart contract register a public name **for the contract address** after the exclusivity period, without upgrading the contract or implementing EIP-1271. XNS recognizes contracts that expose `owner()` (OpenZeppelin-style) or `getOwner()`.
+
+**`owner()` precedence:** If `owner()` succeeds, its return value alone is used — including `address(0)` for renounced ownership. XNS does not fall back to `getOwner()` in that case.
+
+**Ethereum ownership only:** `registerNameForOwnedContract` verifies ownership exclusively against the smart contract deployed at the recipient address on Ethereum. XNS does not verify the ownership or identity of contracts deployed at the same address on other chains.
+
+**Scope:** Public namespaces only, post-exclusivity — same payment and validation rules as `registerName`. Private namespaces and exclusivity-period registrations still require `registerNameWithAuthorization` (EIP-712 / EIP-1271).
 
 ## EIP-7702 Compatibility
 

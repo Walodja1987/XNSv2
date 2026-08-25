@@ -44,6 +44,7 @@
   "function pendingOwner() view returns (address)",
   "function registerName(string,string) payable",
   "function registerNameFor(address,string,string)",
+  "function registerNameForOwnedContract(address,string,string) payable",
   "function registerNameWithAuthorization(tuple(address,string,string,uint256),bytes) payable",
   "function registerPrivateNamespace(string,uint256) payable",
   "function registerPrivateNamespaceFor(address,string,uint256)",
