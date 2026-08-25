@@ -449,6 +449,7 @@ The following test cases are implemented in [XNS.test.ts](./XNS.test.ts).
 - Should return `false` for signature from wrong recipient.
 - Should return `false` for signature with wrong label.
 - Should return `false` for signature with wrong namespace.
+- Should return `false` for a cryptographically valid signature when `validUntil` is in the past.
 
 ---
 

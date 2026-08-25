@@ -331,7 +331,7 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
         require(_nameHashToAddress[key] == address(0), "XNS: name already registered");
 
         require(block.timestamp <= registerNameAuth.validUntil, "XNS: authorization expired");
-        require(_isValidSignature(registerNameAuth, signature), "XNS: bad authorization");
+        require(_isValidAuthSignature(registerNameAuth, signature), "XNS: bad authorization");
 
         _nameHashToAddress[key] = registerNameAuth.recipient;
         _addressToName[registerNameAuth.recipient] = Name({
@@ -411,7 +411,7 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
             }
 
             require(block.timestamp <= auth.validUntil, "XNS: authorization expired");
-            require(_isValidSignature(auth, signatures[i]), "XNS: bad authorization");
+            require(_isValidAuthSignature(auth, signatures[i]), "XNS: bad authorization");
 
             _nameHashToAddress[key] = auth.recipient;
             _addressToName[auth.recipient] = Name({
@@ -811,16 +811,20 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
     }
 
 
-    /// @notice Function to check if a signature is valid (be used in `registerNameWithAuthorization`
-    /// or `batchRegisterNameWithAuthorization`).
+    /// @notice Returns whether a `RegisterNameAuth` authorization is currently usable:
+    /// cryptographically valid and not past `validUntil`. Intended for integrations checking
+    /// readiness before `registerNameWithAuthorization` / `batchRegisterNameWithAuthorization`.
     /// @param registerNameAuth The struct containing recipient, label, namespace, and validUntil.
     /// @param signature The signature to check.
-    /// @return isValid True if the signature is valid, false otherwise.
+    /// @return isValid True if the authorization is currently usable, false otherwise.
     function isValidSignature(
         RegisterNameAuth calldata registerNameAuth,
         bytes calldata signature
     ) external view returns (bool isValid) {
-        return _isValidSignature(registerNameAuth, signature);
+        if (block.timestamp > registerNameAuth.validUntil) {
+            return false;
+        }
+        return _isValidAuthSignature(registerNameAuth, signature);
     }
 
     /// @notice Function to retrieve the amount of pending fees that can be claimed by an address.
@@ -904,11 +908,11 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
     }
 
 
-    /// @dev Internal function to verify EIP-712 signature for `RegisterNameAuth`.
+    /// @dev Cryptographic EIP-712 / EIP-1271 check for `RegisterNameAuth` (does not enforce `validUntil`).
     /// @param registerNameAuth The struct containing recipient, label, namespace, and validUntil.
     /// @param signature The signature to verify.
-    /// @return isValid True if the signature is valid, false otherwise.
-    function _isValidSignature(
+    /// @return isValid True if the signature is cryptographically valid, false otherwise.
+    function _isValidAuthSignature(
         RegisterNameAuth calldata registerNameAuth,
         bytes calldata signature
     ) private view returns (bool isValid) {

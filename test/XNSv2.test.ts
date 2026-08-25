@@ -8298,6 +8298,28 @@ describe("XNSv2", function () {
         expect(isValid).to.be.false;
     });
 
+    it("Should return `false` for a cryptographically valid signature when validUntil is in the past", async () => {
+        const recipient = s.user2.address;
+        const label = "alice";
+        const namespace = "xns";
+
+        const latest = await time.latest();
+        const validUntil = BigInt(latest - 1);
+        const signature = await s.signRegisterNameAuth(s.user2, recipient, label, namespace, validUntil);
+
+        const isValid = await s.xns.isValidSignature(
+            {
+                recipient: recipient,
+                label: label,
+                namespace: namespace,
+                validUntil: validUntil,
+            },
+            signature
+        );
+
+        expect(isValid).to.be.false;
+    });
+
   });
 
   describe("getAddress(label,namespace)", function () {
