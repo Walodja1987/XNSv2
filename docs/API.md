@@ -559,8 +559,9 @@ function isValidLabelOrNamespace(string labelOrNamespace) external pure returns 
 
 ### isValidSignature
 
-Function to check if a signature is valid (be used in `registerNameWithAuthorization`
-or `batchRegisterNameWithAuthorization`).
+Returns whether a `RegisterNameAuth` authorization is currently usable:
+cryptographically valid and not past `validUntil`. Intended for integrations checking
+readiness before `registerNameWithAuthorization` / `batchRegisterNameWithAuthorization`.
 
 ```solidity
 function isValidSignature(struct XNSv2.RegisterNameAuth registerNameAuth, bytes signature) external view returns (bool isValid)
@@ -570,14 +571,14 @@ function isValidSignature(struct XNSv2.RegisterNameAuth registerNameAuth, bytes 
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| registerNameAuth | struct XNSv2.RegisterNameAuth | The struct containing recipient, label, and namespace. |
+| registerNameAuth | struct XNSv2.RegisterNameAuth | The struct containing recipient, label, namespace, and validUntil. |
 | signature | bytes | The signature to check. |
 
 #### Return Values
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| isValid | bool | True if the signature is valid, false otherwise. |
+| isValid | bool | True if the authorization is currently usable, false otherwise. |
 
 ### getPendingFees
 
