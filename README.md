@@ -140,6 +140,18 @@ Registering an XNS name in a public namespace is straightforward:
 * [Name registration for ERC20 token (via constructor)][script-registerNameForERC20A]
 * [Name registration for ERC20 token (via separate `registerName` function)][script-registerNameForERC20B]
 
+### Name Registration for Owned Contracts
+
+Already-deployed smart contracts that expose `owner()` or `getOwner()` (e.g., OpenZeppelin `Ownable`) can receive an XNS name **without upgrading the contract or implementing EIP-1271**. The contract owner calls [`registerNameForOwnedContract`][api-registerNameForOwnedContract] on XNS and pays the registration fee; the name is assigned to the **contract address**, not the EOA owner.
+
+**Requirements:**
+- `recipient` must be a contract on Ethereum with code at that address.
+- `msg.sender` must equal `recipient.owner()` (if that call succeeds) or `recipient.getOwner()` (only if `owner()` is absent or reverts).
+- Public namespace only, after the 7-day exclusivity period (same as [`registerName`][api-registerName]).
+
+**Example script:**
+* [Name registration for owned contract][script-registerNameForOwnedContract]
+
 #### Name Registration via Etherscan
 
 Names can be registered for EOAs directly via [Etherscan][etherscan-mainnet].
@@ -344,13 +356,13 @@ The testnet contract has been parametrized as follows:
 
 XNS can be integrated into smart contracts, allowing users to identify contracts by a human-readable name (e.g., `myprotocol@xns`) instead of a long address.
 
-> **Note:** Existing contracts without EIP-1271 support cannot register names retroactively. For contracts that implement EIP-1271, see [Option 3](#option-3-sponsored-registration-via-eip-1271) for instructions on how to register names.
+> **Note:** Existing contracts without EIP-1271 support can still receive a name via [`registerNameForOwnedContract`][api-registerNameForOwnedContract] if they expose `owner()` or `getOwner()` (see [Name Registration for Owned Contracts](#name-registration-for-owned-contracts)). For contracts that implement EIP-1271, see [Option 4](#option-4-sponsored-registration-via-eip-1271) for sponsored registration during exclusivity or in private namespaces.
 
 This section includes examples of how to name smart contracts on Ethereum, the canonical XNS chain, as well as a guide on using XNS with multi-chain deployments.
 
 ### Integration on Ethereum
 
-There are three ways to integrate XNS:
+There are four ways to integrate XNS:
 
 > **Note:** The following examples demonstrate XNS integration for contracts that are only deployed on Ethereum. For contracts deployed on multiple chains, see the [Using XNS Names with Multi-Chain Deployments](#-using-xns-names-with-multi-chain-deployments) section below for important guidance and considerations.
 
@@ -379,7 +391,7 @@ See [`MockERC20A`][contract-MockERC20A] and the [`registerNameForERC20A.ts`][scr
 
 **Notes:** 
 - Any excess payment is refunded by XNS to `msg.sender`, which will be the contract. Be sure to implement a `receive()` function to accept ETH payments, and provide a way to withdraw any refunded ETH if needed. To avoid receiving refunds altogether, send exactly the required payment when deploying the contract.
-- The `registerName` function only works for **public namespaces** after the exclusivity period (7 days) has ended. For **private namespaces**, contracts must use [Option 3 (EIP-1271)](#option-3-sponsored-registration-via-eip-1271).
+- The `registerName` function only works for **public namespaces** after the exclusivity period (7 days) has ended. For **private namespaces**, contracts must use [Option 4 (EIP-1271)](#option-4-sponsored-registration-via-eip-1271).
 
 #### Option 2: Register via Separate Function
 
@@ -417,9 +429,45 @@ See [`MockERC20B`][contract-MockERC20B] and the [`registerNameForERC20B.ts`][scr
 
 **Notes:**
 - Any excess payment is refunded by XNS to `msg.sender`, which will be the contract. Be sure to implement a `receive()` function to accept ETH payments, and provide a way to withdraw any refunded ETH if needed. To avoid receiving refunds altogether, send exactly the required payment when calling [`registerName`][api-registerName].
-- The `registerName` function only works for **public namespaces** after the exclusivity period (7 days) has ended. For **private namespaces**, contracts must use [Option 3 (EIP-1271)](#option-3-sponsored-registration-via-eip-1271).
+- The `registerName` function only works for **public namespaces** after the exclusivity period (7 days) has ended. For **private namespaces**, contracts must use [Option 4 (EIP-1271)](#option-4-sponsored-registration-via-eip-1271).
 
-#### Option 3: Sponsored Registration via EIP-1271
+#### Option 3: Register for Owned Contract
+
+For already-deployed contracts that expose `owner()` or `getOwner()` but cannot call `registerName` and do not implement EIP-1271, the **contract owner** registers the name **from outside the target contract** — typically via a Hardhat/ethers script or Etherscan. No changes to the target contract are required.
+
+The owner wallet is `msg.sender`; the protocol contract address is `recipient`. XNS checks that `recipient.owner()` (or `getOwner()`) equals the owner wallet, then assigns the name to **`recipient`**, not to the owner.
+
+```typescript
+import hre from "hardhat";
+
+const xnsAddress = "0x..."; // XNS contract on Ethereum
+const myProtocolAddress = "0x..."; // Already-deployed contract to name
+const label = "myprotocol";
+const namespace = "xns";
+const price = hre.ethers.parseEther("0.001");
+
+const owner = (await hre.ethers.getSigners())[0]; // Must equal myProtocol.owner()
+const xns = await hre.ethers.getContractAt("XNSv2", xnsAddress);
+
+await xns.connect(owner).registerNameForOwnedContract(
+  myProtocolAddress,
+  label,
+  namespace,
+  { value: price },
+);
+// → "myprotocol@xns" resolves to myProtocolAddress, not owner.address
+```
+
+Ownership is verified exclusively against the contract deployed at `recipient` on Ethereum.
+
+See [`registerNameForOwnedContract.ts`][script-registerNameForOwnedContract] for a runnable script (including namespace validation and a demo deployment).
+
+**Notes:**
+- Only works for **public namespaces** after the exclusivity period (7 days) has ended.
+- If `owner()` succeeds (including returning `address(0)`), XNS does not fall back to `getOwner()`.
+- For **private namespaces** or during exclusivity, use [Option 4 (EIP-1271)](#option-4-sponsored-registration-via-eip-1271).
+
+#### Option 4: Sponsored Registration via EIP-1271
 
 For contracts that implement EIP-1271, someone else can sponsor the name registration. **This is the only way for contracts to register names in private namespaces and public namespaces during the exclusivity period**.
 
@@ -644,6 +692,7 @@ See the [Developer Notes][dev-notes] for design decisions, code style guidelines
 <!-- Reference-style link definitions -->
 
 [api-registerName]: https://github.com/Walodja1987/xns/blob/main/docs/API.md#registername
+[api-registerNameForOwnedContract]: https://github.com/Walodja1987/xns/blob/main/docs/API.md#registernameforownedcontract
 [api-getAddress]: https://github.com/Walodja1987/xns/blob/main/docs/API.md#getAddress
 [api-getName]: https://github.com/Walodja1987/xns/blob/main/docs/API.md#getName
 [api-getNamespaceInfo]: https://github.com/Walodja1987/xns/blob/main/docs/API.md#getnamespaceinfo
@@ -661,6 +710,7 @@ See the [Developer Notes][dev-notes] for design decisions, code style guidelines
 [script-registerName]: https://github.com/Walodja1987/xns/blob/main/scripts/examples/registerName.ts
 [script-registerNameForERC20A]: https://github.com/Walodja1987/xns/blob/main/scripts/examples/registerNameForERC20A.ts
 [script-registerNameForERC20B]: https://github.com/Walodja1987/xns/blob/main/scripts/examples/registerNameForERC20B.ts
+[script-registerNameForOwnedContract]: https://github.com/Walodja1987/xns/blob/main/scripts/examples/registerNameForOwnedContract.ts
 [script-registerNameWithAuthorization]: https://github.com/Walodja1987/xns/blob/main/scripts/examples/registerNameWithAuthorization.ts
 [script-registerNameWithAuthorizationForERC20]: https://github.com/Walodja1987/xns/blob/main/scripts/examples/registerNameWithAuthorizationForERC20.ts
 [script-batchRegisterNameWithAuthorization]: https://github.com/Walodja1987/xns/blob/main/scripts/examples/batchRegisterNameWithAuthorization.ts

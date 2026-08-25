@@ -39,6 +39,8 @@ Label and namespace string requirements:
 - Users can register names in public namespaces after the 7-day exclusivity period using `registerName`.
 - Each address can own at most one name.
 - Registration fees vary by namespace.
+- Smart-contract owners can register a name directly for an owned contract in a public namespace after
+  the exclusivity period using `registerNameForOwnedContract`.
 
 ### Authorized Name Registration
 - XNS features authorized name registration via EIP-712 signatures.
@@ -98,6 +100,35 @@ function registerName(string label, string namespace) external payable
 | label | string | The label part of the name to register. |
 | namespace | string | The namespace part of the name to register. |
 
+### registerNameForOwnedContract
+
+Register a paid name for a smart contract controlled by `msg.sender`.
+Authorization is checked via the recipient's `owner()` or, if that call fails, `getOwner()`.
+If `owner()` succeeds, its return value alone is used (including `address(0)`); `getOwner()` is not tried.
+This function is only available for public namespaces after the exclusivity period.
+
+The ownership check is performed exclusively against the contract deployed at `recipient` on Ethereum.
+XNS does not verify ownership of contracts at the same address on other chains.
+
+**Requirements:**
+- `recipient` must contain contract code.
+- `recipient.owner()` must equal `msg.sender` when that call succeeds; otherwise `recipient.getOwner()`
+  must equal `msg.sender` when that call succeeds.
+- Otherwise, same requirements, fee distribution, and notes as `registerName` (name assigned to
+  `recipient` instead of `msg.sender`).
+
+```solidity
+function registerNameForOwnedContract(address recipient, string label, string namespace) external payable
+```
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| recipient | address | The Ethereum smart contract that will receive the XNS name. |
+| label | string | The label part of the name. |
+| namespace | string | The namespace part of the name. |
+
 ### registerNameWithAuthorization
 
 Function to sponsor a paid name registration for `recipient` who explicitly authorized it via
@@ -142,7 +173,7 @@ function registerNameWithAuthorization(struct XNSv2.RegisterNameAuth registerNam
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| registerNameAuth | struct XNSv2.RegisterNameAuth | The argument for the function, including recipient, label, and namespace. |
+| registerNameAuth | struct XNSv2.RegisterNameAuth | The argument for the function, including recipient, label, namespace, and validUntil. |
 | signature | bytes | EIP-712 signature by `recipient` (EOA) or EIP-1271 contract signature. |
 
 ### batchRegisterNameWithAuthorization
@@ -163,9 +194,9 @@ a name or the name is already registered (griefing protection). Skipped items ar
 - For private namespaces: 20% is credited to the contract owner.
 
 **Note:** Input validation errors (invalid label, zero recipient, namespace mismatch) cause the entire batch
-to revert. Expired authorizations and invalid signatures revert only for otherwise eligible registrations — they are not evaluated
-for entries skipped because the recipient already has a name or the name is already registered. Those
-state-based conflicts are skipped (batch does not revert) for griefing protection.
+to revert. Expired authorizations and invalid signatures revert only for otherwise eligible registrations —
+they are not evaluated for entries skipped because the recipient already has a name or the name is already
+registered. Those state-based conflicts are skipped (batch does not revert) for griefing protection.
 
 ```solidity
 function batchRegisterNameWithAuthorization(struct XNSv2.RegisterNameAuth[] registerNameAuths, bytes[] signatures) external payable returns (uint256 successfulCount)
@@ -175,7 +206,7 @@ function batchRegisterNameWithAuthorization(struct XNSv2.RegisterNameAuth[] regi
 
 | Name | Type | Description |
 | ---- | ---- | ----------- |
-| registerNameAuths | struct XNSv2.RegisterNameAuth[] | Array of `RegisterNameAuth` structs, each including recipient, label, and namespace. |
+| registerNameAuths | struct XNSv2.RegisterNameAuth[] | Array of `RegisterNameAuth` structs, each including recipient, label, namespace, and validUntil. |
 | signatures | bytes[] | Array of EIP-712 signatures by recipients (EOA) or EIP-1271 contract signatures. |
 
 #### Return Values
@@ -786,5 +817,6 @@ struct RegisterNameAuth {
   uint256 validUntil;
 ```
 
-_Argument for `registerNameWithAuthorization` function (EIP-712 based). `validUntil` is a unix timestamp; the authorization is invalid after that time._
+_Argument for `registerNameWithAuthorization` function (EIP-712 based).
+`validUntil` is a unix timestamp; the authorization is invalid after that time._
 
