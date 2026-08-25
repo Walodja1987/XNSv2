@@ -2,6 +2,8 @@
 pragma solidity 0.8.28;
 
 import {IDETH} from "./interfaces/IDETH.sol";
+import {IOwnableContract} from "./interfaces/IOwnableContract.sol";
+import {IGetOwnerContract} from "./interfaces/IGetOwnerContract.sol";
 import {SignatureChecker} from "@openzeppelin/contracts/utils/cryptography/SignatureChecker.sol";
 import {EIP712} from "@openzeppelin/contracts/utils/cryptography/EIP712.sol";
 import {Ownable2Step} from "@openzeppelin/contracts/access/Ownable2Step.sol";
@@ -905,6 +907,21 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
 
         if (b[0] == 0x2D || b[len - 1] == 0x2D) return false; // no leading/trailing '-'
         return true;
+    }
+
+    /// @dev Returns whether `caller` controls `target` via `owner()` or `getOwner()` on Ethereum.
+    /// If `owner()` succeeds, its return value is authoritative (including `address(0)`); `getOwner()` is
+    /// only tried when the `owner()` call reverts or is absent. Target reverts do not bubble up.
+    function _isOwnerOf(address target, address caller) private view returns (bool) {
+        try IOwnableContract(target).owner() returns (address contractOwner) {
+            return contractOwner == caller;
+        } catch {}
+
+        try IGetOwnerContract(target).getOwner() returns (address contractOwner) {
+            return contractOwner == caller;
+        } catch {}
+
+        return false;
     }
 
 
