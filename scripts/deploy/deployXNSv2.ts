@@ -93,7 +93,7 @@ export default async function main(hre: HardhatRuntimeEnvironment) {
 
   // Deploy XNS
   const XNSv2Factory = await hre.ethers.getContractFactory("XNSv2");
-  const xns = await XNSv2Factory.deploy(ownerAddress);
+  const xns = await XNSv2Factory.connect(deployer).deploy(ownerAddress);
   await xns.waitForDeployment();
 
   const contractAddress = await xns.getAddress();

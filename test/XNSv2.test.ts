@@ -135,8 +135,8 @@ describe("XNSv2", function () {
         // Should have correct EXCLUSIVITY_PERIOD (7 days)
         expect(await s.xns.EXCLUSIVITY_PERIOD()).to.equal(7 * 24 * 60 * 60);
 
-        // Should have correct ONBOARDING_PERIOD (182 days)
-        expect(await s.xns.ONBOARDING_PERIOD()).to.equal(182 * 24 * 60 * 60);
+        // Should have correct ONBOARDING_PERIOD (154 days)
+        expect(await s.xns.ONBOARDING_PERIOD()).to.equal(154 * 24 * 60 * 60);
 
         // Migration should be open at deployment
         expect(await s.xns.isMigrationOpen()).to.equal(true);
@@ -9690,7 +9690,7 @@ describe("XNSv2", function () {
   describe("Name migration (registerNameFor / endMigrationPeriod)", function () {
     let s: SetupOutput;
     const getAddressByLabelAndNamespace = (xns: XNSv2) => xns.getFunction("getAddress(string,string)");
-    const MIGRATION_PERIOD_SECONDS = 7 * 24 * 60 * 60; // private constant; documented as 7 days
+    const MIGRATION_PERIOD_SECONDS = 14 * 24 * 60 * 60; // private constant; documented as 14 days
 
     beforeEach(async () => {
       s = await loadFixture(setup);

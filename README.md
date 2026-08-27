@@ -227,7 +227,7 @@ The private namespace owner registers names via the authorized flow (see [`regis
 
 **Notes:**
 * Regular users always pay the standard fees when registering namespaces via [`registerPublicNamespace`][api-registerPublicNamespace] or [`registerPrivateNamespace`][api-registerPrivateNamespace].
-* During the onboarding period (182-day onboarding period after contract deployment), the XNS contract owner can register public and private namespaces at no cost using [`registerPublicNamespaceFor`][api-registerPublicNamespaceFor] and [`registerPrivateNamespaceFor`][api-registerPrivateNamespaceFor], respectively, to foster adoption. These are OWNER-only functions that allow registering namespaces for other addresses during the onboarding period.
+* During the onboarding period (154-day onboarding period after contract deployment), the XNS contract owner can register public and private namespaces at no cost using [`registerPublicNamespaceFor`][api-registerPublicNamespaceFor] and [`registerPrivateNamespaceFor`][api-registerPrivateNamespaceFor], respectively, to foster adoption. These are OWNER-only functions that allow registering namespaces for other addresses during the onboarding period.
 * **Security recommendation:** Namespace owners should consider using multisig wallets to reduce the risk of wallet access loss or compromise. This is especially important for public namespace owners who receive ongoing fee rewards, and for private namespace owners who maintain exclusive control over their namespace.
 
   **Example scripts:**
@@ -338,12 +338,12 @@ See [`constants/namespaces.json`](./constants/namespaces.json) for the full list
 
 ### Ethereum Mainnet
 
-The official XNS contract is live on Ethereum mainnet at: [0x648E4F05aF2b7eB85109A8dc8AE81D8E006457D8][etherscan-mainnet]
+The official XNS contract is live on Ethereum mainnet at: [0xA235c204bf85BB8952720A64801992F883c9072E][etherscan-mainnet]
 
 
 ### Sepolia Testnet
 
-For testing purposes, the deployed contract on Sepolia can be used at: [0x708a6a410Ea26E536F6534Ac5c98FDD73a4BFe23][etherscan-sepolia-contract]
+For testing purposes, the deployed contract on Sepolia can be used at: [0xA235c204bf85BB8952720A64801992F883c9072E][etherscan-sepolia-contract]
 
 The testnet contract has been parametrized as follows:
 - Public namespace registration fee: 0.05 ether (instead of 50 ether)
@@ -738,9 +738,8 @@ See the [Developer Notes][dev-notes] for design decisions, code style guidelines
 [contract-MockERC20B]: https://github.com/Walodja1987/xns/blob/main/contracts/src/mocks/MockERC20B.sol
 [contract-MockERC20C]: https://github.com/Walodja1987/xns/blob/main/contracts/src/mocks/MockERC20C.sol
 
-[etherscan-mainnet]: https://etherscan.io/address/0x648E4F05aF2b7eB85109A8dc8AE81D8E006457D8
-[etherscan-sepolia-contract]: https://sepolia.etherscan.io/address/0x708a6a410Ea26E536F6534Ac5c98FDD73a4BFe23
-[etherscan-mainnet]: https://etherscan.io/address/xxx
+[etherscan-mainnet]: https://etherscan.io/address/0xA235c204bf85BB8952720A64801992F883c9072E
+[etherscan-sepolia-contract]: https://sepolia.etherscan.io/address/0xA235c204bf85BB8952720A64801992F883c9072E
 [etherscan-deth-sepolia]: https://sepolia.etherscan.io/address/0xeD204c6698167dB50c4da2AC23Fad8F59dc9087A
 
 [license]: https://github.com/Walodja1987/xns/blob/main/LICENSE

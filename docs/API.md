@@ -30,9 +30,9 @@ Label and namespace string requirements:
   - Only the namespace owner can register names (via `registerNameWithAuthorization`
     or `batchRegisterNameWithAuthorization`).
   - Namespace owners do not receive fees; all fees go to the XNS contract owner.
-- During the onboarding period (182 days after XNSv2 contract deployment, 1 year after v1 deployment),
+- During the onboarding period (154 days after XNSv2 contract deployment, 1 year after v1 deployment),
   the contract owner can register namespaces for others at no cost.
-- During the migration period (7 days after deployment, or until `endMigrationPeriod`), the contract owner
+- During the migration period (14 days after deployment, or until `endMigrationPeriod`), the contract owner
   can mint existing v1 names onto v2 addresses via `registerNameFor` at no cost.
 
 ### Name Registration
@@ -109,6 +109,7 @@ This function is only available for public namespaces after the exclusivity peri
 
 The ownership check is performed exclusively against the contract deployed at `recipient` on Ethereum.
 XNS does not verify ownership of contracts at the same address on other chains.
+Subsequent changes to the contract's `owner()` or `getOwner()` do not affect the registered XNS name.
 
 **Requirements:**
 - `recipient` must contain contract code.
@@ -147,8 +148,9 @@ Supports both EOA signatures and EIP-1271 contract wallet signatures.
 - `recipient` must not be the zero address.
 - Namespace must exist.
 - `msg.value` must be >= the namespace's registered price (excess will be refunded).
-- `msg.sender` must be the namespace owner for public namespaces during the exclusivity period
-  or the contract owner for private namespaces.
+- For private namespaces: `msg.sender` must be the namespace owner.
+- For public namespaces during the exclusivity period: `msg.sender` must be the namespace owner.
+  After exclusivity, anyone may sponsor.
 - Recipient must not already have a name.
 - Name must not already be registered.
 - `block.timestamp` must be <= `registerNameAuth.validUntil`.
@@ -227,7 +229,7 @@ Register a new public namespace.
 - `pricePerName` must be >= 0.001 ETH and a multiple of 0.001 ETH (0.001, 0.002, 0.003, etc.).
 
 **Note:**
-- During the onboarding period (182 days following contract deployment), the contract owner can
+- During the onboarding period (154 days following contract deployment), the contract owner can
   register namespaces for free (via `registerPublicNamespaceFor`) to foster adoption.
 - For the avoidance of doubt, anyone can register a new namespace during the onboarding period
   by paying the standard 50 ETH registration fee.
@@ -255,7 +257,7 @@ Register a new private namespace.
 - `pricePerName` must be >= 0.005 ETH and a multiple of 0.001 ETH (0.005, 0.006, 0.007, etc.).
 
 **Note:**
-- During the onboarding period (182 days following contract deployment), the contract owner can
+- During the onboarding period (154 days following contract deployment), the contract owner can
   register namespaces for free (via `registerPrivateNamespaceFor`) to foster adoption.
 - For the avoidance of doubt, anyone can register a new namespace during the onboarding period
   by paying the standard 10 ETH registration fee.
@@ -591,8 +593,8 @@ function isValidLabelOrNamespace(string labelOrNamespace) external pure returns 
 ### isValidSignature
 
 Returns whether a `RegisterNameAuth` authorization is currently usable:
-cryptographically valid and not past `validUntil`. Intended for integrations checking
-readiness before `registerNameWithAuthorization` / `batchRegisterNameWithAuthorization`.
+cryptographically valid and not past `validUntil`. Intended for integrations validating
+a signed registration authorization.
 
 ```solidity
 function isValidSignature(struct XNSv2.RegisterNameAuth registerNameAuth, bytes signature) external view returns (bool isValid)

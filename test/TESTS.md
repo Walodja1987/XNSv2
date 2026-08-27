@@ -19,7 +19,7 @@ The following test cases are implemented in [XNS.test.ts](./XNS.test.ts).
   - Should have correct `PUBLIC_NAMESPACE_REGISTRATION_FEE` (50 ether).
   - Should have correct `PRIVATE_NAMESPACE_REGISTRATION_FEE` (10 ether).
   - Should have correct `EXCLUSIVITY_PERIOD` (7 days).
-  - Should have correct `ONBOARDING_PERIOD` (182 days).
+  - Should have correct `ONBOARDING_PERIOD` (154 days).
   - Migration should be open at deployment (`isMigrationOpen() = true`).
   - Should have correct `PRICE_STEP` (0.001 ether / 1e15).
   - Should have correct `PUBLIC_NAMESPACE_MIN_PRICE` (0.001 ether).
