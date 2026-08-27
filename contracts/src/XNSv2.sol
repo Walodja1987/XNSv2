@@ -148,7 +148,7 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
     /// `registerPrivateNamespaceFor` to bootstrap namespaces for participants at no cost. After this period, all
     /// namespace registrations (including by the owner) require standard fees via `registerPublicNamespace` or
     /// `registerPrivateNamespace`.
-    uint256 public constant ONBOARDING_PERIOD = 182 days;
+    uint256 public constant ONBOARDING_PERIOD = 154 days;
 
     /// @dev Period after contract deployment during which the owner can mint existing v1 names onto v2 via
     /// `registerNameFor` at no cost (no exclusivity check, no payment). Can be terminated early via

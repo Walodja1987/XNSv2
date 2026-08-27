@@ -349,7 +349,7 @@ The testnet contract has been parametrized as follows:
 - Public namespace registration fee: 0.05 ether (instead of 50 ether)
 - Private namespace registration fee: 0.01 ether (instead of 10 ether)
 - Namespace owner exclusive period: 300 seconds (instead of 7 days)
-- Onboarding period: 100 days (instead of 365 days)
+- Onboarding period: 100 days (instead of 254 days)
 - DETH address: [0xeD204c6698167dB50c4da2AC23Fad8F59dc9087A](etherscan-deth-sepolia)
 
 
