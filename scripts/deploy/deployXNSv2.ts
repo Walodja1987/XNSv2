@@ -34,8 +34,9 @@ function delay(ms: number) {
 
 // XNS contract owner address
 // Set to null to use the deployer address as the owner
-const xnsOwnerAddress: string | null = null;
-// Example: const xnsOwnerAddress: string | null = "0x9AdEFeb576dcF52F5220709c1B267d89d5208D78"; // use this address as the owner
+// const xnsOwnerAddress: string | null = null;
+// Example: 
+const xnsOwnerAddress: string | null = "0x9AdEFeb576dcF52F5220709c1B267d89d5208D78"; // use this address as the owner
 // Example: const xnsOwnerAddress: string | null = null; // use deployer address as the owner
 
 // Namespace tiers: price (in ETH) -> namespace

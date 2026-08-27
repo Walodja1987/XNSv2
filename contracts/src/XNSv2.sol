@@ -38,24 +38,24 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 /// ### Namespaces
 /// - Anyone can register new namespaces by paying a one-time fee.
 /// - XNS features two types of namespaces: public and private.
-/// - **Public namespaces (50 ETH):**
-///   - Open to everyone after a 7-day exclusivity period post namespace registration.
+/// - **Public namespaces (0.05 ETH):**
+///   - Open to everyone after a 300-second exclusivity period post namespace registration.
 ///   - During exclusivity, only the namespace owner can register or sponsor names (via `registerNameWithAuthorization`
 ///     or `batchRegisterNameWithAuthorization`).
 ///   - After exclusivity, anyone can register or sponsor names (via `registerName`
 ///     or `batchRegisterNameWithAuthorization`).
 ///   - Namespace owners receive 10% of all name registration fees in perpetuity.
-/// - **Private namespaces (10 ETH):**
+/// - **Private namespaces (0.01 ETH):**
 ///   - Only the namespace owner can register names (via `registerNameWithAuthorization`
 ///     or `batchRegisterNameWithAuthorization`).
 ///   - Namespace owners do not receive fees; all fees go to the XNS contract owner.
-/// - During the onboarding period (182 days after XNSv2 contract deployment, 1 year after v1 deployment),
+/// - During the onboarding period (100 days after XNSv2 contract deployment),
 ///   the contract owner can register namespaces for others at no cost.
 /// - During the migration period (7 days after deployment, or until `endMigrationPeriod`), the contract owner
 ///   can mint existing v1 names onto v2 addresses via `registerNameFor` at no cost.
 ///
 /// ### Name Registration
-/// - Users can register names in public namespaces after the 7-day exclusivity period using `registerName`.
+/// - Users can register names in public namespaces after the 300-second exclusivity period using `registerName`.
 /// - Each address can own at most one name.
 /// - Registration fees vary by namespace.
 /// - Smart-contract owners can register a name directly for an owned contract in a public namespace after
@@ -135,20 +135,20 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
     uint64 public immutable DEPLOYED_AT;
 
     /// @notice Fee to register a public namespace.
-    uint256 public constant PUBLIC_NAMESPACE_REGISTRATION_FEE = 50 ether;
+    uint256 public constant PUBLIC_NAMESPACE_REGISTRATION_FEE = 0.05 ether;
 
     /// @notice Fee to register a private namespace.
-    uint256 public constant PRIVATE_NAMESPACE_REGISTRATION_FEE = 10 ether;
+    uint256 public constant PRIVATE_NAMESPACE_REGISTRATION_FEE = 0.01 ether;
 
     /// @notice Duration of the exclusive namespace-owner window for paid registrations
     /// (relevant for public namespace registrations only).
-    uint256 public constant EXCLUSIVITY_PERIOD = 7 days;
+    uint256 public constant EXCLUSIVITY_PERIOD = 300 seconds;
 
     /// @notice Period after contract deployment during which the owner can use `registerPublicNamespaceFor` and
     /// `registerPrivateNamespaceFor` to bootstrap namespaces for participants at no cost. After this period, all
     /// namespace registrations (including by the owner) require standard fees via `registerPublicNamespace` or
     /// `registerPrivateNamespace`.
-    uint256 public constant ONBOARDING_PERIOD = 154 days;
+    uint256 public constant ONBOARDING_PERIOD = 100 days;
 
     /// @dev Period after contract deployment during which the owner can mint existing v1 names onto v2 via
     /// `registerNameFor` at no cost (no exclusivity check, no payment). Can be terminated early via
@@ -165,7 +165,7 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
     uint256 public constant PRIVATE_NAMESPACE_MIN_PRICE = 0.005 ether;
 
     /// @notice Address of the DETH contract used to burn ETH and credit the recipient.
-    address public constant DETH = 0xE46861C9f28c46F27949fb471986d59B256500a7;
+    address public constant DETH = 0xeD204c6698167dB50c4da2AC23Fad8F59dc9087A;
 
     // -------------------------------------------------------------------------
     // Events
@@ -222,14 +222,14 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
     // =========================================================================
 
     /// @notice Function to register a paid name for `msg.sender`.
-    /// This function only works for public namespaces after the exclusivity period (7 days) has ended.
+    /// This function only works for public namespaces after the exclusivity period (300 seconds) has ended.
     ///
     /// **Requirements:**
     /// - Label must be valid (non-empty, length 1–20, only lowercase letters, digits, and hyphens,
     ///   cannot start or end with '-', cannot contain consecutive hyphens ('--')).
     /// - Namespace must exist and be public.
     /// - `msg.value` must be >= the namespace's registered price (excess will be refunded).
-    /// - Namespace must be past the exclusivity period (7 days after creation).
+    /// - Namespace must be past the exclusivity period (300 seconds after creation).
     /// - Caller must not already have a name.
     /// - Name must not already be registered.
     ///
@@ -489,17 +489,17 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
     /// @notice Register a new public namespace.
     ///
     /// **Requirements:**
-    /// - `msg.value` must be >= 50 ETH (excess refunded).
+    /// - `msg.value` must be >= 0.05 ETH (excess refunded).
     /// - Namespace must be valid (non-empty, length 1–20, only lowercase letters, digits, and hyphens,
     ///   cannot start or end with '-', cannot contain consecutive hyphens ('--')).
     /// - Namespace must not already exist.
     /// - `pricePerName` must be >= 0.001 ETH and a multiple of 0.001 ETH (0.001, 0.002, 0.003, etc.).
     ///
     /// **Note:**
-    /// - During the onboarding period (182 days following contract deployment), the contract owner can
+    /// - During the onboarding period (100 days following contract deployment), the contract owner can
     ///   register namespaces for free (via `registerPublicNamespaceFor`) to foster adoption.
     /// - For the avoidance of doubt, anyone can register a new namespace during the onboarding period
-    ///   by paying the standard 50 ETH registration fee.
+    ///   by paying the standard 0.05 ETH registration fee.
     ///
     /// @param namespace The namespace to register.
     /// @param pricePerName The price per name for the namespace.
@@ -514,17 +514,17 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
     /// @notice Register a new private namespace.
     ///
     /// **Requirements:**
-    /// - `msg.value` must be >= 10 ETH (excess refunded).
+    /// - `msg.value` must be >= 0.01 ETH (excess refunded).
     /// - Namespace must be valid (non-empty, length 1–20, only lowercase letters, digits, and hyphens,
     ///   cannot start or end with '-', cannot contain consecutive hyphens ('--')).
     /// - Namespace must not already exist.
     /// - `pricePerName` must be >= 0.005 ETH and a multiple of 0.001 ETH (0.005, 0.006, 0.007, etc.).
     ///
     /// **Note:**
-    /// - During the onboarding period (182 days following contract deployment), the contract owner can
+    /// - During the onboarding period (100 days following contract deployment), the contract owner can
     ///   register namespaces for free (via `registerPrivateNamespaceFor`) to foster adoption.
     /// - For the avoidance of doubt, anyone can register a new namespace during the onboarding period
-    ///   by paying the standard 10 ETH registration fee.
+    ///   by paying the standard 0.01 ETH registration fee.
     ///
     /// @param namespace The namespace to register.
     /// @param pricePerName The price per name for the namespace.

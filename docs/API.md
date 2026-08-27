@@ -109,6 +109,7 @@ This function is only available for public namespaces after the exclusivity peri
 
 The ownership check is performed exclusively against the contract deployed at `recipient` on Ethereum.
 XNS does not verify ownership of contracts at the same address on other chains.
+Subsequent changes to the contract's `owner()` or `getOwner()` do not affect the registered XNS name.
 
 **Requirements:**
 - `recipient` must contain contract code.
@@ -147,8 +148,9 @@ Supports both EOA signatures and EIP-1271 contract wallet signatures.
 - `recipient` must not be the zero address.
 - Namespace must exist.
 - `msg.value` must be >= the namespace's registered price (excess will be refunded).
-- `msg.sender` must be the namespace owner for public namespaces during the exclusivity period
-  or the contract owner for private namespaces.
+- For private namespaces: `msg.sender` must be the namespace owner.
+- For public namespaces during the exclusivity period: `msg.sender` must be the namespace owner.
+  After exclusivity, anyone may sponsor.
 - Recipient must not already have a name.
 - Name must not already be registered.
 - `block.timestamp` must be <= `registerNameAuth.validUntil`.
@@ -591,8 +593,8 @@ function isValidLabelOrNamespace(string labelOrNamespace) external pure returns 
 ### isValidSignature
 
 Returns whether a `RegisterNameAuth` authorization is currently usable:
-cryptographically valid and not past `validUntil`. Intended for integrations checking
-readiness before `registerNameWithAuthorization` / `batchRegisterNameWithAuthorization`.
+cryptographically valid and not past `validUntil`. Intended for integrations validating
+a signed registration authorization.
 
 ```solidity
 function isValidSignature(struct XNSv2.RegisterNameAuth registerNameAuth, bytes signature) external view returns (bool isValid)
