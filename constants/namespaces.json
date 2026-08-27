@@ -222,11 +222,6 @@
         "isPrivate": false
       },
       {
-        "name": "big-week",
-        "price": "0.001",
-        "isPrivate": false
-      },
-      {
         "name": "bin",
         "price": "0.001",
         "isPrivate": false

@@ -14,6 +14,16 @@ Builds **Safe Transaction Builder** JSON: one `registerPublicNamespaceFor` trans
 - **Default output:** `scripts/tools/out/new-namespaces.json`
 - Edit `DEFAULT_ENTRIES`, addresses, and chain id at the top of the file as needed.
 
+### `build-safe-namespace-migration-batch.js`
+
+Builds **Safe Transaction Builder** JSON for v1→v2 namespace migration: one `registerPublicNamespaceFor` or `registerPrivateNamespaceFor` per entry in [`context/migration scripts/out/v1-namespaces.json`](../../context/migration%20scripts/out/v1-namespaces.json). Preserves each namespace’s v1 `owner`, `pricePerName`, and `isPrivate`.
+
+- **Run:** `node scripts/tools/build-safe-namespace-migration-batch.js` (default XNS address is Sepolia; override with `XNS_ADDRESS` / `--xns`; default `--chain-id` is `1`)
+- **Default output:** `scripts/tools/out/v1-namespace-migration.json`
+- **Chunking:** `--chunk-size 200` (Safe-friendly batch sizes)
+- **Filters:** `--public-only` / `--private-only` / `--skip big-week,x`
+- Execute these batches **before** the name migration batch.
+
 ### `build-safe-name-migration-batch.js`
 
 Builds **Safe Transaction Builder** JSON for v1→v2 name migration: one `registerNameFor(recipient, label, namespace)` transaction per entry in [`context/migration scripts/out/v1-name-registrations.json`](../../context/migration%20scripts/out/v1-name-registrations.json).
