@@ -19,24 +19,24 @@ Label and namespace string requirements:
 ### Namespaces
 - Anyone can register new namespaces by paying a one-time fee.
 - XNS features two types of namespaces: public and private.
-- **Public namespaces (50 ETH):**
-  - Open to everyone after a 7-day exclusivity period post namespace registration.
+- **Public namespaces (0.05 ETH):**
+  - Open to everyone after a 300-second exclusivity period post namespace registration.
   - During exclusivity, only the namespace owner can register or sponsor names (via `registerNameWithAuthorization`
     or `batchRegisterNameWithAuthorization`).
   - After exclusivity, anyone can register or sponsor names (via `registerName`
     or `batchRegisterNameWithAuthorization`).
   - Namespace owners receive 10% of all name registration fees in perpetuity.
-- **Private namespaces (10 ETH):**
+- **Private namespaces (0.01 ETH):**
   - Only the namespace owner can register names (via `registerNameWithAuthorization`
     or `batchRegisterNameWithAuthorization`).
   - Namespace owners do not receive fees; all fees go to the XNS contract owner.
-- During the onboarding period (182 days after XNSv2 contract deployment, 1 year after v1 deployment),
+- During the onboarding period (100 days after XNSv2 contract deployment),
   the contract owner can register namespaces for others at no cost.
 - During the migration period (7 days after deployment, or until `endMigrationPeriod`), the contract owner
   can mint existing v1 names onto v2 addresses via `registerNameFor` at no cost.
 
 ### Name Registration
-- Users can register names in public namespaces after the 7-day exclusivity period using `registerName`.
+- Users can register names in public namespaces after the 300-second exclusivity period using `registerName`.
 - Each address can own at most one name.
 - Registration fees vary by namespace.
 - Smart-contract owners can register a name directly for an owned contract in a public namespace after
@@ -67,14 +67,14 @@ Unconditional revert for all callers; `onlyOwner` would only obscure that this a
 ### registerName
 
 Function to register a paid name for `msg.sender`.
-This function only works for public namespaces after the exclusivity period (7 days) has ended.
+This function only works for public namespaces after the exclusivity period (300 seconds) has ended.
 
 **Requirements:**
 - Label must be valid (non-empty, length 1–20, only lowercase letters, digits, and hyphens,
   cannot start or end with '-', cannot contain consecutive hyphens ('--')).
 - Namespace must exist and be public.
 - `msg.value` must be >= the namespace's registered price (excess will be refunded).
-- Namespace must be past the exclusivity period (7 days after creation).
+- Namespace must be past the exclusivity period (300 seconds after creation).
 - Caller must not already have a name.
 - Name must not already be registered.
 
@@ -222,17 +222,17 @@ function batchRegisterNameWithAuthorization(struct XNSv2.RegisterNameAuth[] regi
 Register a new public namespace.
 
 **Requirements:**
-- `msg.value` must be >= 50 ETH (excess refunded).
+- `msg.value` must be >= 0.05 ETH (excess refunded).
 - Namespace must be valid (non-empty, length 1–20, only lowercase letters, digits, and hyphens,
   cannot start or end with '-', cannot contain consecutive hyphens ('--')).
 - Namespace must not already exist.
 - `pricePerName` must be >= 0.001 ETH and a multiple of 0.001 ETH (0.001, 0.002, 0.003, etc.).
 
 **Note:**
-- During the onboarding period (182 days following contract deployment), the contract owner can
+- During the onboarding period (100 days following contract deployment), the contract owner can
   register namespaces for free (via `registerPublicNamespaceFor`) to foster adoption.
 - For the avoidance of doubt, anyone can register a new namespace during the onboarding period
-  by paying the standard 50 ETH registration fee.
+  by paying the standard 0.05 ETH registration fee.
 
 ```solidity
 function registerPublicNamespace(string namespace, uint256 pricePerName) external payable
@@ -250,17 +250,17 @@ function registerPublicNamespace(string namespace, uint256 pricePerName) externa
 Register a new private namespace.
 
 **Requirements:**
-- `msg.value` must be >= 10 ETH (excess refunded).
+- `msg.value` must be >= 0.01 ETH (excess refunded).
 - Namespace must be valid (non-empty, length 1–20, only lowercase letters, digits, and hyphens,
   cannot start or end with '-', cannot contain consecutive hyphens ('--')).
 - Namespace must not already exist.
 - `pricePerName` must be >= 0.005 ETH and a multiple of 0.001 ETH (0.005, 0.006, 0.007, etc.).
 
 **Note:**
-- During the onboarding period (182 days following contract deployment), the contract owner can
+- During the onboarding period (100 days following contract deployment), the contract owner can
   register namespaces for free (via `registerPrivateNamespaceFor`) to foster adoption.
 - For the avoidance of doubt, anyone can register a new namespace during the onboarding period
-  by paying the standard 10 ETH registration fee.
+  by paying the standard 0.01 ETH registration fee.
 
 ```solidity
 function registerPrivateNamespace(string namespace, uint256 pricePerName) external payable

@@ -66,7 +66,7 @@ export default async function main(hre: HardhatRuntimeEnvironment) {
   console.log("Starting deployment of XNS...\n");
 
   // Get the deployer account
-  const [deployer] = await hre.ethers.getSigners();
+  const [,deployer] = await hre.ethers.getSigners();
   console.log("Deploying with account:", deployer.address);
   console.log(
     "Account balance:",
@@ -94,7 +94,7 @@ export default async function main(hre: HardhatRuntimeEnvironment) {
 
   // Deploy XNS
   const XNSv2Factory = await hre.ethers.getContractFactory("XNSv2");
-  const xns = await XNSv2Factory.deploy(ownerAddress);
+  const xns = await XNSv2Factory.connect(deployer).deploy(ownerAddress);
   await xns.waitForDeployment();
 
   const contractAddress = await xns.getAddress();
