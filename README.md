@@ -350,6 +350,7 @@ The testnet contract has been parametrized as follows:
 - Private namespace registration fee: 0.01 ether (instead of 10 ether)
 - Namespace owner exclusive period: 300 seconds (instead of 7 days)
 - Onboarding period: 100 days (instead of 365 days)
+- DETH address: [0xeD204c6698167dB50c4da2AC23Fad8F59dc9087A](etherscan-deth-sepolia)
 
 
 ## 🔧 Integration Guide for Contract Developers
@@ -740,6 +741,7 @@ See the [Developer Notes][dev-notes] for design decisions, code style guidelines
 [etherscan-mainnet]: https://etherscan.io/address/0x648E4F05aF2b7eB85109A8dc8AE81D8E006457D8
 [etherscan-sepolia-contract]: https://sepolia.etherscan.io/address/0x708a6a410Ea26E536F6534Ac5c98FDD73a4BFe23
 [etherscan-mainnet]: https://etherscan.io/address/xxx
+[etherscan-deth-sepolia]: https://sepolia.etherscan.io/address/0xeD204c6698167dB50c4da2AC23Fad8F59dc9087A
 
 [license]: https://github.com/Walodja1987/xns/blob/main/LICENSE
 
