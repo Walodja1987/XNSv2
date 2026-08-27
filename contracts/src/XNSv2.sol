@@ -257,6 +257,7 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
     ///
     /// The ownership check is performed exclusively against the contract deployed at `recipient` on Ethereum.
     /// XNS does not verify ownership of contracts at the same address on other chains.
+    /// Subsequent changes to the contract's `owner()` or `getOwner()` do not affect the registered XNS name.
     ///
     /// **Requirements:**
     /// - `recipient` must contain contract code.
@@ -856,8 +857,8 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
 
 
     /// @notice Returns whether a `RegisterNameAuth` authorization is currently usable:
-    /// cryptographically valid and not past `validUntil`. Intended for integrations checking
-    /// readiness before `registerNameWithAuthorization` / `batchRegisterNameWithAuthorization`.
+    /// cryptographically valid and not past `validUntil`. Intended for integrations validating
+    /// a signed registration authorization.
     /// @param registerNameAuth The struct containing recipient, label, namespace, and validUntil.
     /// @param signature The signature to check.
     /// @return isValid True if the authorization is currently usable, false otherwise.
