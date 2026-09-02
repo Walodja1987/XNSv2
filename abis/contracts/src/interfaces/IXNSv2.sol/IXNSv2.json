@@ -5,6 +5,7 @@
   "event NamespaceOwnerTransferStarted(bytes32 indexed,string,address indexed,address indexed)",
   "event NamespaceRegistered(bytes32 indexed,string,uint256,address indexed,bool)",
   "function acceptNamespaceOwnership(string)",
+  "function batchRegisterNameFor(address[],string[],string) returns (uint256)",
   "function batchRegisterNameWithAuthorization(tuple(address,string,string,uint256)[],bytes[]) payable returns (uint256)",
   "function claimFees(address)",
   "function claimFeesToSelf()",

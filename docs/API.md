@@ -33,7 +33,7 @@ Label and namespace string requirements:
 - During the onboarding period (154 days after XNSv2 contract deployment, 1 year after v1 deployment),
   the contract owner can register namespaces for others at no cost.
 - During the migration period (14 days after deployment, or until `endMigrationPeriod`), the contract owner
-  can mint existing v1 names onto v2 addresses via `registerNameFor` at no cost.
+  can mint existing v1 names onto v2 addresses via `registerNameFor` / `batchRegisterNameFor` at no cost.
 
 ### Name Registration
 - Users can register names in public namespaces after the 7-day exclusivity period using `registerName`.
@@ -345,6 +345,39 @@ function registerNameFor(address recipient, string label, string namespace) exte
 | recipient | address | The address that will own the name. |
 | label | string | The label part of the name. |
 | namespace | string | The namespace part of the name. |
+
+### batchRegisterNameFor
+
+Batch version of `registerNameFor` for minting many names in one namespace during migration.
+No payment and no exclusivity check. Intended for large imports (e.g. ENS → XNS).
+
+**Requirements:**
+- `msg.sender` must be the contract owner.
+- Migration must still be open (`isMigrationOpen()`).
+- `recipients` and `labels` must have equal non-zero length.
+- Namespace must exist.
+- Each label must be valid; each recipient must be non-zero (invalid entries revert the whole batch).
+
+**Note:** If a recipient already has a name or the name is already registered, that entry is skipped
+(batch does not revert) so large imports can be re-run safely.
+
+```solidity
+function batchRegisterNameFor(address[] recipients, string[] labels, string namespace) external returns (uint256 successfulCount)
+```
+
+#### Parameters
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| recipients | address[] | Addresses that will own the names (parallel to `labels`). |
+| labels | string[] | Label parts of the names (parallel to `recipients`). |
+| namespace | string | Shared namespace for all entries. |
+
+#### Return Values
+
+| Name | Type | Description |
+| ---- | ---- | ----------- |
+| successfulCount | uint256 | Number of names successfully registered. |
 
 ### endMigrationPeriod
 

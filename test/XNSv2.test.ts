@@ -9687,7 +9687,7 @@ describe("XNSv2", function () {
 
   });
 
-  describe("Name migration (registerNameFor / endMigrationPeriod)", function () {
+  describe("Name migration (registerNameFor / batchRegisterNameFor / endMigrationPeriod)", function () {
     let s: SetupOutput;
     const getAddressByLabelAndNamespace = (xns: XNSv2) => xns.getFunction("getAddress(string,string)");
     const MIGRATION_PERIOD_SECONDS = 14 * 24 * 60 * 60; // private constant; documented as 14 days
@@ -9732,6 +9732,61 @@ describe("XNSv2", function () {
       await expect(
         s.xns.connect(s.owner).registerNameFor(s.user2.address, "late", "xns")
       ).to.be.revertedWith("XNS: migration ended");
+    });
+
+    it("Should batch-register multiple names in one namespace during migration", async () => {
+      const namespace = "xns";
+      const recipients = [s.user2.address, s.user3.address, s.user4.address];
+      const labels = ["alice", "bob", "carol"];
+
+      const successful = await s.xns
+        .connect(s.owner)
+        .batchRegisterNameFor.staticCall(recipients, labels, namespace);
+      expect(successful).to.equal(3n);
+
+      const tx = await s.xns.connect(s.owner).batchRegisterNameFor(recipients, labels, namespace);
+      const receipt = await tx.wait();
+
+      expect(await getAddressByLabelAndNamespace(s.xns)("alice", namespace)).to.equal(s.user2.address);
+      expect(await getAddressByLabelAndNamespace(s.xns)("bob", namespace)).to.equal(s.user3.address);
+      expect(await getAddressByLabelAndNamespace(s.xns)("carol", namespace)).to.equal(s.user4.address);
+      expect(await s.xns.getName(s.user2.address)).to.equal("alice@xns");
+      expect(await s.xns.getName(s.user3.address)).to.equal("bob@xns");
+      expect(await s.xns.getName(s.user4.address)).to.equal("carol@xns");
+
+      const events = receipt!.logs.filter((l) => {
+        try {
+          return s.xns.interface.parseLog(l as any)?.name === "NameRegistered";
+        } catch {
+          return false;
+        }
+      });
+      expect(events.length).to.equal(3);
+    });
+
+    it("Should skip conflicts in batchRegisterNameFor and return successfulCount", async () => {
+      const namespace = "xns";
+      await s.xns.connect(s.owner).registerNameFor(s.user2.address, "taken", namespace);
+
+      // user2 already has a name; "taken" is already registered; user3 is fresh
+      const successful = await s.xns.connect(s.owner).batchRegisterNameFor.staticCall(
+        [s.user2.address, s.user3.address, s.user4.address],
+        ["other", "taken", "fresh"],
+        namespace
+      );
+      expect(successful).to.equal(1n);
+
+      await s.xns.connect(s.owner).batchRegisterNameFor(
+        [s.user2.address, s.user3.address, s.user4.address],
+        ["other", "taken", "fresh"],
+        namespace
+      );
+
+      expect(await s.xns.getName(s.user2.address)).to.equal("taken@xns");
+      expect(await getAddressByLabelAndNamespace(s.xns)("taken", namespace)).to.equal(s.user2.address);
+      // "taken" was skipped for user3; "fresh" went to user4
+      expect(await s.xns.getName(s.user3.address)).to.equal("");
+      expect(await s.xns.getName(s.user4.address)).to.equal("fresh@xns");
     });
 
     // -----------------------
@@ -9783,6 +9838,51 @@ describe("XNSv2", function () {
       await expect(
         s.xns.connect(s.owner).registerNameFor(s.user3.address, "alice", "xns")
       ).to.be.revertedWith("XNS: name already registered");
+    });
+
+    it("Should revert batchRegisterNameFor when caller is not contract owner", async () => {
+      await expect(
+        s.xns.connect(s.user1).batchRegisterNameFor([s.user2.address], ["bob"], "xns")
+      ).to.be.revertedWith("XNS: not contract owner");
+    });
+
+    it("Should revert batchRegisterNameFor after migration ended", async () => {
+      await s.xns.connect(s.owner).endMigrationPeriod();
+      await expect(
+        s.xns.connect(s.owner).batchRegisterNameFor([s.user2.address], ["bob"], "xns")
+      ).to.be.revertedWith("XNS: migration ended");
+    });
+
+    it("Should revert batchRegisterNameFor on length mismatch", async () => {
+      await expect(
+        s.xns.connect(s.owner).batchRegisterNameFor([s.user2.address], ["a", "b"], "xns")
+      ).to.be.revertedWith("XNS: length mismatch");
+    });
+
+    it("Should revert batchRegisterNameFor on empty arrays", async () => {
+      await expect(
+        s.xns.connect(s.owner).batchRegisterNameFor([], [], "xns")
+      ).to.be.revertedWith("XNS: empty array");
+    });
+
+    it("Should revert batchRegisterNameFor for invalid label in batch", async () => {
+      await expect(
+        s.xns.connect(s.owner).batchRegisterNameFor(
+          [s.user2.address, s.user3.address],
+          ["ok", "Bad_Label"],
+          "xns"
+        )
+      ).to.be.revertedWith("XNS: invalid label");
+    });
+
+    it("Should revert batchRegisterNameFor for zero recipient in batch", async () => {
+      await expect(
+        s.xns.connect(s.owner).batchRegisterNameFor(
+          [s.user2.address, ethers.ZeroAddress],
+          ["ok", "zero"],
+          "xns"
+        )
+      ).to.be.revertedWith("XNS: 0x recipient");
     });
 
     it("Should revert endMigrationPeriod when caller is not owner", async () => {

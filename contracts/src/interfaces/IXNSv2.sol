@@ -42,6 +42,11 @@ interface IXNSv2 {
     function registerPublicNamespaceFor(address nsOwner, string calldata namespace, uint256 pricePerName) external;
     function registerPrivateNamespaceFor(address nsOwner, string calldata namespace, uint256 pricePerName) external;
     function registerNameFor(address recipient, string calldata label, string calldata namespace) external;
+    function batchRegisterNameFor(
+        address[] calldata recipients,
+        string[] calldata labels,
+        string calldata namespace
+    ) external returns (uint256 successfulCount);
     function endMigrationPeriod() external;
     function claimFees(address recipient) external;
     function claimFeesToSelf() external;

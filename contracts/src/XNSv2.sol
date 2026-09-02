@@ -52,7 +52,7 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 /// - During the onboarding period (154 days after XNSv2 contract deployment, 1 year after v1 deployment),
 ///   the contract owner can register namespaces for others at no cost.
 /// - During the migration period (14 days after deployment, or until `endMigrationPeriod`), the contract owner
-///   can mint existing v1 names onto v2 addresses via `registerNameFor` at no cost.
+///   can mint existing v1 names onto v2 addresses via `registerNameFor` / `batchRegisterNameFor` at no cost.
 ///
 /// ### Name Registration
 /// - Users can register names in public namespaces after the 7-day exclusivity period using `registerName`.
@@ -606,8 +606,60 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
 
         _nameHashToAddress[key] = recipient;
         _addressToName[recipient] = Name({label: label, namespace: namespace});
-
         emit NameRegistered(key, label, namespace, recipient);
+    }
+
+    /// @notice Batch version of `registerNameFor` for minting many names in one namespace during migration.
+    /// No payment and no exclusivity check. Intended for large imports (e.g. ENS → XNS).
+    ///
+    /// **Requirements:**
+    /// - `msg.sender` must be the contract owner.
+    /// - Migration must still be open (`isMigrationOpen()`).
+    /// - `recipients` and `labels` must have equal non-zero length.
+    /// - Namespace must exist.
+    /// - Each label must be valid; each recipient must be non-zero (invalid entries revert the whole batch).
+    ///
+    /// **Note:** If a recipient already has a name or the name is already registered, that entry is skipped
+    /// (batch does not revert) so large imports can be re-run safely.
+    ///
+    /// @param recipients Addresses that will own the names (parallel to `labels`).
+    /// @param labels Label parts of the names (parallel to `recipients`).
+    /// @param namespace Shared namespace for all entries.
+    /// @return successfulCount Number of names successfully registered.
+    function batchRegisterNameFor(
+        address[] calldata recipients,
+        string[] calldata labels,
+        string calldata namespace
+    ) external returns (uint256 successfulCount) {
+        require(msg.sender == owner(), "XNS: not contract owner");
+        require(isMigrationOpen(), "XNS: migration ended");
+        require(recipients.length == labels.length, "XNS: length mismatch");
+        require(recipients.length > 0, "XNS: empty array");
+        require(_namespaces[keccak256(bytes(namespace))].owner != address(0), "XNS: namespace not found");
+
+        uint256 successful = 0;
+        uint256 len = recipients.length;
+        for (uint256 i = 0; i < len; ) {
+            address recipient = recipients[i];
+            require(recipient != address(0), "XNS: 0x recipient");
+            require(_isValidLabelOrNamespace(labels[i]), "XNS: invalid label");
+
+            if (bytes(_addressToName[recipient].label).length == 0) {
+                bytes32 key = keccak256(abi.encodePacked(labels[i], "@", namespace));
+                if (_nameHashToAddress[key] == address(0)) {
+                    _nameHashToAddress[key] = recipient;
+                    _addressToName[recipient] = Name({label: labels[i], namespace: namespace});
+                    emit NameRegistered(key, labels[i], namespace, recipient);
+                    unchecked {
+                        ++successful;
+                    }
+                }
+            }
+            unchecked {
+                ++i;
+            }
+        }
+        return successful;
     }
 
     /// @notice Permanently ends the name migration window early. One-way; cannot be re-opened.
@@ -932,7 +984,7 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
     /// Used in name and namespace registration functions as well as in `isValidLabelOrNamespace` function.
     /// @param labelOrNamespace The label or namespace string to validate.
     /// @return isValid True if the labelOrNamespace is valid, false otherwise.
-    function _isValidLabelOrNamespace(string calldata labelOrNamespace) private pure returns (bool isValid) {
+    function _isValidLabelOrNamespace(string memory labelOrNamespace) private pure returns (bool isValid) {
         bytes memory b = bytes(labelOrNamespace);
         uint256 len = b.length;
         if (len == 0 || len > 20) return false;

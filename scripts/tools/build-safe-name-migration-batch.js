@@ -1,18 +1,19 @@
 #!/usr/bin/env node
 
 /**
- * Builds Safe Transaction Builder JSON for v1→v2 name migration: one `registerNameFor`
- * call per entry in `context/migration scripts/out/v1-name-registrations.json`.
+ * Builds Safe Transaction Builder JSON for v1→v2 name migration using
+ * `batchRegisterNameFor` (grouped by namespace, chunked for gas/Safe size).
  *
- * Import the output JSON into Safe Transaction Builder and submit as a batch.
+ * Import each output JSON into Safe Transaction Builder and submit as a batch.
  *
  * Run:
- *   node scripts/tools/build-safe-name-migration-batch.js
+ *   node scripts/tools/build-safe-name-migration-batch.js --xns 0x...
  *
  * With overrides:
  *   XNS_ADDRESS=0x... node scripts/tools/build-safe-name-migration-batch.js
- *   node scripts/tools/build-safe-name-migration-batch.js --skip xns@x
+ *   node scripts/tools/build-safe-name-migration-batch.js --skip xns@x --batch-size 100
  *   node scripts/tools/build-safe-name-migration-batch.js --input path/to/names.json --output path/to/out.json
+ *   node scripts/tools/build-safe-name-migration-batch.js --chunk-size 20
  */
 
 const fs = require("fs");
@@ -29,6 +30,8 @@ const DEFAULT_INPUT = path.join(
   "context/migration scripts/out/v1-name-registrations.json",
 );
 const DEFAULT_OUTPUT = path.join(root, "scripts/tools/out/v1-name-migration.json");
+/** Names per `batchRegisterNameFor` call (gas / calldata sized). */
+const DEFAULT_BATCH_SIZE = 100;
 
 /**
  * v2_name values to omit from the batch (e.g. v1 contract self-name `xns@x`).
@@ -36,9 +39,9 @@ const DEFAULT_OUTPUT = path.join(root, "scripts/tools/out/v1-name-migration.json
  */
 const DEFAULT_SKIP_V2_NAMES = [];
 
-const REGISTER_NAME_FOR_INPUTS = [
-  { internalType: "address", name: "recipient", type: "address" },
-  { internalType: "string", name: "label", type: "string" },
+const BATCH_REGISTER_NAME_FOR_INPUTS = [
+  { internalType: "address[]", name: "recipients", type: "address[]" },
+  { internalType: "string[]", name: "labels", type: "string[]" },
   { internalType: "string", name: "namespace", type: "string" },
 ];
 
@@ -51,6 +54,8 @@ function parseArgs(argv) {
     chainId: DEFAULT_CHAIN_ID,
     skip: new Set(DEFAULT_SKIP_V2_NAMES.map(normalizeV2Name)),
     verifiedOnly: true,
+    batchSize: DEFAULT_BATCH_SIZE,
+    chunkSize: 0,
   };
 
   for (let i = 2; i < argv.length; i++) {
@@ -72,6 +77,16 @@ function parseArgs(argv) {
       }
     } else if (arg === "--include-unverified") {
       opts.verifiedOnly = false;
+    } else if (arg === "--batch-size" && argv[i + 1]) {
+      opts.batchSize = Number(argv[++i]);
+      if (!Number.isInteger(opts.batchSize) || opts.batchSize < 1) {
+        throw new Error(`Invalid --batch-size: ${argv[i]}`);
+      }
+    } else if (arg === "--chunk-size" && argv[i + 1]) {
+      opts.chunkSize = Number(argv[++i]);
+      if (!Number.isInteger(opts.chunkSize) || opts.chunkSize < 0) {
+        throw new Error(`Invalid --chunk-size: ${argv[i]}`);
+      }
     } else if (arg === "--help" || arg === "-h") {
       printHelp();
       process.exit(0);
@@ -94,6 +109,8 @@ Options:
   --chain-id <id>      Chain id string (default: 1)
   --skip <a@ns,b@c>    Comma-separated v2_name values to omit
   --include-unverified Include names with verified: false
+  --batch-size <n>     Names per batchRegisterNameFor call (default: ${DEFAULT_BATCH_SIZE})
+  --chunk-size <n>     Split into multiple files of at most n txs (0 = single file)
   --help               Show this help
 
 Environment:
@@ -168,19 +185,46 @@ function ensureNoDuplicateNames(entries) {
   }
 }
 
-function buildBatch(entries, { safe, xns, chainId, inputPath }) {
-  const transactions = entries.map(({ recipient, label, namespace }) => ({
+/**
+ * Group by namespace, then split each group into batches of `batchSize`.
+ * Returns ordered list of { namespace, recipients, labels } for each contract call.
+ */
+function buildCallBatches(entries, batchSize) {
+  const byNamespace = new Map();
+  for (const entry of entries) {
+    const key = entry.namespace;
+    if (!byNamespace.has(key)) byNamespace.set(key, []);
+    byNamespace.get(key).push(entry);
+  }
+
+  const calls = [];
+  for (const [namespace, group] of byNamespace) {
+    for (let i = 0; i < group.length; i += batchSize) {
+      const slice = group.slice(i, i + batchSize);
+      calls.push({
+        namespace,
+        recipients: slice.map((e) => e.recipient),
+        labels: slice.map((e) => e.label),
+      });
+    }
+  }
+  return calls;
+}
+
+function buildBatch(calls, { safe, xns, chainId, description }) {
+  const transactions = calls.map(({ recipients, labels, namespace }) => ({
     to: xns,
     value: "0",
     data: null,
     contractMethod: {
-      inputs: REGISTER_NAME_FOR_INPUTS,
-      name: "registerNameFor",
+      inputs: BATCH_REGISTER_NAME_FOR_INPUTS,
+      name: "batchRegisterNameFor",
       payable: false,
     },
     contractInputsValues: {
-      recipient,
-      label,
+      // Safe Transaction Builder expects array args as JSON strings.
+      recipients: JSON.stringify(recipients),
+      labels: JSON.stringify(labels),
       namespace,
     },
   }));
@@ -191,7 +235,7 @@ function buildBatch(entries, { safe, xns, chainId, inputPath }) {
     createdAt: Date.now(),
     meta: {
       name: "XNS v1 name migration batch",
-      description: `${transactions.length} registerNameFor calls from ${path.relative(root, inputPath)}`,
+      description,
       txBuilderVersion: "1.18.3",
       createdFromSafeAddress: safe,
       createdFromOwnerAddress: "",
@@ -199,6 +243,24 @@ function buildBatch(entries, { safe, xns, chainId, inputPath }) {
     },
     transactions,
   };
+}
+
+function chunkArray(items, size) {
+  if (!size || size <= 0) return [items];
+  const chunks = [];
+  for (let i = 0; i < items.length; i += size) {
+    chunks.push(items.slice(i, i + size));
+  }
+  return chunks;
+}
+
+function chunkOutputPath(baseOutput, index, total) {
+  if (total === 1) return baseOutput;
+  const dir = path.dirname(baseOutput);
+  const ext = path.extname(baseOutput);
+  const stem = path.basename(baseOutput, ext);
+  const pad = String(index + 1).padStart(String(total).length, "0");
+  return path.join(dir, `${stem}-${pad}-of-${total}${ext || ".json"}`);
 }
 
 function main() {
@@ -214,19 +276,41 @@ function main() {
   }
 
   const { selected, skipped, meta } = loadNames(opts.input, opts);
-  const batch = buildBatch(selected, {
-    safe: opts.safe,
-    xns: opts.xns,
-    chainId: opts.chainId,
-    inputPath: opts.input,
-  });
+  const calls = buildCallBatches(selected, opts.batchSize);
+  const files = chunkArray(calls, opts.chunkSize);
 
   fs.mkdirSync(path.dirname(opts.output), { recursive: true });
-  fs.writeFileSync(opts.output, `${JSON.stringify(batch, null, 2)}\n`, "utf8");
+
+  let totalTxs = 0;
+  let totalNames = 0;
+  for (let i = 0; i < files.length; i++) {
+    const outPath = chunkOutputPath(opts.output, i, files.length);
+    const nameCount = files[i].reduce((n, c) => n + c.recipients.length, 0);
+    totalNames += nameCount;
+    const description =
+      files.length === 1
+        ? `${files[i].length} batchRegisterNameFor calls (${nameCount} names) from ${path.relative(root, opts.input)}`
+        : `Chunk ${i + 1}/${files.length}: ${files[i].length} batchRegisterNameFor calls (${nameCount} names) from ${path.relative(root, opts.input)}`;
+
+    const batch = buildBatch(files[i], {
+      safe: opts.safe,
+      xns: opts.xns,
+      chainId: opts.chainId,
+      description,
+    });
+    totalTxs += batch.transactions.length;
+
+    fs.writeFileSync(outPath, `${JSON.stringify(batch, null, 2)}\n`, "utf8");
+    console.log(`Wrote ${batch.transactions.length} txs (${nameCount} names) to ${outPath}`);
+  }
 
   console.log(`Source: ${opts.input}`);
-  console.log(`Export snapshot: ${meta.count ?? selected.length} names (${meta.verifiedCount ?? "?"} verified in file)`);
-  console.log(`Wrote ${batch.transactions.length} txs to ${opts.output}`);
+  console.log(
+    `Export snapshot: ${meta.count ?? selected.length} names (${meta.verifiedCount ?? "?"} verified in file)`,
+  );
+  console.log(
+    `Selected ${selected.length} names → ${totalTxs} batchRegisterNameFor txs (${totalNames} names) in ${files.length} file(s) [batch-size=${opts.batchSize}]`,
+  );
   if (skipped.length > 0) {
     console.log(`Skipped ${skipped.length} entries:`);
     for (const s of skipped) {
