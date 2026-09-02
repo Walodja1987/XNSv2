@@ -135,8 +135,8 @@ describe("XNSv2", function () {
         // Should have correct EXCLUSIVITY_PERIOD (7 days)
         expect(await s.xns.EXCLUSIVITY_PERIOD()).to.equal(7 * 24 * 60 * 60);
 
-        // Should have correct ONBOARDING_PERIOD (154 days)
-        expect(await s.xns.ONBOARDING_PERIOD()).to.equal(154 * 24 * 60 * 60);
+        // Should have correct ONBOARDING_PERIOD (147 days)
+        expect(await s.xns.ONBOARDING_PERIOD()).to.equal(147 * 24 * 60 * 60);
 
         // Migration should be open at deployment
         expect(await s.xns.isMigrationOpen()).to.equal(true);
