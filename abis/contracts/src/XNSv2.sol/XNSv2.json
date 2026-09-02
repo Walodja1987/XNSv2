@@ -24,6 +24,7 @@
   "function PUBLIC_NAMESPACE_REGISTRATION_FEE() view returns (uint256)",
   "function acceptNamespaceOwnership(string)",
   "function acceptOwnership()",
+  "function batchRegisterNameFor(address[],string[],string) returns (uint256)",
   "function batchRegisterNameWithAuthorization(tuple(address,string,string,uint256)[],bytes[]) payable returns (uint256)",
   "function claimFees(address)",
   "function claimFeesToSelf()",

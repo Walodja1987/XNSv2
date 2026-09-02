@@ -573,13 +573,15 @@ The following test cases are implemented in [XNS.test.ts](./XNS.test.ts).
 
 ---
 
-### Name migration (`registerNameFor` / `endMigrationPeriod`)
+### Name migration (`registerNameFor` / `batchRegisterNameFor` / `endMigrationPeriod`)
 
 #### Functionality
 
 - Should allow owner to register a name for a recipient during migration.
 - Should allow registering into a private namespace during migration (no exclusivity check).
 - Should allow owner to end migration period early.
+- Should batch-register multiple names in one namespace during migration.
+- Should skip conflicts in `batchRegisterNameFor` and return `successfulCount`.
 
 #### Reverts
 
@@ -590,6 +592,12 @@ The following test cases are implemented in [XNS.test.ts](./XNS.test.ts).
 - Should revert `registerNameFor` for non-existent namespace.
 - Should revert `registerNameFor` if recipient already has a name.
 - Should revert `registerNameFor` if name already registered.
+- Should revert `batchRegisterNameFor` when caller is not contract owner.
+- Should revert `batchRegisterNameFor` after migration ended.
+- Should revert `batchRegisterNameFor` on length mismatch.
+- Should revert `batchRegisterNameFor` on empty arrays.
+- Should revert `batchRegisterNameFor` for invalid label in batch.
+- Should revert `batchRegisterNameFor` for zero recipient in batch.
 - Should revert `endMigrationPeriod` when caller is not owner.
 - Should revert `endMigrationPeriod` if migration already ended.
 - Should revert `endMigrationPeriod` after migration period elapses.

@@ -88,17 +88,36 @@ const config: HardhatUserConfig = {
     sources: "./contracts/src",
   },
   solidity: {
-    // Only use Solidity default versions `>=0.8.25` for EVM networks that support the new `cancun` opcodes:
-    // https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/cancun.md
-    // Only use Solidity default versions `>=0.8.20` for EVM networks that support the opcode `PUSH0`
-    // Otherwise, use the versions `<=0.8.19`
-    version: "0.8.28",
-    settings: {
-      optimizer: {
-        enabled: true,
-        runs: 999_999,
+    // Extended format required for per-file `overrides` (optimizer runs for size).
+    // https://hardhat.org/hardhat-runner/docs/advanced/multiple-solidity-versions
+    compilers: [
+      {
+        // Only use Solidity default versions `>=0.8.25` for EVM networks that support the new `cancun` opcodes:
+        // https://github.com/ethereum/execution-specs/blob/master/network-upgrades/mainnet-upgrades/cancun.md
+        // Only use Solidity default versions `>=0.8.20` for EVM networks that support the opcode `PUSH0`
+        // Otherwise, use the versions `<=0.8.19`
+        version: "0.8.28",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 999_999,
+          },
+          evmVersion: "cancun", // Prevent using the `PUSH0` and `cancun` opcodes
+        },
       },
-      evmVersion: "cancun", // Prevent using the `PUSH0` and `cancun` opcodes
+    ],
+    // Prefer runtime size for XNSv2 (near the 24 KiB limit); other contracts keep high runs.
+    overrides: {
+      "contracts/src/XNSv2.sol": {
+        version: "0.8.28",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+          evmVersion: "cancun",
+        },
+      },
     },
   },
   zksolc: {
