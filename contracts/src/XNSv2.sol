@@ -51,7 +51,7 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 ///   - Namespace owners do not receive fees; all fees go to the XNS contract owner.
 /// - During the onboarding period (154 days after XNSv2 contract deployment, 1 year after v1 deployment),
 ///   the contract owner can register namespaces for others at no cost.
-/// - During the migration period (14 days after deployment, or until `endMigrationPeriod`), the contract owner
+/// - During the migration period (30 days after deployment, or until `endMigrationPeriod`), the contract owner
 ///   can mint existing v1 names onto v2 addresses via `registerNameFor` / `batchRegisterNameFor` at no cost.
 ///
 /// ### Name Registration
@@ -153,7 +153,7 @@ contract XNSv2 is EIP712, Ownable2Step, ReentrancyGuard {
     /// @dev Period after contract deployment during which the owner can mint existing v1 names onto v2 via
     /// `registerNameFor` at no cost (no exclusivity check, no payment). Can be terminated early via
     /// `endMigrationPeriod()`. Use `isMigrationOpen()` to check whether the window is still open.
-    uint256 private constant _MIGRATION_PERIOD = 14 days;
+    uint256 private constant _MIGRATION_PERIOD = 30 days;
 
     /// @notice Unit price step (0.001 ETH).
     uint256 public constant PRICE_STEP = 0.001 ether;

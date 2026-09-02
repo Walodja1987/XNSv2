@@ -32,7 +32,7 @@ Label and namespace string requirements:
   - Namespace owners do not receive fees; all fees go to the XNS contract owner.
 - During the onboarding period (154 days after XNSv2 contract deployment, 1 year after v1 deployment),
   the contract owner can register namespaces for others at no cost.
-- During the migration period (14 days after deployment, or until `endMigrationPeriod`), the contract owner
+- During the migration period (30 days after deployment, or until `endMigrationPeriod`), the contract owner
   can mint existing v1 names onto v2 addresses via `registerNameFor` / `batchRegisterNameFor` at no cost.
 
 ### Name Registration
