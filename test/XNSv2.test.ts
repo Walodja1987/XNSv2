@@ -9690,7 +9690,7 @@ describe("XNSv2", function () {
   describe("Name migration (registerNameFor / batchRegisterNameFor / endMigrationPeriod)", function () {
     let s: SetupOutput;
     const getAddressByLabelAndNamespace = (xns: XNSv2) => xns.getFunction("getAddress(string,string)");
-    const MIGRATION_PERIOD_SECONDS = 14 * 24 * 60 * 60; // private constant; documented as 14 days
+    const MIGRATION_PERIOD_SECONDS = 30 * 24 * 60 * 60; // private constant; documented as 30 days
 
     beforeEach(async () => {
       s = await loadFixture(setup);
