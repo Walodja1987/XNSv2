@@ -25,7 +25,7 @@ const root = path.resolve(__dirname, "../..");
 
 const DEFAULT_SAFE_ADDRESS = "0xEd5356Cf46b7cFfbA4ae0bF804E5C810e60e00CC";
 /** Deployed XNSv2 address (override via XNS_ADDRESS env or --xns). */
-const DEFAULT_XNS_ADDRESS = process.env.XNS_ADDRESS || "0xA235c204bf85BB8952720A64801992F883c9072E";
+const DEFAULT_XNS_ADDRESS = process.env.XNS_ADDRESS || "0x6e797ba2d3103aF167918e71a7E01DE40D45f74b";
 const DEFAULT_CHAIN_ID = "1";
 const DEFAULT_INPUT = path.join(
   root,
