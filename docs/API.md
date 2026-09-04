@@ -30,7 +30,7 @@ Label and namespace string requirements:
   - Only the namespace owner can register names (via `registerNameWithAuthorization`
     or `batchRegisterNameWithAuthorization`).
   - Namespace owners do not receive fees; all fees go to the XNS contract owner.
-- During the onboarding period (147 days after XNSv2 contract deployment, 1 year after v1 deployment),
+- During the onboarding period (146 days after XNSv2 contract deployment, 1 year after v1 deployment),
   the contract owner can register namespaces for others at no cost.
 - During the migration period (30 days after deployment, or until `endMigrationPeriod`), the contract owner
   can mint existing v1 names onto v2 addresses via `registerNameFor` / `batchRegisterNameFor` at no cost.
@@ -229,7 +229,7 @@ Register a new public namespace.
 - `pricePerName` must be >= 0.001 ETH and a multiple of 0.001 ETH (0.001, 0.002, 0.003, etc.).
 
 **Note:**
-- During the onboarding period (147 days following contract deployment), the contract owner can
+- During the onboarding period (146 days following contract deployment), the contract owner can
   register namespaces for free (via `registerPublicNamespaceFor`) to foster adoption.
 - For the avoidance of doubt, anyone can register a new namespace during the onboarding period
   by paying the standard 50 ETH registration fee.
@@ -257,7 +257,7 @@ Register a new private namespace.
 - `pricePerName` must be >= 0.005 ETH and a multiple of 0.001 ETH (0.005, 0.006, 0.007, etc.).
 
 **Note:**
-- During the onboarding period (147 days following contract deployment), the contract owner can
+- During the onboarding period (146 days following contract deployment), the contract owner can
   register namespaces for free (via `registerPrivateNamespaceFor`) to foster adoption.
 - For the avoidance of doubt, anyone can register a new namespace during the onboarding period
   by paying the standard 10 ETH registration fee.
