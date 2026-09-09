@@ -35,8 +35,8 @@ const RED = "\x1b[31m";
 //////////////////////////////////////////////////////////////*/
 
 // Inclusive range. 0 = batch-000.json, 703 = batch-703.json
-const startIndexDefault = 1;
-const endIndexDefault = 703;
+const startIndexDefault = 704;
+const endIndexDefault = 705;
 
 // Signer index (0 = account 1, 1 = account 2, …)
 const signerIndex = 2;
