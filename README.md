@@ -15,22 +15,22 @@
 
 ## Table of contents
 
-1. [Overview](#overview)
-2. [How It Works](#how-it-works) \
+1. [Overview](#-overview)
+2. [How It Works](#-how-it-works) \
    2.1 [Name Registration](#name-registration) \
    2.2 [Name Registration With Authorization](#name-registration-with-authorization) \
    2.3 [Name Resolution](#name-resolution) \
    2.4 [Namespace Registration](#namespace-registration)
-3. [How Is XNS Different from ENS?](#how-is-xns-different-from-ens)
-4. [XNS Price list](#xns-price-list)
-5. [Contract Address](#contract-address)
-6. [Smart Contract Naming](#smart-contract-naming)
-7. [Contract Ownership Transfer](#contract-ownership-transfer)
-8. [Namespace Owner Transfer](#namespace-owner-transfer)
-9. [Privacy Considerations](#privacy-considerations)
-10. [License and Deployment Policy](#license-and-deployment-policy)
-11. [API](#api)
-12. [Developer Notes](#developer-notes)
+3. [How Is XNS Different from ENS?](#-how-is-xns-different-from-ens)
+4. [XNS Price list](#-xns-price-list)
+5. [Contract Address](#-contract-address)
+6. [Smart Contract Naming](#-smart-contract-naming)
+7. [Contract Ownership Transfer](#-contract-ownership-transfer)
+8. [Namespace Owner Transfer](#-namespace-owner-transfer)
+9. [Privacy Considerations](#-privacy-considerations)
+10. [License and Deployment Policy](#-license-and-deployment-policy)
+11. [API](#-api)
+12. [Developer Notes](#-developer-notes)
 
 ## 🚀 Overview
 
@@ -140,7 +140,7 @@ To register an EOA name via [Etherscan][etherscan-mainnet], connect the wallet t
 * [Name registration for ERC20 token (via constructor)][script-registerNameForERC20A]
 * [Name registration for ERC20 token (via separate `registerName` function)][script-registerNameForERC20B]
 
-Smart contracts can be named as well. See [Smart Contract Naming](#smart-contract-naming).
+Smart contracts can be named as well. See [Smart Contract Naming](#-smart-contract-naming).
 
 
 ### Name Registration With Authorization
