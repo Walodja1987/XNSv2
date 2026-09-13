@@ -92,10 +92,10 @@ Anyone can register a new namespace by paying the one-time registration fee.
 
 ### ETH Burn and Fee Distribution
 
-- **80%** of ETH sent is **burnt** via DETH.
+- **80%** of ETH sent is **burnt** via [DETH](https://github.com/Walodja1987/deth).
 - **20%** is credited as **fees**:
   - Public namespaces: 10% to namespace owner, 10% to XNS contract owner
-  - Private namespaces: 20% to XNS owner
+  - Private namespaces: 20% to XNS contract owner
 
 **Notes:**
 * Namespace owners only receive fees from name registrations in their namespace (public namespaces only).
@@ -105,9 +105,10 @@ Anyone can register a new namespace by paying the one-time registration fee.
 
 **ENS** replicates the web2 domain model with a rent-seeking approach:
 
+- **Dot format (`name.eth`):** Visually identical to web2 domains, despite serving a fundamentally different purpose.
 - **Names expire:** Users must renew their names, creating ongoing subscription costs for users.
 - **Name sniping:** If a user forgets to renew, others can grab their name, especially if it previously received funds. If they don't notice and continue sharing the name, funds will be lost.
-- **Transferable names:** ENS names are transferable and tradeable, thereby encouraging speculation rather than use as permanent identity.
+- **Transferable names:** ENS names are transferable and tradeable, thereby encouraging speculation rather than use as payment identifiers.
 - **Complex:** Unnecessarily complex architecture for the purpose of simple name-to-address mapping.
 - **Lack of Ethereum alignment:** ENS previously considered launching a separate "namechain" (now cancelled) and has a token that does not provide direct value accrual to ETH holders.
 
@@ -116,6 +117,7 @@ Anyone can register a new namespace by paying the one-time registration fee.
 
 **XNS** takes a fundamentally different approach:
 
+- **`@` format (`label@namespace`):** Clearly distinct from web2 domains, signaling a payment identifier rather than a website.
 - **Names are permanent** and never expire.
 - **Names are non-transferable**, discouraging speculation.
 - **Aligned with ETH holders:** 80 % of registration fees (paid in ETH) are burned, accruing value to ETH holders by reducing the supply. No valueless governance token needed.
