@@ -34,7 +34,7 @@
 
 ## 🚀 Overview
 
-**XNS** is an **immutable address book for Ethereum**. It maps human-readable names to Ethereum addresses so you can send crypto to `vitalik@xns` instead of `0x8AdEFeb576dcF52F5220709c1B267d89d5208E78`. With XNS, applications and wallets can show user-friendly names in place of long hexadecimal addresses, making every Ethereum interaction simpler and safer.
+**XNS** is an **immutable address book for Ethereum**. It maps human-readable names to Ethereum addresses so you can send crypto to `vitalik@eth` instead of `0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045`. With XNS, applications and wallets can show user-friendly names in place of long hexadecimal addresses, making every Ethereum interaction simpler and safer.
 
 **Key properties:**
 - **Permanent:** Each name is irrevocably bound to an Ethereum address; no expiration, no transfer, no resale.
