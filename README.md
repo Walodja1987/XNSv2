@@ -105,22 +105,20 @@ Anyone can register a new namespace by paying the one-time registration fee.
 
 **ENS** replicates the web2 domain model with a rent-seeking approach:
 
-- **Dot format (`name.eth`):** Visually identical to web2 domains, despite serving a fundamentally different purpose.
 - **Names expire:** Users must renew their names, creating ongoing subscription costs for users.
 - **Name sniping:** If a user forgets to renew, others can grab their name, especially if it previously received funds. If they don't notice and continue sharing the name, funds will be lost.
 - **Transferable names:** ENS names are transferable and tradeable, thereby encouraging speculation rather than use as payment identifiers.
 - **Complex:** Unnecessarily complex architecture for the purpose of simple name-to-address mapping.
-- **Lack of Ethereum alignment:** ENS previously considered launching a separate "namechain" (now cancelled) and has a token that does not provide direct value accrual to ETH holders.
-
-> To put it simply: ENS names work like bank account numbers that expire. Forget to renew, and your number is reassigned to a stranger. Keep sharing it without noticing, and every payment goes to the wrong person.
+- **Lack of Ethereum alignment:** ENS has a token that does not provide direct value accrual to ETH holders.
+- **Dot format (`name.eth`):** Visually identical to web2 domains, despite serving a fundamentally different purpose.
 
 
 **XNS** takes a fundamentally different approach:
 
-- **`@` format (`label@namespace`):** Clearly distinct from web2 domains, signaling a payment identifier rather than a website.
 - **Names are permanent** and never expire.
 - **Names are non-transferable**, discouraging speculation.
 - **Aligned with ETH holders:** 80 % of registration fees (paid in ETH) are burned, accruing value to ETH holders by reducing the supply. No valueless governance token needed.
+- **`@` format (`label@namespace`):** Clearly distinct from web2 domains, signaling a payment identifier rather than a website.
 
 Beyond these core differences, XNS offers additional capabilities: permissionless namespace registration (for a fee), support for private namespaces with exclusive control as well as smart contract naming.
 
@@ -128,14 +126,14 @@ Beyond these core differences, XNS offers additional capabilities: permissionles
 
 ### Name Registration
 
-Registering an XNS name in a public namespace is straightforward:
+The simplest way to register a name within a public namespace is using the [x2xPay.me][x2xpay] payments app: connect your wallet, pick an available name, and pay the one-time registration fee.
 
-1. **Check Available Namespaces**: Browse the [XNS price list](#-xns-price-list) to find available namespaces and their registration fees (e.g., names within the `xns` namespace cost 0.001 ETH).
-2. **Choose a Name**: e.g., `alice@xns` (must not be registered yet).
-3. **Register Name**: Send a transaction with the required ETH amount to register a name (see [`registerName`][api-registerName] in API docs). Any excess will be refunded.
-4. **Verify Resolution**: Wait a few blocks, then verify the name is registered (see [`getAddress`][api-getAddress] and [`getName`][api-getName] in API docs).
+To register an EOA name via [Etherscan][etherscan-mainnet], connect the wallet that should own the name and call [`registerName`][api-registerName] with the label, namespace, and fee. Excess ETH is refunded. Wait a few blocks, then verify with [`getAddress`][api-getAddress] or [`getName`][api-getName].
 
-**Note:** [`registerName`][api-registerName] only works for public namespaces after the exclusivity period (7 days) has ended. During the exclusivity period or for private namespaces, namespace owners must use [`registerNameWithAuthorization`][api-registerNameWithAuthorization] even for their own registrations.
+**Example:** Registering `bob@xns` in the `xns` namespace (costs 0.001 ETH):
+<img width="670" height="301" alt="image" src="https://github.com/user-attachments/assets/2323cac5-060d-4cc8-abc6-0a27ea3f03d4" />
+
+> **Note:** [`registerName`][api-registerName] only works for public namespaces after the exclusivity period (7 days) has ended. During the exclusivity period or for private namespaces, namespace owners must use [`registerNameWithAuthorization`][api-registerNameWithAuthorization], even for their own registrations.
 
 **Example scripts:**
 * [Name registration for EOA][script-registerName]
@@ -153,17 +151,6 @@ Already-deployed smart contracts that expose `owner()` or `getOwner()` (e.g., Op
 
 **Example script:**
 * [Name registration for owned contract][script-registerNameForOwnedContract]
-
-#### Name Registration via Etherscan
-
-Names can be registered for EOAs directly via [Etherscan][etherscan-mainnet].
-
-> ⚠️**Important:** Ensure the connected wallet address is the one to be named.
-
-<img width="302" height="82" alt="image" src="https://github.com/user-attachments/assets/628791be-b647-4bcc-b85f-f75289afac1c" />
-
-**Example 1:** Registering `bob@xns` in the `xns` namespace (costs 0.001 ETH):
-<img width="670" height="301" alt="image" src="https://github.com/user-attachments/assets/2323cac5-060d-4cc8-abc6-0a27ea3f03d4" />
 
 
 ### Name Registration With Authorization
@@ -740,6 +727,7 @@ See the [Developer Notes][dev-notes] for design decisions, code style guidelines
 [contract-MockERC20B]: https://github.com/Walodja1987/xns/blob/main/contracts/src/mocks/MockERC20B.sol
 [contract-MockERC20C]: https://github.com/Walodja1987/xns/blob/main/contracts/src/mocks/MockERC20C.sol
 
+[x2xpay]: https://x2xpay.me
 [etherscan-mainnet]: https://etherscan.io/address/0x6e797ba2d3103aF167918e71a7E01DE40D45f74b
 [etherscan-sepolia-contract]: https://sepolia.etherscan.io/address/0x6e797ba2d3103aF167918e71a7E01DE40D45f74b
 [etherscan-deth-sepolia]: https://sepolia.etherscan.io/address/0xeD204c6698167dB50c4da2AC23Fad8F59dc9087A
