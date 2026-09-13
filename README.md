@@ -15,22 +15,22 @@
 
 ## Table of contents
 
-1. [Overview](#-overview)
-2. [How It Works](#-how-it-works) \
+1. [Overview](#overview)
+2. [How It Works](#how-it-works) \
    2.1 [Name Registration](#name-registration) \
    2.2 [Name Registration With Authorization](#name-registration-with-authorization) \
    2.3 [Name Resolution](#name-resolution) \
    2.4 [Namespace Registration](#namespace-registration)
 3. [How Is XNS Different from ENS?](#-how-is-xns-different-from-ens)
-4. [XNS Price list](#-xns-price-list)
-5. [Contract Address](#-contract-address)
-6. [Integration Guide for Contract Developers](#-integration-guide-for-contract-developers)
-7. [Contract Ownership Transfer](#-contract-ownership-transfer)
-8. [Namespace Owner Transfer](#-namespace-owner-transfer)
-9. [Privacy Considerations](#-privacy-considerations)
-10. [License and Deployment Policy](#-license-and-deployment-policy)
-11. [API](#-api)
-12. [Developer Notes](#-developer-notes)
+4. [XNS Price list](#xns-price-list)
+5. [Contract Address](#contract-address)
+6. [Smart Contract Naming](#smart-contract-naming)
+7. [Contract Ownership Transfer](#contract-ownership-transfer)
+8. [Namespace Owner Transfer](#namespace-owner-transfer)
+9. [Privacy Considerations](#privacy-considerations)
+10. [License and Deployment Policy](#license-and-deployment-policy)
+11. [API](#api)
+12. [Developer Notes](#developer-notes)
 
 ## 🚀 Overview
 
@@ -142,7 +142,7 @@ To register an EOA name via [Etherscan][etherscan-mainnet], connect the wallet t
 
 ### Name Registration for Owned Contracts
 
-Already-deployed smart contracts that expose `owner()` or `getOwner()` (e.g., OpenZeppelin `Ownable`) can receive an XNS name **without upgrading the contract or implementing EIP-1271**. The contract owner calls [`registerNameForOwnedContract`][api-registerNameForOwnedContract] on XNS and pays the registration fee; the name is assigned to the **contract address**, not the EOA owner.
+Already-deployed smart contracts that expose `owner()` or `getOwner()` (e.g., OpenZeppelin `Ownable`) can receive an XNS name without changing the contract. The contract owner calls [`registerNameForOwnedContract`][api-registerNameForOwnedContract] on XNS and pays the registration fee; the name is assigned to the **contract address**, not the EOA owner.
 
 **Requirements:**
 - `recipient` must be a contract on Ethereum with code at that address.
@@ -151,6 +151,8 @@ Already-deployed smart contracts that expose `owner()` or `getOwner()` (e.g., Op
 
 **Example script:**
 * [Name registration for owned contract][script-registerNameForOwnedContract]
+
+If the contract has neither `owner()` nor `getOwner()`, sponsored registration via EIP-1271 may work if the contract implements `isValidSignature` (see [Name Registration With Authorization](#name-registration-with-authorization)).
 
 
 ### Name Registration With Authorization
@@ -203,20 +205,20 @@ XNS provides simple on-chain resolution for names and addresses.
 ### Namespace Registration
 
 **How to register a public namespace:**
-1. **Choose a Namespace:** Select an available namespace and set the desired price per name (must be >= 0.001 ETH and a multiple of 0.001 ETH).
+1. **Choose a Namespace:** Select an available namespace and set the desired price per name (must be at least 0.001 ETH and a multiple of 0.001 ETH).
 2. **Register Namespace:** Submit a transaction with the required ETH to register the namespace (see [`registerPublicNamespace`][api-registerPublicNamespace] in the API docs). Any excess will be refunded.
 
 Public namespace owners have an exclusive 7-day window to register or sponsor any name within their namespace. After this period, anyone can freely register names via [`registerName`][api-registerName]. **During the exclusivity period, use [`registerNameWithAuthorization`][api-registerNameWithAuthorization] even for their own registrations.**
 
 **How to register a private namespace:**
-1. **Choose a Namespace:** Select an available namespace and set the desired price per name (must be >= 0.005 ETH and a multiple of 0.001 ETH).
+1. **Choose a Namespace:** Select an available namespace and set the desired price per name (must be at least 0.005 ETH and a multiple of 0.001 ETH).
 2. **Register Namespace:** Submit a transaction with the required ETH to register the namespace (see [`registerPrivateNamespace`][api-registerPrivateNamespace] in the API docs). Any excess will be refunded.
 
 The private namespace owner registers names via the authorized flow (see [`registerNameWithAuthorization`][api-registerNameWithAuthorization] in the API docs). **This is the only way to register names in private namespaces, including registrations for the namespace owner themselves.**
 
 **Notes:**
 * Regular users always pay the standard fees when registering namespaces via [`registerPublicNamespace`][api-registerPublicNamespace] or [`registerPrivateNamespace`][api-registerPrivateNamespace].
-* During the onboarding period (146-day onboarding period after contract deployment), the XNS contract owner can register public and private namespaces at no cost using [`registerPublicNamespaceFor`][api-registerPublicNamespaceFor] and [`registerPrivateNamespaceFor`][api-registerPrivateNamespaceFor], respectively, to foster adoption. These are OWNER-only functions that allow registering namespaces for other addresses during the onboarding period.
+* During the onboarding period (one year after XNSv1 contract deployment on 28 Jan 2026), the XNS contract owner can register public and private namespaces at no cost using [`registerPublicNamespaceFor`][api-registerPublicNamespaceFor] and [`registerPrivateNamespaceFor`][api-registerPrivateNamespaceFor], respectively, to foster adoption. These are OWNER-only functions that allow registering namespaces for other addresses during the onboarding period.
 * **Security recommendation:** Namespace owners should consider using multisig wallets to reduce the risk of wallet access loss or compromise. This is especially important for public namespace owners who receive ongoing fee rewards, and for private namespace owners who maintain exclusive control over their namespace.
 
   **Example scripts:**
@@ -315,7 +317,7 @@ Public namespaces are open — anyone can register a name under them by paying t
 
 ### Private Namespaces
 
-Private namespaces are restricted — only the namespace owner can register names under them. There are currently 137 private namespaces, all priced at 0.005 ETH. These include thematic namespaces such as `divine`, `celestial`, `arcane`, `seraphim`, `genesis`, `valhalla`, `dragon`, and many more.
+Private namespaces are restricted, meaning that only the namespace owner can register names under them. There are currently 137 private namespaces, all priced at 0.005 ETH. These include thematic namespaces such as `divine`, `celestial`, `arcane`, `seraphim`, `genesis`, `valhalla`, `dragon`, and many more.
 
 See [`constants/namespaces.json`](./constants/namespaces.json) for the full list.
 
@@ -332,7 +334,7 @@ The official XNS contract is live on Ethereum mainnet at: [0x6e797ba2d3103aF1679
 
 ### Sepolia Testnet
 
-For testing purposes, the deployed contract on Sepolia can be used at: [0x6e797ba2d3103aF167918e71a7E01DE40D45f74b][etherscan-sepolia-contract]
+For testing purposes, the deployed contract on Sepolia can be used at the same address: [0x6e797ba2d3103aF167918e71a7E01DE40D45f74b][etherscan-sepolia-contract]
 
 The testnet contract has been parametrized as follows:
 - Public namespace registration fee: 0.05 ether (instead of 50 ether)
@@ -342,21 +344,16 @@ The testnet contract has been parametrized as follows:
 - DETH address: [0xeD204c6698167dB50c4da2AC23Fad8F59dc9087A](etherscan-deth-sepolia)
 
 
-## 🔧 Integration Guide for Contract Developers
+## 🔧 Smart Contract Naming
 
-XNS can be integrated into smart contracts, allowing users to identify contracts by a human-readable name (e.g., `myprotocol@xns`) instead of a long address.
+Smart contracts can receive an XNS name (e.g., `myprotocol@xns`) so users can identify them by a human-readable name instead of a long address.
 
-> **Note:** Existing contracts without EIP-1271 support can still receive a name via [`registerNameForOwnedContract`][api-registerNameForOwnedContract] if they expose `owner()` or `getOwner()` (see [Name Registration for Owned Contracts](#name-registration-for-owned-contracts)). For contracts that implement EIP-1271, see [Option 4](#option-4-sponsored-registration-via-eip-1271) for sponsored registration during exclusivity or in private namespaces.
+> **Note:** The following examples demonstrate naming for contracts that are only deployed on Ethereum. For contracts deployed on multiple chains, see the [Using XNS Names with Multi-Chain Deployments](#using-xns-names-with-multi-chain-deployments) section below for important guidance and considerations.
 
-This section includes examples of how to name smart contracts on Ethereum, the canonical XNS chain, as well as a guide on using XNS with multi-chain deployments.
+There are four ways to name a smart contract:
 
-### Integration on Ethereum
 
-There are four ways to integrate XNS:
-
-> **Note:** The following examples demonstrate XNS integration for contracts that are only deployed on Ethereum. For contracts deployed on multiple chains, see the [Using XNS Names with Multi-Chain Deployments](#-using-xns-names-with-multi-chain-deployments) section below for important guidance and considerations.
-
-#### Option 1: Register via Constructor
+### Option 1: Register via Constructor
 
 ```solidity
 // SPDX-License-Identifier: MIT
@@ -383,7 +380,7 @@ See [`MockERC20A`][contract-MockERC20A] and the [`registerNameForERC20A.ts`][scr
 - Any excess payment is refunded by XNS to `msg.sender`, which will be the contract. Be sure to implement a `receive()` function to accept ETH payments, and provide a way to withdraw any refunded ETH if needed. To avoid receiving refunds altogether, send exactly the required payment when deploying the contract.
 - The `registerName` function only works for **public namespaces** after the exclusivity period (7 days) has ended. For **private namespaces**, contracts must use [Option 4 (EIP-1271)](#option-4-sponsored-registration-via-eip-1271).
 
-#### Option 2: Register via Separate Function
+### Option 2: Register via Separate Function
 
 ```solidity
 // SPDX-License-Identifier: MIT
@@ -421,7 +418,7 @@ See [`MockERC20B`][contract-MockERC20B] and the [`registerNameForERC20B.ts`][scr
 - Any excess payment is refunded by XNS to `msg.sender`, which will be the contract. Be sure to implement a `receive()` function to accept ETH payments, and provide a way to withdraw any refunded ETH if needed. To avoid receiving refunds altogether, send exactly the required payment when calling [`registerName`][api-registerName].
 - The `registerName` function only works for **public namespaces** after the exclusivity period (7 days) has ended. For **private namespaces**, contracts must use [Option 4 (EIP-1271)](#option-4-sponsored-registration-via-eip-1271).
 
-#### Option 3: Register for Owned Contract
+### Option 3: Register for Owned Contract
 
 For already-deployed contracts that expose `owner()` or `getOwner()` but cannot call `registerName` and do not implement EIP-1271, the **contract owner** registers the name **from outside the target contract** — typically via a Hardhat/ethers script or Etherscan. No changes to the target contract are required.
 
@@ -457,7 +454,7 @@ See [`registerNameForOwnedContract.ts`][script-registerNameForOwnedContract] for
 - If `owner()` succeeds (including returning `address(0)`), XNS does not fall back to `getOwner()`.
 - For **private namespaces** or during exclusivity, use [Option 4 (EIP-1271)](#option-4-sponsored-registration-via-eip-1271).
 
-#### Option 4: Sponsored Registration via EIP-1271
+### Option 4: Sponsored Registration via EIP-1271
 
 For contracts that implement EIP-1271, someone else can sponsor the name registration. **This is the only way for contracts to register names in private namespaces and public namespaces during the exclusivity period**.
 
@@ -513,7 +510,7 @@ contract MyContractWallet {
 See [`MockERC20C`][contract-MockERC20C] and the [`registerNameWithAuthorizationForERC20C.ts`][script-registerNameWithAuthorizationForERC20C] script for an example of how to register a name for an ERC20 token using the EIP-1271 method.
 
 
-### Using XNS Names with Multi-Chain Deployments
+## Using XNS Names with Multi-Chain Deployments
 
 This section is intended for teams that:
 
@@ -524,7 +521,7 @@ This section is intended for teams that:
 
 **Ethereum is the source of truth** for XNS names. Other chains do not resolve XNS names on-chain, but reference them off-chain for clarity.
 
-#### Deployment Pattern
+### Deployment Pattern
 
 The recommended deployment pattern is to add a dedicated [`registerName`][api-registerName] function to the contract that performs XNS name registration on Ethereum mainnet (`chainId = 1`) and reverts on other chains. After deployment, invoke [`registerName`][api-registerName] on Ethereum mainnet to link the XNS name to the contract address.
 
