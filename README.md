@@ -21,7 +21,7 @@
    2.2 [Name Registration With Authorization](#name-registration-with-authorization) \
    2.3 [Name Resolution](#name-resolution) \
    2.4 [Namespace Registration](#namespace-registration)
-3. [How Is XNS Different from ENS?](#-how-is-xns-different-from-ens)
+3. [How Is XNS Different from ENS?](#how-is-xns-different-from-ens)
 4. [XNS Price list](#xns-price-list)
 5. [Contract Address](#contract-address)
 6. [Smart Contract Naming](#smart-contract-naming)
@@ -140,19 +140,7 @@ To register an EOA name via [Etherscan][etherscan-mainnet], connect the wallet t
 * [Name registration for ERC20 token (via constructor)][script-registerNameForERC20A]
 * [Name registration for ERC20 token (via separate `registerName` function)][script-registerNameForERC20B]
 
-### Name Registration for Owned Contracts
-
-Already-deployed smart contracts that expose `owner()` or `getOwner()` (e.g., OpenZeppelin `Ownable`) can receive an XNS name without changing the contract. The contract owner calls [`registerNameForOwnedContract`][api-registerNameForOwnedContract] on XNS and pays the registration fee; the name is assigned to the **contract address**, not the EOA owner.
-
-**Requirements:**
-- `recipient` must be a contract on Ethereum with code at that address.
-- `msg.sender` must equal `recipient.owner()` (if that call succeeds) or `recipient.getOwner()` (only if `owner()` is absent or reverts).
-- Public namespace only, after the 7-day exclusivity period (same as [`registerName`][api-registerName]).
-
-**Example script:**
-* [Name registration for owned contract][script-registerNameForOwnedContract]
-
-If the contract has neither `owner()` nor `getOwner()`, sponsored registration via EIP-1271 may work if the contract implements `isValidSignature` (see [Name Registration With Authorization](#name-registration-with-authorization)).
+Smart contracts can be named as well. See [Smart Contract Naming](#smart-contract-naming).
 
 
 ### Name Registration With Authorization
@@ -512,18 +500,29 @@ See [`MockERC20C`][contract-MockERC20C] and the [`registerNameWithAuthorizationF
 
 ## Using XNS Names with Multi-Chain Deployments
 
-This section is intended for teams that:
+If all of the following hold:
 
-* Deploy the **same contract** to multiple chains
-* Ensure the contract has the **same address** across those chains (e.g. using `CREATE2`)
-* Deploy at least one instance on **Ethereum mainnet**
-* Want to use an XNS name as a **human-readable identifier** in documentation, dashboards, and address books instead of raw hexadecimal addresses
+* The **same contract** is deployed to multiple chains
+* The contract has the **same address** on those chains (e.g. `CREATE2`)
+* At least one instance is on **Ethereum mainnet**
 
-**Ethereum is the source of truth** for XNS names. Other chains do not resolve XNS names on-chain, but reference them off-chain for clarity.
+then you can reference the XNS name (e.g. `myprotocol@xns`) as the identifier for every chain where the address matches the Ethereum deployment. If the address differs on a chain, use the raw address there.
+
+Example:
+
+| Network                               | XNS name / Address |
+|---------------------------------------|--------------------|
+| Ethereum / Arbitrum / Optimism / Base | `myprotocol@xns`   |
+| Avalanche                             | `0x1234…5678`      |
+
 
 ### Deployment Pattern
 
-The recommended deployment pattern is to add a dedicated [`registerName`][api-registerName] function to the contract that performs XNS name registration on Ethereum mainnet (`chainId = 1`) and reverts on other chains. After deployment, invoke [`registerName`][api-registerName] on Ethereum mainnet to link the XNS name to the contract address.
+If you use a method like `CREATE2` that needs the same bytecode and constructor arguments on every chain to get the same address, constructor registration is possible only if those arguments are identical everywhere (same XNS address, label, and namespace). That works, but it bakes the name into the CREATE2 address, forces dummy name arguments on non-Ethereum chains, and will call XNS on those chains unless you add a `chainId` check (a call to the Ethereum XNS address on another chain is wasted or can lose ETH).
+
+Prefer a dedicated [`registerName`][api-registerName] function that runs only on Ethereum mainnet (`chainId = 1`) and reverts on other chains. After deployment, call it on Ethereum to attach the name. The CREATE2 address then does not depend on the name, and other chains never touch XNS.
+
+With `CREATE`, the address does not depend on bytecode, so this pattern is optional.
 
 Example:
 
@@ -539,18 +538,6 @@ contract YourContract {
 ```
 
 >**Note:** Add access control as needed.
-
-
-### Documentation and Address Books
-
-When publishing contract addresses, use the XNS name (e.g., `myprotocol@xns`) if the contract address matches the Ethereum deployment. If the address is different on another chain, use the raw address instead.
-
-Example:
-
-| Network                         | XNS name / Address         |
-|-------------------------------------|--------------------|
-| Ethereum / Arbitrum / Optimism / Base | `myprotocol@xns`   |
-| Avalanche                           | `0x1234…5678`      |
 
 
 ## 🔐 Contract Ownership Transfer
